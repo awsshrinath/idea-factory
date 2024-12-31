@@ -1,25 +1,32 @@
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
-import { FileText, Image, Video } from "lucide-react";
+import { FileText, Image, Video, Calendar } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const QuickActionCard = ({
   icon: Icon,
   title,
   description,
+  onClick,
 }: {
   icon: any;
   title: string;
   description: string;
+  onClick: () => void;
 }) => (
   <div className="glass p-6 rounded-xl">
     <Icon className="h-8 w-8 mb-4 text-primary" />
     <h3 className="text-lg font-semibold mb-2">{title}</h3>
     <p className="text-sm text-muted-foreground mb-4">{description}</p>
-    <Button className="w-full">Get Started</Button>
+    <Button className="w-full" onClick={onClick}>
+      Get Started
+    </Button>
   </div>
 );
 
 const Index = () => {
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -34,16 +41,25 @@ const Index = () => {
                 icon={FileText}
                 title="Generate Content"
                 description="Create engaging posts for your social media platforms"
+                onClick={() => navigate('/content')}
               />
               <QuickActionCard
                 icon={Image}
                 title="Create Images"
                 description="Generate unique images using AI technology"
+                onClick={() => navigate('/images')}
               />
               <QuickActionCard
                 icon={Video}
                 title="Make Videos"
                 description="Produce professional videos with AI assistance"
+                onClick={() => navigate('/videos')}
+              />
+              <QuickActionCard
+                icon={Calendar}
+                title="Schedule Post"
+                description="Plan and schedule your content calendar"
+                onClick={() => navigate('/schedule')}
               />
             </div>
           </section>
