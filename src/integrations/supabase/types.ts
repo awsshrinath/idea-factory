@@ -48,6 +48,39 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_images: {
+        Row: {
+          aspect_ratio: string
+          created_at: string | null
+          id: string
+          image_path: string
+          prompt: string
+          style: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          aspect_ratio: string
+          created_at?: string | null
+          id?: string
+          image_path: string
+          prompt: string
+          style: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          aspect_ratio?: string
+          created_at?: string | null
+          id?: string
+          image_path?: string
+          prompt?: string
+          style?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       trending_topics: {
         Row: {
           created_at: string | null
