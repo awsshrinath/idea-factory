@@ -5,17 +5,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { VideoSuggestions } from "@/components/videos/VideoSuggestions";
+import { WorkflowSteps } from "@/components/videos/WorkflowSteps";
+import { WorkflowSelection } from "@/components/videos/WorkflowSelection";
+import { TipsSection } from "@/components/videos/TipsSection";
 import { 
-  Video, 
-  ImagePlus, 
   Wand2, 
   Mic, 
   Subtitles, 
   Download,
   HelpCircle,
-  ChevronRight,
-  Play,
-  Image,
   ArrowLeft
 } from "lucide-react";
 import {
@@ -46,81 +44,6 @@ export function Videos() {
     setVideoIdea("");
   };
 
-  const renderStepIndicator = () => (
-    <div className="flex items-center justify-between mb-8 bg-muted p-4 rounded-lg">
-      {Object.entries(workflowSteps).map(([step, label], index) => (
-        <div key={step} className="flex items-center">
-          <div className={`flex flex-col items-center ${currentStep === step ? 'text-primary' : 'text-muted-foreground'}`}>
-            <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-2 
-              ${currentStep === step ? 'bg-primary text-primary-foreground' : 'bg-muted-foreground/20'}`}>
-              {index + 1}
-            </div>
-            <span className="text-sm font-medium">{label}</span>
-          </div>
-          {index < Object.keys(workflowSteps).length - 1 && (
-            <ChevronRight className="mx-4 text-muted-foreground" />
-          )}
-        </div>
-      ))}
-    </div>
-  );
-
-  const renderWorkflowSelection = () => (
-    <div className="grid md:grid-cols-2 gap-6">
-      <Card 
-        className="cursor-pointer hover:border-primary transition-colors"
-        onClick={() => {
-          setWorkflowType("direct");
-          setCurrentStep("script");
-        }}
-      >
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Video className="h-5 w-5" />
-            Direct Video Generation
-          </CardTitle>
-          <CardDescription>
-            Generate a video directly from your script with AI-powered visuals
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Play className="h-4 w-4" /> Quick single-step video creation
-            </div>
-            <Button className="w-full">Start Direct Video</Button>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card 
-        className="cursor-pointer hover:border-primary transition-colors"
-        onClick={() => {
-          setWorkflowType("fine-tuned");
-          setCurrentStep("script");
-        }}
-      >
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ImagePlus className="h-5 w-5" />
-            Fine-Tuned Video Generation
-          </CardTitle>
-          <CardDescription>
-            Generate and customize images first, then create your video with precise control
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <Image className="h-4 w-4" /> Detailed image-first approach
-            </div>
-            <Button className="w-full">Start Fine-Tuned Video</Button>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
-  );
-
   return (
     <div className="min-h-screen flex">
       <Sidebar />
@@ -149,12 +72,11 @@ export function Videos() {
           {/* Main Content */}
           <div className="grid md:grid-cols-[1fr,300px] gap-6">
             <div className="space-y-6">
-              {/* Workflow Selection or Current Workflow */}
               {!workflowType ? (
-                renderWorkflowSelection()
+                <WorkflowSelection onSelect={setWorkflowType} />
               ) : (
                 <>
-                  {renderStepIndicator()}
+                  <WorkflowSteps currentStep={currentStep} steps={workflowSteps} />
                   <Card>
                     <CardHeader>
                       <Button 
@@ -258,22 +180,7 @@ export function Videos() {
             {/* Right Sidebar with Suggestions */}
             <div className="space-y-6">
               <VideoSuggestions onSuggestionClick={setVideoIdea} />
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-lg">Tips & Examples</CardTitle>
-                  <CardDescription>How to get the best results</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <h4 className="font-medium">Writing Great Prompts</h4>
-                    <ul className="text-sm text-muted-foreground space-y-1">
-                      <li>• Be specific about the style and tone</li>
-                      <li>• Include your target audience</li>
-                      <li>• Mention any specific visuals</li>
-                    </ul>
-                  </div>
-                </CardContent>
-              </Card>
+              <TipsSection />
             </div>
           </div>
         </div>
