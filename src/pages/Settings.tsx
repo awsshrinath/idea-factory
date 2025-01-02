@@ -28,7 +28,16 @@ export function Settings() {
                 <ScrollArea className="h-[500px] w-full rounded-md border p-4">
                   <div className="space-y-4">
                     <div>
-                      <h3 className="font-bold">Version 1.0.0 (Current)</h3>
+                      <h3 className="font-bold">Version 1.1.0 (Current)</h3>
+                      <ul className="list-disc ml-6 space-y-2">
+                        <li>Added Videos page with AI-powered video generation capabilities</li>
+                        <li>Implemented workflow selection for direct and fine-tuned video creation</li>
+                        <li>Added script generation and management interface</li>
+                        <li>Integrated audio and caption generation UI components</li>
+                      </ul>
+                    </div>
+                    <div>
+                      <h3 className="font-bold">Version 1.0.0</h3>
                       <ul className="list-disc ml-6 space-y-2">
                         <li>Initial dashboard implementation with performance metrics</li>
                         <li>Added Quick Actions with improved visual design and 2x2 grid layout</li>
@@ -51,6 +60,15 @@ export function Settings() {
               <CardContent>
                 <ScrollArea className="h-[500px] w-full rounded-md border p-4">
                   <div className="space-y-6">
+                    <div>
+                      <h3 className="font-bold mb-2">Video Generation Features</h3>
+                      <ul className="list-disc ml-6 space-y-2">
+                        <li>Integrate Eleven Labs for text-to-speech conversion</li>
+                        <li>Implement Whisper for automatic caption generation</li>
+                        <li>Add support for custom video styles and transitions</li>
+                        <li>Enable direct social media sharing</li>
+                      </ul>
+                    </div>
                     <div>
                       <h3 className="font-bold mb-2">Dashboard Improvements</h3>
                       <ul className="list-disc ml-6 space-y-2">
