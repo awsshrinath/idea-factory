@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
+import { VideoSuggestions } from "@/components/videos/VideoSuggestions";
 import { 
   Video, 
   ImagePlus, 
@@ -14,7 +15,8 @@ import {
   HelpCircle,
   ChevronRight,
   Play,
-  Image
+  Image,
+  ArrowLeft
 } from "lucide-react";
 import {
   Tooltip,
@@ -38,6 +40,12 @@ export function Videos() {
     preview: "Preview & Export"
   };
 
+  const handleBack = () => {
+    setWorkflowType(null);
+    setCurrentStep("script");
+    setVideoIdea("");
+  };
+
   const renderStepIndicator = () => (
     <div className="flex items-center justify-between mb-8 bg-muted p-4 rounded-lg">
       {Object.entries(workflowSteps).map(([step, label], index) => (
@@ -55,31 +63,6 @@ export function Videos() {
         </div>
       ))}
     </div>
-  );
-
-  const renderSuggestions = () => (
-    <Card className="mb-6">
-      <CardHeader>
-        <CardTitle className="text-lg">Suggestions</CardTitle>
-        <CardDescription>Click to use these example prompts</CardDescription>
-      </CardHeader>
-      <CardContent className="grid gap-2">
-        {[
-          "Create a corporate training video about effective team collaboration",
-          "Design an engaging product launch video for a new tech gadget",
-          "Generate an educational tutorial about sustainable living",
-        ].map((suggestion) => (
-          <Button
-            key={suggestion}
-            variant="ghost"
-            className="justify-start h-auto py-2 px-3 text-left"
-            onClick={() => setVideoIdea(suggestion)}
-          >
-            {suggestion}
-          </Button>
-        ))}
-      </CardContent>
-    </Card>
   );
 
   const renderWorkflowSelection = () => (
@@ -176,10 +159,11 @@ export function Videos() {
                     <CardHeader>
                       <Button 
                         variant="ghost" 
-                        className="w-fit mb-4"
-                        onClick={() => setWorkflowType(null)}
+                        className="w-fit mb-4 flex items-center gap-2"
+                        onClick={handleBack}
                       >
-                        ← Back to workflow selection
+                        <ArrowLeft className="h-4 w-4" />
+                        Back to workflow selection
                       </Button>
                       <CardTitle>
                         {workflowType === "direct" ? "Direct Video Generation" : "Fine-Tuned Video Generation"}
@@ -273,7 +257,7 @@ export function Videos() {
 
             {/* Right Sidebar with Suggestions */}
             <div className="space-y-6">
-              {renderSuggestions()}
+              <VideoSuggestions onSuggestionClick={setVideoIdea} />
               <Card>
                 <CardHeader>
                   <CardTitle className="text-lg">Tips & Examples</CardTitle>
