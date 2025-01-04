@@ -1,13 +1,11 @@
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
 import { VideoSuggestions } from "@/components/videos/VideoSuggestions";
 import { WorkflowSteps } from "@/components/videos/WorkflowSteps";
 import { WorkflowSelection } from "@/components/videos/WorkflowSelection";
 import { TipsSection } from "@/components/videos/TipsSection";
+import { VideoExampleCarousel } from "@/components/videos/VideoExampleCarousel";
+import { RecentVideos } from "@/components/videos/RecentVideos";
 import { 
   Wand2, 
   Mic, 
@@ -48,9 +46,9 @@ export function Videos() {
     <div className="min-h-screen flex">
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
-          <div className="mb-8">
+          <div>
             <div className="flex items-center gap-2">
               <h1 className="text-4xl font-bold">Create Stunning AI-Generated Videos</h1>
               <TooltipProvider>
@@ -68,6 +66,9 @@ export function Videos() {
               Transform your ideas into engaging videos with AI
             </p>
           </div>
+
+          {/* Example Videos Carousel */}
+          <VideoExampleCarousel />
 
           {/* Main Content */}
           <div className="grid md:grid-cols-[1fr,300px] gap-6">
@@ -175,9 +176,12 @@ export function Videos() {
                   </Card>
                 </>
               )}
+              
+              {/* Recent Videos Section */}
+              <RecentVideos />
             </div>
 
-            {/* Right Sidebar with Suggestions */}
+            {/* Right Sidebar */}
             <div className="space-y-6">
               <VideoSuggestions onSuggestionClick={setVideoIdea} />
               <TipsSection />
