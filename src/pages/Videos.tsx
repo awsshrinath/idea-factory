@@ -47,18 +47,18 @@ export function Videos() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background text-foreground">
+    <div className="min-h-screen flex bg-background">
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-4xl font-bold text-foreground">Create Stunning AI-Generated Videos</h1>
+              <h1 className="text-4xl font-heading font-bold text-foreground">Create Stunning AI-Generated Videos</h1>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
-                    <HelpCircle className="h-6 w-6 text-muted-foreground" />
+                    <HelpCircle className="h-6 w-6 text-muted-foreground hover:text-secondary transition-colors" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p>Example: "A motivational video about teamwork"</p>
@@ -66,7 +66,7 @@ export function Videos() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <p className="text-xl text-muted-foreground mt-2">
+            <p className="text-xl text-muted-foreground mt-2 font-sans">
               Transform your ideas into engaging videos with AI
             </p>
           </div>
@@ -82,20 +82,20 @@ export function Videos() {
               ) : (
                 <>
                   <WorkflowSteps currentStep={currentStep} steps={workflowSteps} />
-                  <Card className="bg-card text-card-foreground">
+                  <Card className="bg-card border-accent/20">
                     <CardHeader>
                       <Button 
                         variant="ghost" 
-                        className="w-fit mb-4 flex items-center gap-2"
+                        className="w-fit mb-4 flex items-center gap-2 text-foreground hover:text-primary transition-colors"
                         onClick={handleBack}
                       >
                         <ArrowLeft className="h-4 w-4" />
                         Back to workflow selection
                       </Button>
-                      <CardTitle className="text-foreground">
+                      <CardTitle className="text-foreground font-heading">
                         {workflowType === "direct" ? "Direct Video Generation" : "Fine-Tuned Video Generation"}
                       </CardTitle>
-                      <CardDescription className="text-muted-foreground">
+                      <CardDescription className="text-muted-foreground font-sans">
                         {workflowType === "direct" 
                           ? "Create your video directly from a script" 
                           : "Create precise visuals before generating your video"}
@@ -103,28 +103,28 @@ export function Videos() {
                     </CardHeader>
                     <CardContent>
                       <Tabs defaultValue="script" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 bg-muted">
-                          <TabsTrigger value="script">Script</TabsTrigger>
-                          <TabsTrigger value="generation">Generation</TabsTrigger>
-                          <TabsTrigger value="audio">Audio</TabsTrigger>
-                          <TabsTrigger value="preview">Preview</TabsTrigger>
+                        <TabsList className="grid w-full grid-cols-4 bg-background border border-accent/20">
+                          <TabsTrigger value="script" className="data-[state=active]:bg-primary">Script</TabsTrigger>
+                          <TabsTrigger value="generation" className="data-[state=active]:bg-primary">Generation</TabsTrigger>
+                          <TabsTrigger value="audio" className="data-[state=active]:bg-primary">Audio</TabsTrigger>
+                          <TabsTrigger value="preview" className="data-[state=active]:bg-primary">Preview</TabsTrigger>
                         </TabsList>
 
                         <TabsContent value="script">
                           <div className="space-y-4">
                             <div>
-                              <label className="text-sm font-medium text-foreground">Your Video Idea</label>
+                              <label className="text-sm font-medium text-foreground font-sans">Your Video Idea</label>
                               <Textarea
                                 placeholder="Write about teamwork and collaboration in the workplace..."
                                 value={videoIdea}
                                 onChange={(e) => setVideoIdea(e.target.value)}
-                                className="mt-1.5 bg-background text-foreground"
+                                className="mt-1.5 bg-background text-foreground border-accent/20 focus:border-primary transition-colors"
                                 rows={4}
                               />
                             </div>
                             <div className="flex gap-2">
-                              <Button className="flex items-center gap-2">
-                                <Wand2 className="h-4 w-4" />
+                              <Button className="bg-primary text-foreground hover:bg-primary/90 transition-colors">
+                                <Wand2 className="h-4 w-4 mr-2" />
                                 Generate Script
                               </Button>
                             </div>
