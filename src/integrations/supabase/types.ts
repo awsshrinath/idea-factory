@@ -81,6 +81,36 @@ export type Database = {
         }
         Relationships: []
       }
+      sample_videos: {
+        Row: {
+          created_at: string | null
+          description: string
+          id: string
+          style: string
+          thumbnail_url: string
+          title: string
+          video_url: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          id?: string
+          style: string
+          thumbnail_url: string
+          title: string
+          video_url: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          id?: string
+          style?: string
+          thumbnail_url?: string
+          title?: string
+          video_url?: string
+        }
+        Relationships: []
+      }
       trending_topics: {
         Row: {
           created_at: string | null
@@ -99,6 +129,51 @@ export type Database = {
           description?: string
           id?: string
           title?: string
+        }
+        Relationships: []
+      }
+      videos: {
+        Row: {
+          created_at: string | null
+          file_path: string
+          id: string
+          public_url: string | null
+          script_content: string | null
+          status: string
+          style: string | null
+          thumbnail_url: string | null
+          title: string
+          updated_at: string | null
+          user_id: string
+          video_type: string
+        }
+        Insert: {
+          created_at?: string | null
+          file_path: string
+          id?: string
+          public_url?: string | null
+          script_content?: string | null
+          status?: string
+          style?: string | null
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string | null
+          user_id: string
+          video_type: string
+        }
+        Update: {
+          created_at?: string | null
+          file_path?: string
+          id?: string
+          public_url?: string | null
+          script_content?: string | null
+          status?: string
+          style?: string | null
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string | null
+          user_id?: string
+          video_type?: string
         }
         Relationships: []
       }
