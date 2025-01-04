@@ -47,14 +47,14 @@ export function Videos() {
   };
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-background text-foreground">
       <Sidebar />
       <main className="flex-1 ml-64 p-8">
         <div className="max-w-6xl mx-auto space-y-8">
           {/* Header Section */}
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-4xl font-bold">Create Stunning AI-Generated Videos</h1>
+              <h1 className="text-4xl font-bold text-foreground">Create Stunning AI-Generated Videos</h1>
               <TooltipProvider>
                 <Tooltip>
                   <TooltipTrigger>
@@ -82,7 +82,7 @@ export function Videos() {
               ) : (
                 <>
                   <WorkflowSteps currentStep={currentStep} steps={workflowSteps} />
-                  <Card>
+                  <Card className="bg-card text-card-foreground">
                     <CardHeader>
                       <Button 
                         variant="ghost" 
@@ -92,10 +92,10 @@ export function Videos() {
                         <ArrowLeft className="h-4 w-4" />
                         Back to workflow selection
                       </Button>
-                      <CardTitle>
+                      <CardTitle className="text-foreground">
                         {workflowType === "direct" ? "Direct Video Generation" : "Fine-Tuned Video Generation"}
                       </CardTitle>
-                      <CardDescription>
+                      <CardDescription className="text-muted-foreground">
                         {workflowType === "direct" 
                           ? "Create your video directly from a script" 
                           : "Create precise visuals before generating your video"}
@@ -103,7 +103,7 @@ export function Videos() {
                     </CardHeader>
                     <CardContent>
                       <Tabs defaultValue="script" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4">
+                        <TabsList className="grid w-full grid-cols-4 bg-muted">
                           <TabsTrigger value="script">Script</TabsTrigger>
                           <TabsTrigger value="generation">Generation</TabsTrigger>
                           <TabsTrigger value="audio">Audio</TabsTrigger>
@@ -113,12 +113,12 @@ export function Videos() {
                         <TabsContent value="script">
                           <div className="space-y-4">
                             <div>
-                              <label className="text-sm font-medium">Your Video Idea</label>
+                              <label className="text-sm font-medium text-foreground">Your Video Idea</label>
                               <Textarea
                                 placeholder="Write about teamwork and collaboration in the workplace..."
                                 value={videoIdea}
                                 onChange={(e) => setVideoIdea(e.target.value)}
-                                className="mt-1.5"
+                                className="mt-1.5 bg-background text-foreground"
                                 rows={4}
                               />
                             </div>
