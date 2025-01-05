@@ -30,9 +30,9 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   return (
-    <Card>
+    <Card className="border border-accent/20 shadow-lg bg-card animate-fade-in">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 text-foreground">
           <Eye className="w-5 h-5" />
           Live Preview
         </CardTitle>
@@ -47,15 +47,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             return (
               <div
                 key={platform}
-                className="p-4 rounded-md border bg-card"
+                className="p-4 rounded-md border border-accent/20 bg-background transition-all duration-300 hover:scale-[1.02]"
               >
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium capitalize">{platform}</h3>
+                  <h3 className="font-medium capitalize text-foreground">{platform}</h3>
                   <span className="text-sm text-muted-foreground">
                     {count}/{limit} characters
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap">{content}</p>
+                <p className="text-sm whitespace-pre-wrap text-foreground">{content}</p>
               </div>
             );
           })}

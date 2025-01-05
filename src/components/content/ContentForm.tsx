@@ -59,7 +59,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-xl p-6 shadow-lg border border-accent/20 animate-fade-in">
       <div className="space-y-2">
         <label className="text-sm font-medium">Content Description</label>
         <Textarea
@@ -68,7 +68,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           onChange={(e) =>
             onChange({ ...formData, description: e.target.value })
           }
-          className="h-32"
+          className="h-32 bg-background text-foreground border-accent/20 focus:border-primary transition-colors"
         />
       </div>
 
@@ -81,7 +81,10 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               type="button"
               variant={formData.platforms.includes(value) ? "default" : "outline"}
               onClick={() => handlePlatformToggle(value)}
-              className="gap-2"
+              className={cn(
+                "gap-2 transition-all duration-300 hover:scale-105",
+                formData.platforms.includes(value) && "bg-primary text-primary-foreground"
+              )}
             >
               {icon}
               {label}
@@ -100,8 +103,8 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               variant={formData.tone === value ? "default" : "outline"}
               onClick={() => onChange({ ...formData, tone: value })}
               className={cn(
-                "flex-col h-auto py-4 gap-2",
-                formData.tone === value && "bg-primary"
+                "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105",
+                formData.tone === value && "bg-primary text-primary-foreground shadow-lg"
               )}
             >
               {icon}
@@ -114,7 +117,10 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
       <Button
         type="submit"
         size="lg"
-        className="w-full"
+        className={cn(
+          "w-full transition-all duration-300 hover:scale-[1.02] bg-primary text-primary-foreground",
+          isGenerating && "animate-pulse"
+        )}
         disabled={
           !formData.description ||
           formData.platforms.length === 0 ||
