@@ -13,6 +13,7 @@ import {
   Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ContentFormProps {
   formData: ContentFormData;
@@ -60,77 +61,111 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-xl p-6 shadow-lg border border-accent/20 animate-fade-in hover:shadow-xl transition-all duration-300">
-      <div className="space-y-2">
-        <label className="text-sm font-medium italic">Content Description</label>
-        <Textarea
-          placeholder="Describe your idea… e.g., 'Write about the top 5 benefits of using AI in business.'"
-          value={formData.description}
-          onChange={(e) =>
-            onChange({ ...formData, description: e.target.value })
+    <form onSubmit={handleSubmit} className="space-y-8">
+      <div className="space-y-4 bg-gradient-to-br from-card/80 to-card p-6 rounded-xl shadow-lg border border-accent/20 backdrop-blur-sm transform transition-all duration-300 hover:shadow-xl hover:scale-[1.01] animate-fade-in">
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+            Content Description
+            <Tooltip>
+              <TooltipTrigger>
+                <Sparkles className="w-4 h-4 text-primary/60" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Describe your content idea in detail</p>
+              </TooltipContent>
+            </Tooltip>
+          </label>
+          <Textarea
+            placeholder="Describe your idea… e.g., 'Write about the top 5 benefits of using AI in business.'"
+            value={formData.description}
+            onChange={(e) =>
+              onChange({ ...formData, description: e.target.value })
+            }
+            className="h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+            Select Platforms
+            <Tooltip>
+              <TooltipTrigger>
+                <Sparkles className="w-4 h-4 text-primary/60" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Choose where to publish your content</p>
+              </TooltipContent>
+            </Tooltip>
+          </label>
+          <div className="flex flex-wrap gap-2">
+            {platforms.map(({ value, icon, label }) => (
+              <Button
+                key={value}
+                type="button"
+                variant={formData.platforms.includes(value) ? "default" : "outline"}
+                onClick={() => handlePlatformToggle(value)}
+                className={cn(
+                  "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg",
+                  formData.platforms.includes(value) &&
+                    "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
+                )}
+              >
+                {icon}
+                {label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+            Select Tone
+            <Tooltip>
+              <TooltipTrigger>
+                <Sparkles className="w-4 h-4 text-primary/60" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Choose the writing style for your content</p>
+              </TooltipContent>
+            </Tooltip>
+          </label>
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            {tones.map(({ value, icon, label }) => (
+              <Button
+                key={value}
+                type="button"
+                variant={formData.tone === value ? "default" : "outline"}
+                onClick={() => onChange({ ...formData, tone: value })}
+                className={cn(
+                  "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg",
+                  formData.tone === value &&
+                    "bg-gradient-to-r from-primary via-primary/80 to-secondary text-primary-foreground"
+                )}
+              >
+                {icon}
+                {label}
+              </Button>
+            ))}
+          </div>
+        </div>
+
+        <Button
+          type="submit"
+          size="lg"
+          className={cn(
+            "w-full transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg shadow-lg group",
+            isGenerating && "animate-pulse"
+          )}
+          disabled={
+            !formData.description ||
+            formData.platforms.length === 0 ||
+            isGenerating
           }
-          className="h-32 bg-background text-foreground border-accent/20 focus:border-primary transition-colors rounded-lg resize-none hover:border-primary/50"
-        />
+        >
+          <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+          {isGenerating ? "Generating..." : "Generate Content"}
+        </Button>
       </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium italic">Select Platforms</label>
-        <div className="flex flex-wrap gap-2">
-          {platforms.map(({ value, icon, label }) => (
-            <Button
-              key={value}
-              type="button"
-              variant={formData.platforms.includes(value) ? "default" : "outline"}
-              onClick={() => handlePlatformToggle(value)}
-              className={cn(
-                "gap-2 transition-all duration-300 hover:scale-105 rounded-lg",
-                formData.platforms.includes(value) && "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg"
-              )}
-            >
-              {icon}
-              {label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <div className="space-y-2">
-        <label className="text-sm font-medium italic">Select Tone</label>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-          {tones.map(({ value, icon, label }) => (
-            <Button
-              key={value}
-              type="button"
-              variant={formData.tone === value ? "default" : "outline"}
-              onClick={() => onChange({ ...formData, tone: value })}
-              className={cn(
-                "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105 rounded-lg",
-                formData.tone === value && "bg-gradient-to-r from-primary via-primary/80 to-secondary text-primary-foreground shadow-lg"
-              )}
-            >
-              {icon}
-              {label}
-            </Button>
-          ))}
-        </div>
-      </div>
-
-      <Button
-        type="submit"
-        size="lg"
-        className={cn(
-          "w-full transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg shadow-lg",
-          isGenerating && "animate-pulse"
-        )}
-        disabled={
-          !formData.description ||
-          formData.platforms.length === 0 ||
-          isGenerating
-        }
-      >
-        <Wand2 className="w-4 h-4 mr-2" />
-        {isGenerating ? "Generating..." : "Generate Content"}
-      </Button>
     </form>
   );
 }

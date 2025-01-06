@@ -37,7 +37,7 @@ export function RecentContent() {
 
   if (isLoading) {
     return (
-      <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in">
+      <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card/80 to-card backdrop-blur-sm animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             <Clock className="w-5 h-5" />
@@ -60,7 +60,7 @@ export function RecentContent() {
   }
 
   return (
-    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in hover:shadow-xl transition-all duration-300">
+    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card/80 to-card backdrop-blur-sm animate-fade-in hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           <Clock className="w-5 h-5" />
@@ -73,11 +73,13 @@ export function RecentContent() {
           {content?.map((item) => (
             <div
               key={item.id}
-              className="p-4 rounded-lg border border-accent/20 bg-background hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50"
+              className="p-4 rounded-lg border border-accent/20 bg-background/50 hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
             >
               <div className="flex justify-between items-start gap-4">
                 <div>
-                  <h3 className="font-medium mb-1">{item.title}</h3>
+                  <h3 className="font-medium mb-1 group-hover:text-primary transition-colors duration-300">
+                    {item.title}
+                  </h3>
                   <p className="text-sm text-muted-foreground mb-2">
                     {item.description}
                   </p>
@@ -92,14 +94,26 @@ export function RecentContent() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
-                    <Eye className="w-4 h-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-accent/50 transition-colors group"
+                  >
+                    <Eye className="w-4 h-4 group-hover:text-primary transition-colors" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
-                    <Copy className="w-4 h-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-accent/50 transition-colors group"
+                  >
+                    <Copy className="w-4 h-4 group-hover:text-primary transition-colors" />
                   </Button>
-                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
-                    <Trash className="w-4 h-4" />
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hover:bg-accent/50 transition-colors group"
+                  >
+                    <Trash className="w-4 h-4 group-hover:text-primary transition-colors" />
                   </Button>
                 </div>
               </div>
@@ -109,7 +123,9 @@ export function RecentContent() {
           {content?.length === 0 && (
             <div className="text-center py-12 px-4">
               <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-lg font-medium text-muted-foreground mb-2">No content yet</p>
+              <p className="text-lg font-medium text-muted-foreground mb-2">
+                No content yet
+              </p>
               <p className="text-sm text-muted-foreground mb-4">
                 Start by generating your first piece of content
               </p>

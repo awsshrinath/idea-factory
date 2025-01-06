@@ -31,7 +31,7 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
 
   if (isLoading) {
     return (
-      <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in">
+      <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card/80 to-card backdrop-blur-sm animate-fade-in">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             <Sparkles className="w-5 h-5" />
@@ -53,7 +53,7 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
   }
 
   return (
-    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in hover:shadow-xl transition-all duration-300">
+    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card/80 to-card backdrop-blur-sm animate-fade-in hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           <Sparkles className="w-5 h-5" />
@@ -65,9 +65,11 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
           {topics?.map((topic) => (
             <div
               key={topic.id}
-              className="p-4 rounded-lg border border-accent/20 bg-background hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50"
+              className="p-4 rounded-lg border border-accent/20 bg-background/50 hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
             >
-              <h3 className="font-medium mb-1">{topic.title}</h3>
+              <h3 className="font-medium mb-1 group-hover:text-primary transition-colors duration-300">
+                {topic.title}
+              </h3>
               <p className="text-sm text-muted-foreground mb-3">
                 {topic.description}
               </p>
@@ -75,7 +77,7 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
                 variant="secondary"
                 size="sm"
                 onClick={() => onSelect(topic)}
-                className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground hover:shadow-md transition-all duration-300"
+                className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground hover:shadow-md transition-all duration-300 group-hover:scale-105"
               >
                 Use This
               </Button>

@@ -28,7 +28,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   return (
-    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in hover:shadow-xl transition-all duration-300">
+    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card/80 to-card backdrop-blur-sm animate-fade-in hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]">
       <CardHeader>
         <CardTitle className="flex items-center gap-2 text-foreground bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           <Eye className="w-5 h-5" />
@@ -45,15 +45,19 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             return (
               <div
                 key={platform}
-                className="p-4 rounded-lg border border-accent/20 bg-background hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50"
+                className="p-4 rounded-lg border border-accent/20 bg-background/50 hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
               >
                 <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium capitalize text-foreground">{platform}</h3>
+                  <h3 className="font-medium capitalize text-foreground group-hover:text-primary transition-colors duration-300">
+                    {platform}
+                  </h3>
                   <span className="text-sm text-muted-foreground">
                     {count}/{limit} characters
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap text-foreground">{content}</p>
+                <p className="text-sm whitespace-pre-wrap text-foreground/90">
+                  {content}
+                </p>
               </div>
             );
           })}
