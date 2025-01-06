@@ -41,6 +41,13 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   },
 ];
 
+const gradients = {
+  professional: "from-[#FF416C] to-[#FF4B2B]",
+  friendly: "from-[#42E695] to-[#3BB2B8]",
+  casual: "from-[#FFD54F] to-[#FFB74D]",
+  creative: "from-[#6A5ACD] to-[#8A2BE2]",
+};
+
 export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -62,7 +69,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-4 bg-gradient-to-br from-card/80 to-card p-6 rounded-xl shadow-lg border border-accent/20 backdrop-blur-sm transform transition-all duration-300 hover:shadow-xl hover:scale-[1.01] animate-fade-in">
+      <div className="space-y-4 bg-gradient-to-br from-[#1D2433] to-[#283047] p-8 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-white/10 backdrop-blur-sm transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] animate-fade-in">
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
             Content Description
@@ -105,7 +112,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
                 variant={formData.platforms.includes(value) ? "default" : "outline"}
                 onClick={() => handlePlatformToggle(value)}
                 className={cn(
-                  "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg",
+                  "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg hover:shadow-xl",
                   formData.platforms.includes(value) &&
                     "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
                 )}
@@ -137,9 +144,9 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
                 variant={formData.tone === value ? "default" : "outline"}
                 onClick={() => onChange({ ...formData, tone: value })}
                 className={cn(
-                  "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg",
+                  "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg hover:shadow-xl",
                   formData.tone === value &&
-                    "bg-gradient-to-r from-primary via-primary/80 to-secondary text-primary-foreground"
+                    `bg-gradient-to-r ${gradients[value]} text-primary-foreground`
                 )}
               >
                 {icon}
@@ -153,7 +160,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           type="submit"
           size="lg"
           className={cn(
-            "w-full transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg shadow-lg group",
+            "w-full transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)]",
             isGenerating && "animate-pulse"
           )}
           disabled={

@@ -28,14 +28,14 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   return (
-    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card/80 to-card backdrop-blur-sm animate-fade-in hover:shadow-xl transition-all duration-300 transform hover:scale-[1.01]">
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2 text-foreground bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          <Eye className="w-5 h-5" />
+    <Card className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl">
+      <CardHeader className="p-6">
+        <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+          <Eye className="w-6 h-6" />
           Live Preview
         </CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="p-6">
         <div className="space-y-4">
           {formData.platforms.map((platform) => {
             const content = getPreviewContent();
@@ -45,17 +45,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             return (
               <div
                 key={platform}
-                className="p-4 rounded-lg border border-accent/20 bg-background/50 hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
+                className="p-6 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
               >
-                <div className="flex justify-between items-center mb-2">
-                  <h3 className="font-medium capitalize text-foreground group-hover:text-primary transition-colors duration-300">
+                <div className="flex justify-between items-center mb-3">
+                  <h3 className="font-medium capitalize text-lg text-foreground group-hover:text-primary transition-colors duration-300">
                     {platform}
                   </h3>
                   <span className="text-sm text-muted-foreground">
                     {count}/{limit} characters
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap text-foreground/90">
+                <p className="text-sm whitespace-pre-wrap text-foreground/90 leading-relaxed">
                   {content}
                 </p>
               </div>
@@ -63,7 +63,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           })}
 
           {formData.platforms.length === 0 && (
-            <div className="text-center text-muted-foreground py-8 animate-pulse">
+            <div className="text-center text-muted-foreground py-12 animate-pulse">
               Select a platform to see the preview
             </div>
           )}
