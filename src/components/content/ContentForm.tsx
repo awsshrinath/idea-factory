@@ -10,6 +10,7 @@ import {
   Users,
   Coffee,
   Sparkles,
+  Wand2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -59,21 +60,21 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-xl p-6 shadow-lg border border-accent/20 animate-fade-in">
+    <form onSubmit={handleSubmit} className="space-y-6 bg-card rounded-xl p-6 shadow-lg border border-accent/20 animate-fade-in hover:shadow-xl transition-all duration-300">
       <div className="space-y-2">
-        <label className="text-sm font-medium">Content Description</label>
+        <label className="text-sm font-medium italic">Content Description</label>
         <Textarea
           placeholder="Describe your idea… e.g., 'Write about the top 5 benefits of using AI in business.'"
           value={formData.description}
           onChange={(e) =>
             onChange({ ...formData, description: e.target.value })
           }
-          className="h-32 bg-background text-foreground border-accent/20 focus:border-primary transition-colors"
+          className="h-32 bg-background text-foreground border-accent/20 focus:border-primary transition-colors rounded-lg resize-none hover:border-primary/50"
         />
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Select Platforms</label>
+        <label className="text-sm font-medium italic">Select Platforms</label>
         <div className="flex flex-wrap gap-2">
           {platforms.map(({ value, icon, label }) => (
             <Button
@@ -82,8 +83,8 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               variant={formData.platforms.includes(value) ? "default" : "outline"}
               onClick={() => handlePlatformToggle(value)}
               className={cn(
-                "gap-2 transition-all duration-300 hover:scale-105",
-                formData.platforms.includes(value) && "bg-primary text-primary-foreground"
+                "gap-2 transition-all duration-300 hover:scale-105 rounded-lg",
+                formData.platforms.includes(value) && "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground shadow-lg"
               )}
             >
               {icon}
@@ -94,7 +95,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Select Tone</label>
+        <label className="text-sm font-medium italic">Select Tone</label>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
           {tones.map(({ value, icon, label }) => (
             <Button
@@ -103,8 +104,8 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               variant={formData.tone === value ? "default" : "outline"}
               onClick={() => onChange({ ...formData, tone: value })}
               className={cn(
-                "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105",
-                formData.tone === value && "bg-primary text-primary-foreground shadow-lg"
+                "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105 rounded-lg",
+                formData.tone === value && "bg-gradient-to-r from-primary via-primary/80 to-secondary text-primary-foreground shadow-lg"
               )}
             >
               {icon}
@@ -118,7 +119,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         type="submit"
         size="lg"
         className={cn(
-          "w-full transition-all duration-300 hover:scale-[1.02] bg-primary text-primary-foreground",
+          "w-full transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-primary to-secondary text-primary-foreground rounded-lg shadow-lg",
           isGenerating && "animate-pulse"
         )}
         disabled={
@@ -127,6 +128,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           isGenerating
         }
       >
+        <Wand2 className="w-4 h-4 mr-2" />
         {isGenerating ? "Generating..." : "Generate Content"}
       </Button>
     </form>

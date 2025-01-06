@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Copy, Eye, Trash } from "lucide-react";
+import { Clock, Copy, Eye, Trash, FileText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Content {
@@ -37,9 +37,9 @@ export function RecentContent() {
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
+          <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
             <Clock className="w-5 h-5" />
             Recent Content
           </CardTitle>
@@ -50,7 +50,7 @@ export function RecentContent() {
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-24 rounded-md bg-muted animate-pulse"
+                className="h-24 rounded-lg bg-muted animate-pulse"
               />
             ))}
           </div>
@@ -60,9 +60,9 @@ export function RecentContent() {
   }
 
   return (
-    <Card>
+    <Card className="border border-accent/20 shadow-lg bg-gradient-to-br from-card to-card/90 animate-fade-in hover:shadow-xl transition-all duration-300">
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+        <CardTitle className="flex items-center gap-2 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
           <Clock className="w-5 h-5" />
           Recent Content
         </CardTitle>
@@ -73,7 +73,7 @@ export function RecentContent() {
           {content?.map((item) => (
             <div
               key={item.id}
-              className="p-4 rounded-md border bg-card"
+              className="p-4 rounded-lg border border-accent/20 bg-background hover:shadow-md transition-all duration-300 hover:scale-[1.02] hover:border-primary/50"
             >
               <div className="flex justify-between items-start gap-4">
                 <div>
@@ -92,13 +92,13 @@ export function RecentContent() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
                     <Eye className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
                     <Copy className="w-4 h-4" />
                   </Button>
-                  <Button variant="ghost" size="icon">
+                  <Button variant="ghost" size="icon" className="hover:bg-accent/50 transition-colors">
                     <Trash className="w-4 h-4" />
                   </Button>
                 </div>
@@ -107,8 +107,18 @@ export function RecentContent() {
           ))}
 
           {content?.length === 0 && (
-            <div className="text-center text-muted-foreground py-8">
-              No content created yet
+            <div className="text-center py-12 px-4">
+              <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+              <p className="text-lg font-medium text-muted-foreground mb-2">No content yet</p>
+              <p className="text-sm text-muted-foreground mb-4">
+                Start by generating your first piece of content
+              </p>
+              <Button
+                variant="outline"
+                className="bg-gradient-to-r from-primary to-secondary text-primary-foreground hover:shadow-md transition-all duration-300"
+              >
+                Create Your First Content
+              </Button>
             </div>
           )}
         </div>
