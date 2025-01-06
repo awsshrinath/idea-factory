@@ -81,11 +81,12 @@
 }
 
 .calendar-container .fc-toolbar-title {
-  @apply text-xl font-bold;
+  @apply text-xl font-bold text-foreground;
 }
 
 .calendar-container .fc-button {
-  @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  @apply bg-gradient-primary hover:bg-gradient-secondary text-foreground 
+         transition-all duration-300 hover:shadow-glow;
 }
 
 .calendar-container .fc-button-primary {
@@ -94,7 +95,7 @@
 
 .calendar-container .fc-button-primary:not(:disabled).fc-button-active,
 .calendar-container .fc-button-primary:not(:disabled):active {
-  @apply bg-primary/90 border-primary;
+  @apply bg-gradient-secondary border-secondary;
 }
 
 .calendar-container .fc-daygrid-day-number,
@@ -103,11 +104,12 @@
 }
 
 .calendar-container .fc-day-today {
-  @apply bg-accent/50 !important;
+  @apply bg-accent/20 !important;
 }
 
 .calendar-container .fc-event {
-  @apply cursor-pointer border-none;
+  @apply cursor-pointer border-none shadow-card hover:shadow-card-hover 
+         transition-all duration-300;
 }
 
 .calendar-container .fc-event-time,
@@ -120,5 +122,5 @@
 }
 
 .calendar-container .fc-view-harness {
-  @apply bg-background border rounded-lg;
+  @apply bg-gradient-card border border-white/10 rounded-lg;
 }

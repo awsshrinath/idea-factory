@@ -9,15 +9,17 @@ import {
 
 export function FilterSection() {
   return (
-    <Card>
+    <Card className="bg-gradient-card border border-white/10 shadow-card 
+                     hover:shadow-card-hover transition-all duration-300
+                     hover:bg-gradient-card-hover">
       <CardHeader>
-        <CardTitle className="text-lg">Filters</CardTitle>
+        <CardTitle className="text-lg text-foreground font-heading">Filters</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <label className="text-sm font-medium">Content Type</label>
+          <label className="text-sm font-medium text-foreground">Content Type</label>
           <Select>
-            <SelectTrigger>
+            <SelectTrigger className="bg-muted border-white/10 text-foreground">
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
@@ -29,9 +31,9 @@ export function FilterSection() {
           </Select>
         </div>
         <div className="space-y-2">
-          <label className="text-sm font-medium">Platform</label>
+          <label className="text-sm font-medium text-foreground">Platform</label>
           <Select>
-            <SelectTrigger>
+            <SelectTrigger className="bg-muted border-white/10 text-foreground">
               <SelectValue placeholder="All Platforms" />
             </SelectTrigger>
             <SelectContent>

@@ -63,14 +63,15 @@ export function CalendarView() {
   };
 
   return (
-    <Card>
+    <Card className="bg-gradient-card border border-white/10 shadow-card 
+                     hover:shadow-card-hover transition-all duration-300">
       <CardContent className="p-6">
         <div className="mb-4 flex justify-between items-center">
           <Select
             value={view}
             onValueChange={(value) => setView(value)}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-muted border-white/10 text-foreground">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
