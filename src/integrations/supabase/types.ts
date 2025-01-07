@@ -48,6 +48,42 @@ export type Database = {
         }
         Relationships: []
       }
+      generated_content: {
+        Row: {
+          created_at: string | null
+          description: string
+          generated_text: string | null
+          id: string
+          platform: string[]
+          status: string | null
+          tone: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          generated_text?: string | null
+          id?: string
+          platform: string[]
+          status?: string | null
+          tone: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          generated_text?: string | null
+          id?: string
+          platform?: string[]
+          status?: string | null
+          tone?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       generated_images: {
         Row: {
           aspect_ratio: string
@@ -77,6 +113,30 @@ export type Database = {
           prompt?: string
           style?: string
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      recent_activity: {
+        Row: {
+          activity_type: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          user_id: string
+        }
+        Insert: {
+          activity_type: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          user_id: string
+        }
+        Update: {
+          activity_type?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
           user_id?: string
         }
         Relationships: []
@@ -111,6 +171,39 @@ export type Database = {
         }
         Relationships: []
       }
+      scheduled_posts: {
+        Row: {
+          content: string
+          created_at: string | null
+          id: string
+          platform: string[]
+          scheduled_date: string
+          status: string | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string | null
+          id?: string
+          platform: string[]
+          scheduled_date: string
+          status?: string | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string | null
+          id?: string
+          platform?: string[]
+          scheduled_date?: string
+          status?: string | null
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       trending_topics: {
         Row: {
           created_at: string | null
@@ -129,6 +222,30 @@ export type Database = {
           description?: string
           id?: string
           title?: string
+        }
+        Relationships: []
+      }
+      user_metrics: {
+        Row: {
+          engagement_rate: number | null
+          top_content: Json | null
+          total_content: number | null
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          engagement_rate?: number | null
+          top_content?: Json | null
+          total_content?: number | null
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          engagement_rate?: number | null
+          top_content?: Json | null
+          total_content?: number | null
+          updated_at?: string | null
+          user_id?: string
         }
         Relationships: []
       }
