@@ -27,9 +27,9 @@ export function VideoExampleCarousel() {
   }, []);
 
   return (
-    <Card>
+    <Card className="bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Example Videos</h3>
+        <h3 className="text-lg font-semibold mb-4 text-foreground">Example Videos</h3>
         <div className="flex gap-4 overflow-x-auto pb-4">
           {sampleVideos.map((video) => (
             <div key={video.id} className="flex-none w-72">
@@ -37,20 +37,29 @@ export function VideoExampleCarousel() {
                 <img 
                   src={video.thumbnail_url} 
                   alt={video.title}
-                  className="w-full h-40 object-cover rounded-lg"
+                  className="w-full h-40 object-cover rounded-lg shadow-card"
                 />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button size="sm" variant="secondary" className="flex items-center gap-2">
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity 
+                              flex items-center justify-center gap-2 rounded-lg">
+                  <Button 
+                    size="sm" 
+                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 
+                              hover:shadow-glow flex items-center gap-2"
+                  >
                     <Play className="h-4 w-4" />
                     Play
                   </Button>
-                  <Button size="sm" variant="secondary" className="flex items-center gap-2">
+                  <Button 
+                    size="sm" 
+                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 
+                              hover:shadow-glow flex items-center gap-2"
+                  >
                     <Copy className="h-4 w-4" />
                     Use Template
                   </Button>
                 </div>
               </div>
-              <h4 className="font-medium mt-2">{video.title}</h4>
+              <h4 className="font-medium mt-2 text-foreground">{video.title}</h4>
               <p className="text-sm text-muted-foreground">{video.description}</p>
             </div>
           ))}

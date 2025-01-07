@@ -31,31 +31,31 @@ export function RecentVideos() {
   }, []);
 
   return (
-    <Card>
+    <Card className="bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4">Recent Videos</h3>
+        <h3 className="text-lg font-semibold mb-4 text-foreground">Recent Videos</h3>
         <div className="grid gap-4">
           {recentVideos.map((video) => (
-            <div key={video.id} className="flex items-center gap-4">
+            <div key={video.id} className="flex items-center gap-4 p-3 rounded-lg bg-muted/20 hover:bg-muted/40 transition-colors">
               <img 
                 src={video.thumbnail_url || '/placeholder.svg'} 
                 alt={video.title}
-                className="w-24 h-16 object-cover rounded"
+                className="w-24 h-16 object-cover rounded shadow-md"
               />
               <div className="flex-1">
-                <h4 className="font-medium">{video.title}</h4>
+                <h4 className="font-medium text-foreground">{video.title}</h4>
                 <p className="text-sm text-muted-foreground">
                   {new Date(video.created_at || '').toLocaleDateString()}
                 </p>
               </div>
               <div className="flex gap-2">
-                <Button size="sm" variant="ghost">
+                <Button size="sm" variant="ghost" className="hover:bg-primary/20 hover:text-primary transition-colors">
                   <Play className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="ghost">
+                <Button size="sm" variant="ghost" className="hover:bg-primary/20 hover:text-primary transition-colors">
                   <Download className="h-4 w-4" />
                 </Button>
-                <Button size="sm" variant="ghost">
+                <Button size="sm" variant="ghost" className="hover:bg-primary/20 hover:text-primary transition-colors">
                   <RefreshCw className="h-4 w-4" />
                 </Button>
               </div>
