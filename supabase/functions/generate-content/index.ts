@@ -30,14 +30,12 @@ serve(async (req) => {
     - Maintain a ${tone} tone throughout the content
     - Write in ${language}`;
 
-    // Create proper Headers instance
-    const headers = new Headers();
-    headers.set('Authorization', `Bearer ${openAIApiKey}`);
-    headers.set('Content-Type', 'application/json');
-
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers,
+      headers: {
+        'Authorization': `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json'
+      },
       body: JSON.stringify({
         model: aiModel === 'chatgpt' ? 'gpt-4o-mini' : 'gpt-4o',
         messages: [
