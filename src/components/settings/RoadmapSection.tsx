@@ -1,49 +1,124 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { 
+  Video, 
+  LayoutDashboard, 
+  Activity,
+  FileText,
+  Settings2,
+  ArrowUp,
+  Check
+} from "lucide-react";
 
 export function RoadmapSection() {
   return (
     <Card className="bg-gradient-to-br from-[#1F1F33] to-[#2C2C4A] border border-white/10 shadow-lg hover:shadow-xl transition-shadow">
       <CardHeader>
-        <CardTitle className="text-foreground">Roadmap</CardTitle>
+        <CardTitle className="text-foreground flex items-center gap-2">
+          <Settings2 className="w-5 h-5 text-primary" />
+          Roadmap
+        </CardTitle>
         <CardDescription>Upcoming features and improvements</CardDescription>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[500px] w-full rounded-md border border-white/10 p-4 bg-background/50">
           <div className="space-y-6">
-            <div>
-              <h3 className="font-bold mb-2 text-foreground">Video Generation Features</h3>
-              <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
-                <li>Integrate Eleven Labs for text-to-speech conversion</li>
-                <li>Implement Whisper for automatic caption generation</li>
-                <li>Add support for custom video styles and transitions</li>
-                <li>Enable direct social media sharing</li>
-              </ul>
+            <div className="group hover:bg-accent/5 p-4 rounded-lg transition-all duration-300">
+              <div className="flex items-start gap-2">
+                <Video className="w-5 h-5 text-primary mt-1 shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-foreground">Video Generation Features</h3>
+                    <span className="bg-primary/10 text-primary text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                      <ArrowUp className="w-3 h-3" />
+                      Priority
+                    </span>
+                  </div>
+                  <ul className="list-none space-y-3 text-muted-foreground">
+                    {[
+                      "Integrate Eleven Labs for text-to-speech conversion",
+                      "Implement Whisper for automatic caption generation",
+                      "Add support for custom video styles and transitions",
+                      "Enable direct social media sharing"
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-accent mt-1 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold mb-2 text-foreground">Dashboard Improvements</h3>
-              <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
-                <li>Add legends and toggles for Performance Metrics graphs</li>
-                <li>Implement trend indicators with percentage changes</li>
-                <li>Enhanced hover animations for Quick Actions</li>
-              </ul>
+
+            <div className="group hover:bg-accent/5 p-4 rounded-lg transition-all duration-300">
+              <div className="flex items-start gap-2">
+                <LayoutDashboard className="w-5 h-5 text-secondary mt-1 shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-foreground">Dashboard Improvements</h3>
+                  </div>
+                  <ul className="list-none space-y-3 text-muted-foreground">
+                    {[
+                      "Add legends and toggles for Performance Metrics graphs",
+                      "Implement trend indicators with percentage changes",
+                      "Enhanced hover animations for Quick Actions"
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-accent mt-1 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold mb-2 text-foreground">Recent Activity Enhancements</h3>
-              <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
-                <li>Categorize activities by type</li>
-                <li>Add detailed view for each activity</li>
-                <li>Implement activity filtering</li>
-              </ul>
+
+            <div className="group hover:bg-accent/5 p-4 rounded-lg transition-all duration-300">
+              <div className="flex items-start gap-2">
+                <Activity className="w-5 h-5 text-accent mt-1 shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-foreground">Recent Activity Enhancements</h3>
+                  </div>
+                  <ul className="list-none space-y-3 text-muted-foreground">
+                    {[
+                      "Categorize activities by type",
+                      "Add detailed view for each activity",
+                      "Implement activity filtering"
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-accent mt-1 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
-            <div>
-              <h3 className="font-bold mb-2 text-foreground">Content Management</h3>
-              <ul className="list-disc ml-6 space-y-2 text-muted-foreground">
-                <li>Content generation workflow</li>
-                <li>Image creation and management</li>
-                <li>Video content tools</li>
-                <li>Scheduling system</li>
-              </ul>
+
+            <div className="group hover:bg-accent/5 p-4 rounded-lg transition-all duration-300">
+              <div className="flex items-start gap-2">
+                <FileText className="w-5 h-5 text-primary mt-1 shrink-0" />
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-2">
+                    <h3 className="font-bold text-foreground">Content Management</h3>
+                  </div>
+                  <ul className="list-none space-y-3 text-muted-foreground">
+                    {[
+                      "Content generation workflow",
+                      "Image creation and management",
+                      "Video content tools",
+                      "Scheduling system"
+                    ].map((item, index) => (
+                      <li key={index} className="flex items-start gap-2">
+                        <Check className="w-4 h-4 text-accent mt-1 shrink-0" />
+                        <span>{item}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
             </div>
           </div>
         </ScrollArea>
