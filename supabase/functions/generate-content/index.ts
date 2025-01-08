@@ -11,6 +11,11 @@ const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 const supabaseUrl = Deno.env.get('SUPABASE_URL');
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
 
+if (!openAIApiKey) {
+  console.error('OPENAI_API_KEY is not set');
+  throw new Error('OPENAI_API_KEY is not set');
+}
+
 const supabase = createClient(supabaseUrl!, supabaseServiceKey!);
 
 serve(async (req) => {
@@ -22,6 +27,14 @@ serve(async (req) => {
   try {
     const { description, platform, tone, language, aiModel } = await req.json();
 
+    console.log('Received request with parameters:', {
+      description,
+      platform,
+      tone,
+      language,
+      aiModel,
+    });
+
     // Construct the system prompt based on platform and tone
     const systemPrompt = `You are an AI content writer specializing in creating ${tone} content for ${platform}. 
     Follow these platform-specific guidelines:
@@ -31,13 +44,7 @@ serve(async (req) => {
     - Maintain a ${tone} tone throughout the content
     - Write in ${language}`;
 
-    console.log('Generating content with parameters:', {
-      description,
-      platform,
-      tone,
-      language,
-      aiModel
-    });
+    console.log('Making request to OpenAI with system prompt:', systemPrompt);
 
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
@@ -55,7 +62,15 @@ serve(async (req) => {
       }),
     });
 
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('OpenAI API error:', errorData);
+      throw new Error(`OpenAI API error: ${JSON.stringify(errorData)}`);
+    }
+
     const data = await response.json();
+    console.log('Received response from OpenAI:', data);
+
     const generatedText = data.choices[0].message.content;
 
     // Store the generated content in the database
@@ -74,11 +89,12 @@ serve(async (req) => {
       .single();
 
     if (contentError) {
+      console.error('Error storing content:', contentError);
       throw new Error(`Error storing content: ${contentError.message}`);
     }
 
     // Log the activity
-    await supabase
+    const { error: activityError } = await supabase
       .from('recent_activity')
       .insert({
         activity_type: 'content_generation',
@@ -89,6 +105,10 @@ serve(async (req) => {
           language,
         },
       });
+
+    if (activityError) {
+      console.error('Error logging activity:', activityError);
+    }
 
     return new Response(
       JSON.stringify({ 
@@ -103,7 +123,10 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-content function:', error);
     return new Response(
-      JSON.stringify({ success: false, error: error.message }),
+      JSON.stringify({ 
+        success: false, 
+        error: error.message || 'An unexpected error occurred'
+      }),
       { 
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
