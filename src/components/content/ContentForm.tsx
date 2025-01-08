@@ -23,6 +23,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
 
 interface ContentFormProps {
   formData: ContentFormData;
@@ -72,6 +74,7 @@ const gradients = {
 
 export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const { toast } = useToast();
 
   const handlePlatformToggle = (platform: Platform) => {
     onChange({
@@ -85,8 +88,41 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
-    // TODO: Implement content generation with selected AI model
-    setTimeout(() => setIsGenerating(false), 2000);
+
+    try {
+      // Take the first platform for now, we'll handle multiple platforms later
+      const platform = formData.platforms[0];
+      
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          description: formData.description,
+          platform,
+          tone: formData.tone,
+          language: formData.language,
+          aiModel: formData.aiModel,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data.success) {
+        toast({
+          title: "Content generated successfully!",
+          description: "Your content is ready for review.",
+        });
+      } else {
+        throw new Error(data.error || 'Failed to generate content');
+      }
+    } catch (error) {
+      console.error('Error generating content:', error);
+      toast({
+        variant: "destructive",
+        title: "Error generating content",
+        description: error.message,
+      });
+    } finally {
+      setIsGenerating(false);
+    }
   };
 
   return (

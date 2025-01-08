@@ -1,1 +1,10 @@
 project_id = "nphkufnrodsvvyxyaglc"
+
+[api]
+enabled = true
+port = 54321
+schemas = ["public", "storage", "graphql_public"]
+
+[[functions]]
+name = "generate-content"
+verify_jwt = true
