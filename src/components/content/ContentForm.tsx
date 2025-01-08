@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { ContentFormData, Platform, Tone } from "@/pages/Content";
+import { ContentFormData, Platform, Tone, AIModel, Language } from "@/pages/Content";
 import {
   Linkedin,
   Twitter,
@@ -11,8 +11,17 @@ import {
   Coffee,
   Sparkles,
   Wand2,
+  Bot,
+  Globe,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface ContentFormProps {
@@ -41,6 +50,19 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   },
 ];
 
+const aiModels: { value: AIModel; label: string }[] = [
+  { value: "chatgpt", label: "ChatGPT (Conversational)" },
+  { value: "deepseek", label: "DeepSeek (SEO-Focused)" },
+];
+
+const languages: { value: Language; label: string }[] = [
+  { value: "English", label: "English" },
+  { value: "Spanish", label: "Spanish" },
+  { value: "French", label: "French" },
+  { value: "German", label: "German" },
+  { value: "Chinese", label: "Chinese" },
+];
+
 const gradients = {
   professional: "from-[#FF416C] to-[#FF4B2B]",
   friendly: "from-[#42E695] to-[#3BB2B8]",
@@ -63,7 +85,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
-    // TODO: Implement content generation
+    // TODO: Implement content generation with selected AI model
     setTimeout(() => setIsGenerating(false), 2000);
   };
 
@@ -90,6 +112,78 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             }
             className="h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50"
           />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+              AI Model
+              <Tooltip>
+                <TooltipTrigger>
+                  <Bot className="w-4 h-4 text-primary/60" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Choose your preferred AI model</p>
+                </TooltipContent>
+              </Tooltip>
+            </label>
+            <Select
+              value={formData.aiModel}
+              onValueChange={(value: AIModel) =>
+                onChange({ ...formData, aiModel: value })
+              }
+            >
+              <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectValue placeholder="Select AI Model" />
+              </SelectTrigger>
+              <SelectContent>
+                {aiModels.map((model) => (
+                  <SelectItem
+                    key={model.value}
+                    value={model.value}
+                    className="cursor-pointer"
+                  >
+                    {model.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+              Language
+              <Tooltip>
+                <TooltipTrigger>
+                  <Globe className="w-4 h-4 text-primary/60" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Choose content language</p>
+                </TooltipContent>
+              </Tooltip>
+            </label>
+            <Select
+              value={formData.language}
+              onValueChange={(value: Language) =>
+                onChange({ ...formData, language: value })
+              }
+            >
+              <SelectTrigger className="bg-background/50 border-accent/20">
+                <SelectValue placeholder="Select Language" />
+              </SelectTrigger>
+              <SelectContent>
+                {languages.map((lang) => (
+                  <SelectItem
+                    key={lang.value}
+                    value={lang.value}
+                    className="cursor-pointer"
+                  >
+                    {lang.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
 
         <div className="space-y-2">

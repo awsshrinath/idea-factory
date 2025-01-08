@@ -48,39 +48,89 @@ export type Database = {
         }
         Relationships: []
       }
+      content_versions: {
+        Row: {
+          content: string
+          content_id: string | null
+          created_at: string | null
+          id: string
+          user_id: string | null
+          version_number: number
+        }
+        Insert: {
+          content: string
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+          version_number: number
+        }
+        Update: {
+          content?: string
+          content_id?: string | null
+          created_at?: string | null
+          id?: string
+          user_id?: string | null
+          version_number?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_versions_content_id_fkey"
+            columns: ["content_id"]
+            isOneToOne: false
+            referencedRelation: "generated_content"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       generated_content: {
         Row: {
+          ai_model: string
           created_at: string | null
           description: string
           generated_text: string | null
+          hashtags: string[] | null
           id: string
+          language: string
           platform: string[]
+          seo_score: number | null
           status: string | null
           tone: string
           updated_at: string | null
           user_id: string
+          version: number
         }
         Insert: {
+          ai_model?: string
           created_at?: string | null
           description: string
           generated_text?: string | null
+          hashtags?: string[] | null
           id?: string
+          language?: string
           platform: string[]
+          seo_score?: number | null
           status?: string | null
           tone: string
           updated_at?: string | null
           user_id: string
+          version?: number
         }
         Update: {
+          ai_model?: string
           created_at?: string | null
           description?: string
           generated_text?: string | null
+          hashtags?: string[] | null
           id?: string
+          language?: string
           platform?: string[]
+          seo_score?: number | null
           status?: string | null
           tone?: string
           updated_at?: string | null
           user_id?: string
+          version?: number
         }
         Relationships: []
       }
