@@ -44,22 +44,25 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw error;
+      }
 
-      if (data.success) {
+      if (data?.success) {
         toast({
           title: "Content generated successfully!",
           description: "Your content is ready for review.",
         });
       } else {
-        throw new Error(data.error || 'Failed to generate content');
+        throw new Error(data?.error || 'Failed to generate content');
       }
     } catch (error) {
       console.error('Error generating content:', error);
       toast({
         variant: "destructive",
         title: "Error generating content",
-        description: error.message,
+        description: error.message || "An unexpected error occurred",
       });
     } finally {
       setIsGenerating(false);
@@ -68,7 +71,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-4 bg-gradient-to-br from-[#1D2433] to-[#283047] p-8 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-white/10 backdrop-blur-sm transform transition-all duration-300 hover:shadow-2xl hover:scale-[1.01] animate-fade-in">
+      <div className="space-y-4 bg-gradient-to-br from-[#1D2433] to-[#283047] p-8 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-white/10 backdrop-blur-sm">
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
             Content Description
@@ -110,7 +113,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           type="submit"
           size="lg"
           className={cn(
-            "w-full transition-all duration-300 hover:scale-[1.02] bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)]",
+            "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)]",
             isGenerating && "animate-pulse"
           )}
           disabled={!formData.description || formData.platforms.length === 0 || isGenerating}
