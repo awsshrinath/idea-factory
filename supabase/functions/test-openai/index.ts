@@ -21,14 +21,12 @@ serve(async (req) => {
 
     console.log('Testing OpenAI API connection...');
 
-    // Create headers for OpenAI request
-    const headers = new Headers();
-    headers.set('Authorization', `Bearer ${openAIApiKey}`);
-    headers.set('Content-Type', 'application/json');
-
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers,
+      headers: {
+        Authorization: `Bearer ${openAIApiKey}`,
+        'Content-Type': 'application/json',
+      },
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         messages: [
@@ -47,32 +45,23 @@ serve(async (req) => {
     const data = await response.json();
     console.log('OpenAI API response:', data);
 
-    // Create response headers
-    const responseHeaders = new Headers();
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      responseHeaders.set(key, value);
-    });
-    responseHeaders.set('Content-Type', 'application/json');
-
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'OpenAI API connection successful',
         response: data.choices[0].message.content 
       }),
-      { headers: responseHeaders }
+      { 
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
+      }
     );
 
   } catch (error) {
     console.error('Error testing OpenAI connection:', error);
     
-    // Create error response headers
-    const errorHeaders = new Headers();
-    Object.entries(corsHeaders).forEach(([key, value]) => {
-      errorHeaders.set(key, value);
-    });
-    errorHeaders.set('Content-Type', 'application/json');
-
     return new Response(
       JSON.stringify({ 
         success: false, 
@@ -80,7 +69,10 @@ serve(async (req) => {
       }),
       { 
         status: 500,
-        headers: errorHeaders,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'application/json'
+        }
       }
     );
   }
