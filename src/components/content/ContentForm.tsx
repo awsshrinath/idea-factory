@@ -18,6 +18,7 @@ interface ContentFormProps {
 
 export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isTesting, setIsTesting] = useState(false);
   const { toast } = useToast();
 
   const handlePlatformToggle = (platform: Platform) => {
@@ -69,6 +70,36 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
     }
   };
 
+  const testOpenAIConnection = async () => {
+    setIsTesting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('test-openai');
+      
+      if (error) {
+        console.error('Function invocation error:', error);
+        throw error;
+      }
+
+      if (data?.success) {
+        toast({
+          title: "OpenAI Connection Test",
+          description: "Connection successful! API key is working correctly.",
+        });
+      } else {
+        throw new Error(data?.error || 'Failed to test OpenAI connection');
+      }
+    } catch (error) {
+      console.error('Error testing OpenAI connection:', error);
+      toast({
+        variant: "destructive",
+        title: "OpenAI Connection Test Failed",
+        description: error.message || "Failed to connect to OpenAI API. Please check your API key.",
+      });
+    } finally {
+      setIsTesting(false);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
       <div className="space-y-4 bg-gradient-to-br from-[#1D2433] to-[#283047] p-8 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-white/10 backdrop-blur-sm">
@@ -109,18 +140,30 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           onToneSelect={(tone) => onChange({ ...formData, tone: tone })}
         />
 
-        <Button
-          type="submit"
-          size="lg"
-          className={cn(
-            "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)]",
-            isGenerating && "animate-pulse"
-          )}
-          disabled={!formData.description || formData.platforms.length === 0 || isGenerating}
-        >
-          <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-          {isGenerating ? "Generating..." : "Generate Content"}
-        </Button>
+        <div className="flex gap-4">
+          <Button
+            type="button"
+            variant="outline"
+            onClick={testOpenAIConnection}
+            className="w-full transition-all duration-300 border-accent/20 hover:border-primary/50"
+            disabled={isTesting}
+          >
+            {isTesting ? "Testing..." : "Test OpenAI Connection"}
+          </Button>
+          
+          <Button
+            type="submit"
+            size="lg"
+            className={cn(
+              "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)]",
+              isGenerating && "animate-pulse"
+            )}
+            disabled={!formData.description || formData.platforms.length === 0 || isGenerating}
+          >
+            <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+            {isGenerating ? "Generating..." : "Generate Content"}
+          </Button>
+        </div>
       </div>
     </form>
   );
