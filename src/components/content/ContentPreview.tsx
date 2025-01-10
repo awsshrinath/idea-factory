@@ -1,12 +1,44 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
+import { useEffect, useRef } from "react";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
 }
 
 export function ContentPreview({ formData }: ContentPreviewProps) {
+  const previewRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Debounce resize observations
+    let rafId: number;
+    const observer = new ResizeObserver((entries) => {
+      // Cancel any pending observations
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      
+      // Schedule the next observation
+      rafId = requestAnimationFrame(() => {
+        entries.forEach(() => {
+          // Handle resize if needed
+        });
+      });
+    });
+
+    if (previewRef.current) {
+      observer.observe(previewRef.current);
+    }
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      observer.disconnect();
+    };
+  }, []);
+
   const getPreviewContent = () => {
     if (!formData.description) {
       return "Your content preview will appear here...";
@@ -28,7 +60,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   return (
-    <Card className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl">
+    <Card 
+      ref={previewRef}
+      className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl"
+    >
       <CardHeader className="p-6">
         <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
           <Eye className="w-6 h-6" />
