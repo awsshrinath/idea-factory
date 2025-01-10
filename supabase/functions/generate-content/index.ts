@@ -35,7 +35,7 @@ serve(async (req) => {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         model: aiModel === 'chatgpt' ? 'gpt-4o-mini' : 'gpt-4o',
@@ -44,7 +44,7 @@ serve(async (req) => {
           { role: 'user', content: description }
         ],
         temperature: 0.7,
-      })
+      }),
     });
 
     if (!openAIResponse.ok) {
@@ -66,7 +66,7 @@ serve(async (req) => {
       { 
         headers: { 
           ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
       }
     );
@@ -81,7 +81,7 @@ serve(async (req) => {
         status: 500,
         headers: { 
           ...corsHeaders,
-          'Content-Type': 'application/json'
+          'Content-Type': 'application/json',
         },
       }
     );

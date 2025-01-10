@@ -8,3 +8,7 @@ schemas = ["public", "storage", "graphql_public"]
 [[functions]]
 name = "test-openai"
 verify_jwt = false
+
+[[functions]]
+name = "generate-content"
+verify_jwt = false
