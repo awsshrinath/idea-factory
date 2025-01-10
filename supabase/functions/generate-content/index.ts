@@ -30,10 +30,11 @@ serve(async (req) => {
     - Maintain a ${tone} tone throughout the content
     - Write in ${language}`;
 
+    console.log('Making request to OpenAI API...');
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        Authorization: `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -53,7 +54,7 @@ serve(async (req) => {
     }
 
     const data = await openAIResponse.json();
-    console.log('OpenAI response:', data);
+    console.log('OpenAI response received:', data);
 
     const generatedText = data.choices[0].message.content;
 
