@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -9,21 +9,38 @@ interface ContentPreviewProps {
 
 export function ContentPreview({ formData }: ContentPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
+  const [isResizing, setIsResizing] = useState(false);
 
   useEffect(() => {
-    // Debounce resize observations
+    let timeoutId: NodeJS.Timeout;
     let rafId: number;
+
     const observer = new ResizeObserver((entries) => {
-      // Cancel any pending observations
+      // Skip if already processing a resize
+      if (isResizing) return;
+
+      // Cancel any pending frames
       if (rafId) {
         cancelAnimationFrame(rafId);
       }
-      
-      // Schedule the next observation
+
+      // Clear any pending timeouts
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      setIsResizing(true);
+
+      // Schedule the resize handling
       rafId = requestAnimationFrame(() => {
         entries.forEach(() => {
-          // Handle resize if needed
+          // Handle resize if needed in the future
         });
+
+        // Reset the resize flag after a short delay
+        timeoutId = setTimeout(() => {
+          setIsResizing(false);
+        }, 100);
       });
     });
 
@@ -35,9 +52,12 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       if (rafId) {
         cancelAnimationFrame(rafId);
       }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
       observer.disconnect();
     };
-  }, []);
+  }, [isResizing]);
 
   const getPreviewContent = () => {
     if (!formData.description) {
