@@ -21,12 +21,14 @@ serve(async (req) => {
 
     console.log('Testing OpenAI API connection...');
 
+    const openAIHeaders = new Headers({
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    });
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers: openAIHeaders,
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         messages: [
@@ -52,7 +54,7 @@ serve(async (req) => {
         response: data.choices[0].message.content 
       }),
       { 
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: new Headers({ ...corsHeaders, 'Content-Type': 'application/json' }),
       }
     );
 
@@ -65,7 +67,7 @@ serve(async (req) => {
       }),
       { 
         status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+        headers: new Headers({ ...corsHeaders, 'Content-Type': 'application/json' }),
       }
     );
   }
