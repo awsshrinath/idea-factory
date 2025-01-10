@@ -34,7 +34,7 @@ serve(async (req) => {
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${openAIApiKey}`,
+        'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
@@ -44,7 +44,7 @@ serve(async (req) => {
           { role: 'user', content: description }
         ],
         temperature: 0.7,
-      }),
+      })
     });
 
     if (!openAIResponse.ok) {
