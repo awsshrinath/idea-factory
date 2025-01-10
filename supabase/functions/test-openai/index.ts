@@ -21,17 +21,23 @@ serve(async (req) => {
 
     console.log('Testing OpenAI API connection...');
 
+    // Ensure all headers are strings and properly formatted
+    const headers = {
+      'Authorization': `Bearer ${openAIApiKey}`,
+      'Content-Type': 'application/json',
+    };
+
+    console.log('Making request to OpenAI API...');
+
     const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify({
         model: 'gpt-3.5-turbo',
         messages: [
           { role: 'user', content: 'Say "OpenAI connection successful!"' }
         ],
+        max_tokens: 50
       }),
     });
 
