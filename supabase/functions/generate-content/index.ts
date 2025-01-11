@@ -7,7 +7,6 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
@@ -21,7 +20,6 @@ serve(async (req) => {
     const { description, platform, tone, language, aiModel } = await req.json();
     console.log('Received request:', { description, platform, tone, language, aiModel });
 
-    // Construct the system prompt
     const systemPrompt = `You are an AI content writer specializing in creating ${tone} content for ${platform}. 
     Follow these platform-specific guidelines:
     ${platform === 'twitter' ? '- Keep the content within 280 characters\n' : ''}
@@ -34,7 +32,7 @@ serve(async (req) => {
     const openAIResponse = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${openAIApiKey}`,
+        Authorization: `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
