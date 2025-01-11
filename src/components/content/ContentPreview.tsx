@@ -22,6 +22,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -42,6 +43,14 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         previewElement.removeEventListener('scroll', handleScroll);
       }
     };
+  }, []);
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      setUserId(user?.id || null);
+    };
+    getCurrentUser();
   }, []);
 
   useEffect(() => {
@@ -97,6 +106,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   const saveAsDraft = async () => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to save content",
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
       const { data: contentData, error: contentError } = await supabase
@@ -108,7 +126,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           language: formData.language,
           ai_model: formData.aiModel,
           status: 'draft',
-          version: 1
+          version: 1,
+          user_id: userId
         })
         .select()
         .single();
@@ -121,7 +140,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         .insert({
           content_id: contentData.id,
           version_number: 1,
-          content: formData.description
+          content: formData.description,
+          user_id: userId
         });
 
       if (versionError) throw versionError;
@@ -143,6 +163,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   const publishNow = async () => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to publish content",
+      });
+      return;
+    }
+
     try {
       setIsPublishing(true);
       const { data: contentData, error: contentError } = await supabase
@@ -154,7 +183,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           language: formData.language,
           ai_model: formData.aiModel,
           status: 'published',
-          version: 1
+          version: 1,
+          user_id: userId
         })
         .select()
         .single();
@@ -167,7 +197,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         .insert({
           content_id: contentData.id,
           version_number: 1,
-          content: formData.description
+          content: formData.description,
+          user_id: userId
         });
 
       if (versionError) throw versionError;
@@ -189,6 +220,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   const schedulePost = async () => {
+    if (!userId) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "You must be logged in to schedule posts",
+      });
+      return;
+    }
+
     try {
       setIsScheduling(true);
       const { error: scheduledError } = await supabase
@@ -196,7 +236,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         .insert({
           content: formData.description,
           platform: formData.platforms,
-          scheduled_date: scheduledDate
+          scheduled_date: scheduledDate,
+          user_id: userId
         });
 
       if (scheduledError) throw scheduledError;
