@@ -1,9 +1,14 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, ArrowUp } from "lucide-react";
+import { Eye, ArrowUp, Save, Send, Clock } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -13,6 +18,11 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const [isResizing, setIsResizing] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [isScheduling, setIsScheduling] = useState(false);
+  const [scheduledDate, setScheduledDate] = useState("");
+  const { toast } = useToast();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -86,6 +96,127 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     }
   };
 
+  const saveAsDraft = async () => {
+    try {
+      setIsSaving(true);
+      const { data: contentData, error: contentError } = await supabase
+        .from('generated_content')
+        .insert({
+          description: formData.description,
+          platform: formData.platforms,
+          tone: formData.tone,
+          language: formData.language,
+          ai_model: formData.aiModel,
+          status: 'draft',
+          version: 1
+        })
+        .select()
+        .single();
+
+      if (contentError) throw contentError;
+
+      // Save version
+      const { error: versionError } = await supabase
+        .from('content_versions')
+        .insert({
+          content_id: contentData.id,
+          version_number: 1,
+          content: formData.description
+        });
+
+      if (versionError) throw versionError;
+
+      toast({
+        title: "Success",
+        description: "Content saved as draft",
+      });
+    } catch (error) {
+      console.error('Error saving draft:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to save draft",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const publishNow = async () => {
+    try {
+      setIsPublishing(true);
+      const { data: contentData, error: contentError } = await supabase
+        .from('generated_content')
+        .insert({
+          description: formData.description,
+          platform: formData.platforms,
+          tone: formData.tone,
+          language: formData.language,
+          ai_model: formData.aiModel,
+          status: 'published',
+          version: 1
+        })
+        .select()
+        .single();
+
+      if (contentError) throw contentError;
+
+      // Save version
+      const { error: versionError } = await supabase
+        .from('content_versions')
+        .insert({
+          content_id: contentData.id,
+          version_number: 1,
+          content: formData.description
+        });
+
+      if (versionError) throw versionError;
+
+      toast({
+        title: "Success",
+        description: "Content published successfully",
+      });
+    } catch (error) {
+      console.error('Error publishing:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to publish content",
+      });
+    } finally {
+      setIsPublishing(false);
+    }
+  };
+
+  const schedulePost = async () => {
+    try {
+      setIsScheduling(true);
+      const { error: scheduledError } = await supabase
+        .from('scheduled_posts')
+        .insert({
+          content: formData.description,
+          platform: formData.platforms,
+          scheduled_date: scheduledDate
+        });
+
+      if (scheduledError) throw scheduledError;
+
+      toast({
+        title: "Success",
+        description: "Post scheduled successfully",
+      });
+    } catch (error) {
+      console.error('Error scheduling post:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to schedule post",
+      });
+    } finally {
+      setIsScheduling(false);
+    }
+  };
+
   const getPreviewContent = () => {
     if (!formData.description) {
       return "Your content preview will appear here...";
@@ -149,6 +280,63 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
               Select a platform to see the preview
             </div>
           )}
+
+          <div className="flex gap-3 mt-6">
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={saveAsDraft}
+              disabled={isSaving || !formData.description}
+            >
+              <Save className="w-4 h-4 mr-2" />
+              {isSaving ? "Saving..." : "Save as Draft"}
+            </Button>
+            
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={publishNow}
+              disabled={isPublishing || !formData.description}
+            >
+              <Send className="w-4 h-4 mr-2" />
+              {isPublishing ? "Publishing..." : "Publish Now"}
+            </Button>
+
+            <Dialog>
+              <DialogTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  disabled={!formData.description}
+                >
+                  <Clock className="w-4 h-4 mr-2" />
+                  Schedule Post
+                </Button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Schedule Post</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="space-y-2">
+                    <Label>Schedule Date and Time</Label>
+                    <Input
+                      type="datetime-local"
+                      value={scheduledDate}
+                      onChange={(e) => setScheduledDate(e.target.value)}
+                    />
+                  </div>
+                  <Button
+                    className="w-full"
+                    onClick={schedulePost}
+                    disabled={isScheduling || !scheduledDate}
+                  >
+                    {isScheduling ? "Scheduling..." : "Confirm Schedule"}
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
       </CardContent>
 
