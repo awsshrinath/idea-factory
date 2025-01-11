@@ -34,6 +34,49 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     };
   }, []);
 
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout;
+    let rafId: number;
+
+    const observer = new ResizeObserver((entries) => {
+      if (isResizing) return;
+
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+
+      setIsResizing(true);
+
+      rafId = requestAnimationFrame(() => {
+        entries.forEach(() => {
+          // Handle resize if needed in the future
+        });
+
+        timeoutId = setTimeout(() => {
+          setIsResizing(false);
+        }, 100);
+      });
+    });
+
+    if (previewRef.current) {
+      observer.observe(previewRef.current);
+    }
+
+    return () => {
+      if (rafId) {
+        cancelAnimationFrame(rafId);
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+      observer.disconnect();
+    };
+  }, [isResizing]);
+
   const scrollToTop = () => {
     if (previewRef.current) {
       previewRef.current.scrollTo({
@@ -41,52 +84,6 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         behavior: 'smooth'
       });
     }
-  };
-
-  let timeoutId: NodeJS.Timeout;
-  let rafId: number;
-
-  const observer = new ResizeObserver((entries) => {
-    // Skip if already processing a resize
-    if (isResizing) return;
-
-    // Cancel any pending frames
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-    }
-
-    // Clear any pending timeouts
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-
-    setIsResizing(true);
-
-    // Schedule the resize handling
-    rafId = requestAnimationFrame(() => {
-      entries.forEach(() => {
-        // Handle resize if needed in the future
-      });
-
-      // Reset the resize flag after a short delay
-      timeoutId = setTimeout(() => {
-        setIsResizing(false);
-      }, 100);
-    });
-  });
-
-  if (previewRef.current) {
-    observer.observe(previewRef.current);
-  }
-
-  return () => {
-    if (rafId) {
-      cancelAnimationFrame(rafId);
-    }
-    if (timeoutId) {
-      clearTimeout(timeoutId);
-    }
-    observer.disconnect();
   };
 
   const getPreviewContent = () => {
