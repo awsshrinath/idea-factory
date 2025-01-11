@@ -33,6 +33,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsGenerating(true);
+    console.log("Generating content with data:", formData);
 
     try {
       const { data, error } = await supabase.functions.invoke('generate-content', {
@@ -45,15 +46,23 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         },
       });
 
+      console.log("Response from generate-content:", data);
+
       if (error) {
         console.error('Function invocation error:', error);
         throw error;
       }
 
-      if (data?.success) {
+      if (data?.content) {
+        // Update the form data with the generated content
+        onChange({
+          ...formData,
+          description: data.content,
+        });
+
         toast({
           title: "Content generated successfully!",
-          description: "Your content is ready for review.",
+          description: "Your content has been updated in the preview.",
         });
       } else {
         throw new Error(data?.error || 'Failed to generate content');
