@@ -1,7 +1,8 @@
 import { AIModel, Language } from "@/pages/Content";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Bot, Globe } from "lucide-react";
+import { Bot, Globe, HelpCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface ModelLanguageSelectorProps {
   selectedModel: AIModel;
@@ -10,9 +11,17 @@ interface ModelLanguageSelectorProps {
   onLanguageSelect: (language: Language) => void;
 }
 
-const aiModels: { value: AIModel; label: string }[] = [
-  { value: "chatgpt", label: "ChatGPT (Conversational)" },
-  { value: "deepseek", label: "DeepSeek (SEO-Focused)" },
+const aiModels: { value: AIModel; label: string; description: string }[] = [
+  { 
+    value: "chatgpt", 
+    label: "ChatGPT", 
+    description: "Best for conversational and engaging content with natural language flow"
+  },
+  { 
+    value: "deepseek", 
+    label: "DeepSeek", 
+    description: "Optimized for SEO-friendly content with targeted keywords and structure"
+  },
 ];
 
 const languages: { value: Language; label: string }[] = [
@@ -43,18 +52,37 @@ export function ModelLanguageSelector({
             </TooltipContent>
           </Tooltip>
         </label>
-        <Select value={selectedModel} onValueChange={onModelSelect}>
-          <SelectTrigger className="bg-background/50 border-accent/20">
-            <SelectValue placeholder="Select AI Model" />
-          </SelectTrigger>
-          <SelectContent>
-            {aiModels.map((model) => (
-              <SelectItem key={model.value} value={model.value} className="cursor-pointer">
-                {model.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="relative">
+          <Select value={selectedModel} onValueChange={onModelSelect}>
+            <SelectTrigger 
+              className={cn(
+                "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
+                "focus:ring-primary/20 focus:border-primary"
+              )}
+            >
+              <SelectValue placeholder="Select AI Model" />
+            </SelectTrigger>
+            <SelectContent>
+              {aiModels.map((model) => (
+                <SelectItem 
+                  key={model.value} 
+                  value={model.value} 
+                  className="cursor-pointer flex items-center justify-between group"
+                >
+                  <span>{model.label}</span>
+                  <Tooltip>
+                    <TooltipTrigger>
+                      <HelpCircle className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                    </TooltipTrigger>
+                    <TooltipContent side="right">
+                      <p className="max-w-[200px]">{model.description}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-2">
@@ -70,7 +98,12 @@ export function ModelLanguageSelector({
           </Tooltip>
         </label>
         <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
-          <SelectTrigger className="bg-background/50 border-accent/20">
+          <SelectTrigger 
+            className={cn(
+              "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
+              "focus:ring-primary/20 focus:border-primary"
+            )}
+          >
             <SelectValue placeholder="Select Language" />
           </SelectTrigger>
           <SelectContent>

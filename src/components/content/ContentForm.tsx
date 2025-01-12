@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ContentFormData, Platform, Tone, AIModel, Language } from "@/pages/Content";
-import { Sparkles, Wand2 } from "lucide-react";
+import { Sparkles, Wand2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,16 +10,26 @@ import { useToast } from "@/components/ui/use-toast";
 import { PlatformSelector } from "./PlatformSelector";
 import { ToneSelector } from "./ToneSelector";
 import { ModelLanguageSelector } from "./ModelLanguageSelector";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 interface ContentFormProps {
   formData: ContentFormData;
   onChange: (data: ContentFormData) => void;
 }
 
+const MAX_CHARS = 500;
+const PLACEHOLDER_TEXT = "Write a professional LinkedIn post about AI in healthcare...\n\nOr try:\n- Share 5 tips for effective social media marketing\n- Announce a new product launch\n- Create an engaging Twitter thread about industry trends";
+
 export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [isTesting, setIsTesting] = useState(false);
+  const [charCount, setCharCount] = useState(0);
+  const [showError, setShowError] = useState(false);
   const { toast } = useToast();
+
+  useEffect(() => {
+    setCharCount(formData.description.length);
+  }, [formData.description]);
 
   const handlePlatformToggle = (platform: Platform) => {
     onChange({
@@ -32,7 +42,12 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (charCount > MAX_CHARS) {
+      setShowError(true);
+      return;
+    }
     setIsGenerating(true);
+    setShowError(false);
     console.log("Generating content with data:", formData);
 
     try {
@@ -54,7 +69,6 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
       }
 
       if (data?.content) {
-        // Update the form data with the generated content
         onChange({
           ...formData,
           description: data.content,
@@ -125,11 +139,31 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             </Tooltip>
           </label>
           <Textarea
-            placeholder="Describe your idea… e.g., 'Write about the top 5 benefits of using AI in business.'"
+            placeholder={PLACEHOLDER_TEXT}
             value={formData.description}
-            onChange={(e) => onChange({ ...formData, description: e.target.value })}
-            className="h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50"
+            onChange={(e) => {
+              onChange({ ...formData, description: e.target.value });
+              setCharCount(e.target.value.length);
+            }}
+            className={cn(
+              "h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50",
+              showError && "border-red-500 focus:border-red-500"
+            )}
           />
+          <div className="flex justify-between items-center text-sm">
+            <span className={cn(
+              "text-muted-foreground",
+              charCount > MAX_CHARS && "text-red-500"
+            )}>
+              {charCount}/{MAX_CHARS} characters
+            </span>
+            {showError && (
+              <span className="text-red-500 flex items-center gap-1">
+                <AlertCircle className="w-4 h-4" />
+                Character limit exceeded
+              </span>
+            )}
+          </div>
         </div>
 
         <ModelLanguageSelector
@@ -154,7 +188,10 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             type="button"
             variant="outline"
             onClick={testOpenAIConnection}
-            className="w-full transition-all duration-300 border-accent/20 hover:border-primary/50"
+            className={cn(
+              "w-full transition-all duration-300 border-accent/20 hover:border-primary/50",
+              isTesting && "animate-pulse"
+            )}
             disabled={isTesting}
           >
             {isTesting ? "Testing..." : "Test OpenAI Connection"}
@@ -164,15 +201,30 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             type="submit"
             size="lg"
             className={cn(
-              "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)]",
+              "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-105",
               isGenerating && "animate-pulse"
             )}
-            disabled={!formData.description || formData.platforms.length === 0 || isGenerating}
+            disabled={!formData.description || formData.platforms.length === 0 || isGenerating || charCount > MAX_CHARS}
           >
             <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-            {isGenerating ? "Generating..." : "Generate Content"}
+            {isGenerating ? (
+              <span className="flex items-center gap-2">
+                <span className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent" />
+                Generating...
+              </span>
+            ) : (
+              "Generate Content"
+            )}
           </Button>
         </div>
+
+        {formData.platforms.length === 0 && (
+          <Alert className="bg-muted border-accent/20">
+            <AlertDescription className="text-muted-foreground">
+              Select at least one platform to generate content
+            </AlertDescription>
+          </Alert>
+        )}
       </div>
     </form>
   );
