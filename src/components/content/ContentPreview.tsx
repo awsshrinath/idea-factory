@@ -17,7 +17,6 @@ interface ContentPreviewProps {
 
 export function ContentPreview({ formData }: ContentPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
-  const [isResizing, setIsResizing] = useState(false);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
@@ -56,47 +55,40 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   }, []);
 
   useEffect(() => {
-    let timeoutId: NodeJS.Timeout;
-    let rafId: number;
+    let observer: ResizeObserver | null = null;
+    let animationFrameId: number | null = null;
 
-    const observer = new ResizeObserver((entries) => {
-      if (isResizing) return;
-
-      if (rafId) {
-        cancelAnimationFrame(rafId);
+    const handleResize = (entries: ResizeObserverEntry[]) => {
+      // Cancel any pending animation frame
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
       }
 
-      if (timeoutId) {
-        clearTimeout(timeoutId);
-      }
-
-      setIsResizing(true);
-
-      rafId = requestAnimationFrame(() => {
+      // Schedule the resize handling in the next animation frame
+      animationFrameId = requestAnimationFrame(() => {
         entries.forEach(() => {
           // Handle resize if needed in the future
         });
-
-        timeoutId = setTimeout(() => {
-          setIsResizing(false);
-        }, 100);
       });
-    });
+    };
 
     if (previewRef.current) {
+      observer = new ResizeObserver((entries) => {
+        handleResize(entries);
+      });
+      
       observer.observe(previewRef.current);
     }
 
     return () => {
-      if (rafId) {
-        cancelAnimationFrame(rafId);
+      if (observer) {
+        observer.disconnect();
       }
-      if (timeoutId) {
-        clearTimeout(timeoutId);
+      if (animationFrameId !== null) {
+        cancelAnimationFrame(animationFrameId);
       }
-      observer.disconnect();
     };
-  }, [isResizing]);
+  }, []);
 
   const scrollToTop = () => {
     if (previewRef.current) {
