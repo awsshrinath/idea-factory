@@ -9,6 +9,7 @@ import { useToast } from "@/components/ui/use-toast";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -24,6 +25,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const [scheduledDate, setScheduledDate] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -115,6 +117,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       return;
     }
 
+    if (!formData.description) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please add some content before saving",
+      });
+      return;
+    }
+
     try {
       setIsSaving(true);
       const { data: contentData, error: contentError } = await supabase
@@ -150,6 +161,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         title: "Success",
         description: "Content saved as draft",
       });
+
+      // Navigate to content list or dashboard after successful save
+      navigate("/");
+
     } catch (error) {
       console.error('Error saving draft:', error);
       toast({
@@ -168,6 +183,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         variant: "destructive",
         title: "Error",
         description: "You must be logged in to publish content",
+      });
+      return;
+    }
+
+    if (!formData.description) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please add some content before publishing",
       });
       return;
     }
@@ -207,6 +231,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         title: "Success",
         description: "Content published successfully",
       });
+
+      // Navigate to content list or dashboard after successful publish
+      navigate("/");
+
     } catch (error) {
       console.error('Error publishing:', error);
       toast({
