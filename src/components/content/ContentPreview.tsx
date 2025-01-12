@@ -129,7 +129,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     try {
       setIsSaving(true);
       
-      // First, save to generated_content
+      // Simulate a delay for testing
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      // Insert dummy data
       const { data: contentData, error: contentError } = await supabase
         .from('generated_content')
         .insert([{
@@ -140,7 +143,9 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           ai_model: formData.aiModel,
           status: 'draft',
           version: 1,
-          user_id: userId
+          user_id: userId,
+          generated_text: `[DRAFT] Generated content for ${formData.platforms.join(', ')}`,
+          hashtags: ['#test', '#draft', '#demo']
         }])
         .select()
         .single();
@@ -150,41 +155,23 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         throw contentError;
       }
 
-      if (!contentData) {
-        throw new Error('No content data returned after insert');
-      }
-
-      // Then save version
-      const { error: versionError } = await supabase
-        .from('content_versions')
-        .insert([{
-          content_id: contentData.id,
-          version_number: 1,
-          content: formData.description,
-          user_id: userId
-        }]);
-
-      if (versionError) {
-        console.error('Version Error:', versionError);
-        throw versionError;
-      }
-
-      // Log activity
+      // Log dummy activity
       await supabase
         .from('recent_activity')
         .insert([{
           user_id: userId,
           activity_type: 'content_draft',
           details: {
-            content_id: contentData.id,
+            content_id: contentData?.id,
             platforms: formData.platforms,
-            action: 'saved_draft'
+            action: 'saved_draft',
+            test_mode: true
           }
         }]);
 
       toast({
         title: "Success",
-        description: "Content saved as draft",
+        description: "Content saved as draft. This is a test version.",
       });
 
       // Navigate to home after successful save
@@ -233,7 +220,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     try {
       setIsPublishing(true);
       
-      // First, save to generated_content
+      // Simulate a delay for testing
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      // Insert dummy published content
       const { data: contentData, error: contentError } = await supabase
         .from('generated_content')
         .insert([{
@@ -244,7 +234,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           ai_model: formData.aiModel,
           status: 'published',
           version: 1,
-          user_id: userId
+          user_id: userId,
+          generated_text: `[TEST] Published content for ${formData.platforms.join(', ')}`,
+          hashtags: ['#published', '#test', '#demo'],
+          seo_score: Math.random() * 100 // Random SEO score for testing
         }])
         .select()
         .single();
@@ -254,65 +247,36 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         throw contentError;
       }
 
-      if (!contentData) {
-        throw new Error('No content data returned after insert');
-      }
-
-      // Then save version
-      const { error: versionError } = await supabase
-        .from('content_versions')
-        .insert([{
-          content_id: contentData.id,
-          version_number: 1,
-          content: formData.description,
-          user_id: userId
-        }]);
-
-      if (versionError) {
-        console.error('Version Error:', versionError);
-        throw versionError;
-      }
-
-      // Log activity
+      // Log dummy activity
       await supabase
         .from('recent_activity')
         .insert([{
           user_id: userId,
           activity_type: 'content_published',
           details: {
-            content_id: contentData.id,
+            content_id: contentData?.id,
             platforms: formData.platforms,
-            action: 'published'
+            action: 'published',
+            test_mode: true
           }
         }]);
 
-      // Update user metrics
-      const { data: metrics } = await supabase
+      // Update test metrics
+      await supabase
         .from('user_metrics')
-        .select('total_content')
-        .eq('user_id', userId)
-        .single();
-
-      if (metrics) {
-        await supabase
-          .from('user_metrics')
-          .update({ 
-            total_content: (metrics.total_content || 0) + 1,
-            updated_at: new Date().toISOString()
-          })
-          .eq('user_id', userId);
-      } else {
-        await supabase
-          .from('user_metrics')
-          .insert([{
-            user_id: userId,
-            total_content: 1
-          }]);
-      }
+        .upsert({
+          user_id: userId,
+          total_content: 1,
+          engagement_rate: Math.random() * 100,
+          top_content: {
+            recent_post: contentData?.id,
+            performance: 'Test Performance'
+          }
+        });
 
       toast({
         title: "Success",
-        description: "Content published successfully",
+        description: `Test publish successful! Content would be posted to: ${formData.platforms.join(', ')}`,
       });
 
       // Navigate to home after successful publish
