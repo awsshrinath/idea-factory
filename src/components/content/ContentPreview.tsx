@@ -128,9 +128,11 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
     try {
       setIsSaving(true);
+      
+      // First, save to generated_content
       const { data: contentData, error: contentError } = await supabase
         .from('generated_content')
-        .insert({
+        .insert([{
           description: formData.description,
           platform: formData.platforms,
           tone: formData.tone,
@@ -139,21 +141,25 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           status: 'draft',
           version: 1,
           user_id: userId
-        })
+        }])
         .select()
         .single();
 
       if (contentError) throw contentError;
 
-      // Save version
+      if (!contentData) {
+        throw new Error('No content data returned after insert');
+      }
+
+      // Then save version
       const { error: versionError } = await supabase
         .from('content_versions')
-        .insert({
+        .insert([{
           content_id: contentData.id,
           version_number: 1,
           content: formData.description,
           user_id: userId
-        });
+        }]);
 
       if (versionError) throw versionError;
 
@@ -162,7 +168,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         description: "Content saved as draft",
       });
 
-      // Navigate to content list or dashboard after successful save
+      // Navigate to home after successful save
       navigate("/");
 
     } catch (error) {
@@ -198,9 +204,11 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
     try {
       setIsPublishing(true);
+      
+      // First, save to generated_content
       const { data: contentData, error: contentError } = await supabase
         .from('generated_content')
-        .insert({
+        .insert([{
           description: formData.description,
           platform: formData.platforms,
           tone: formData.tone,
@@ -209,21 +217,25 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           status: 'published',
           version: 1,
           user_id: userId
-        })
+        }])
         .select()
         .single();
 
       if (contentError) throw contentError;
 
-      // Save version
+      if (!contentData) {
+        throw new Error('No content data returned after insert');
+      }
+
+      // Then save version
       const { error: versionError } = await supabase
         .from('content_versions')
-        .insert({
+        .insert([{
           content_id: contentData.id,
           version_number: 1,
           content: formData.description,
           user_id: userId
-        });
+        }]);
 
       if (versionError) throw versionError;
 
@@ -232,7 +244,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         description: "Content published successfully",
       });
 
-      // Navigate to content list or dashboard after successful publish
+      // Navigate to home after successful publish
       navigate("/");
 
     } catch (error) {
