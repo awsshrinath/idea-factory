@@ -145,7 +145,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         .select()
         .single();
 
-      if (contentError) throw contentError;
+      if (contentError) {
+        console.error('Content Error:', contentError);
+        throw contentError;
+      }
 
       if (!contentData) {
         throw new Error('No content data returned after insert');
@@ -161,7 +164,23 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           user_id: userId
         }]);
 
-      if (versionError) throw versionError;
+      if (versionError) {
+        console.error('Version Error:', versionError);
+        throw versionError;
+      }
+
+      // Log activity
+      await supabase
+        .from('recent_activity')
+        .insert([{
+          user_id: userId,
+          activity_type: 'content_draft',
+          details: {
+            content_id: contentData.id,
+            platforms: formData.platforms,
+            action: 'saved_draft'
+          }
+        }]);
 
       toast({
         title: "Success",
@@ -176,7 +195,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save draft",
+        description: "Failed to save draft. Please try again.",
       });
     } finally {
       setIsSaving(false);
@@ -202,6 +221,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       return;
     }
 
+    if (formData.platforms.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please select at least one platform to publish to",
+      });
+      return;
+    }
+
     try {
       setIsPublishing(true);
       
@@ -221,7 +249,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         .select()
         .single();
 
-      if (contentError) throw contentError;
+      if (contentError) {
+        console.error('Content Error:', contentError);
+        throw contentError;
+      }
 
       if (!contentData) {
         throw new Error('No content data returned after insert');
@@ -237,7 +268,47 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           user_id: userId
         }]);
 
-      if (versionError) throw versionError;
+      if (versionError) {
+        console.error('Version Error:', versionError);
+        throw versionError;
+      }
+
+      // Log activity
+      await supabase
+        .from('recent_activity')
+        .insert([{
+          user_id: userId,
+          activity_type: 'content_published',
+          details: {
+            content_id: contentData.id,
+            platforms: formData.platforms,
+            action: 'published'
+          }
+        }]);
+
+      // Update user metrics
+      const { data: metrics } = await supabase
+        .from('user_metrics')
+        .select('total_content')
+        .eq('user_id', userId)
+        .single();
+
+      if (metrics) {
+        await supabase
+          .from('user_metrics')
+          .update({ 
+            total_content: (metrics.total_content || 0) + 1,
+            updated_at: new Date().toISOString()
+          })
+          .eq('user_id', userId);
+      } else {
+        await supabase
+          .from('user_metrics')
+          .insert([{
+            user_id: userId,
+            total_content: 1
+          }]);
+      }
 
       toast({
         title: "Success",
@@ -252,7 +323,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to publish content",
+        description: "Failed to publish content. Please try again.",
       });
     } finally {
       setIsPublishing(false);
