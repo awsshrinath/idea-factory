@@ -1,4 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
 
 interface PlatformPreviewProps {
@@ -46,17 +47,18 @@ export function PlatformPreview({ platform, content, isEditing, onContentChange 
   return (
     <div className={cn(commonClasses, getPlatformStyles())}>
       {renderHeader()}
-      <div 
-        className={cn(
-          "prose prose-invert max-w-none",
-          isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
-        )}
-        contentEditable={isEditing}
-        onBlur={(e) => onContentChange(e.currentTarget.textContent || "")}
-        suppressContentEditableWarning
-      >
-        {content}
-      </div>
+      {isEditing ? (
+        <Textarea
+          value={content}
+          onChange={(e) => onContentChange(e.target.value)}
+          className="min-h-[120px] bg-background/50 border-primary/30 focus:border-primary"
+          placeholder={`Write your ${platform} post here...`}
+        />
+      ) : (
+        <div className="prose prose-invert max-w-none whitespace-pre-wrap">
+          {content}
+        </div>
+      )}
     </div>
   );
 }

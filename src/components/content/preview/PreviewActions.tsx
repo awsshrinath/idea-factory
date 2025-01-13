@@ -1,16 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { Save, Send, Clock } from "lucide-react";
+import { Calendar, Save, Send, Clock, Edit2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PreviewActionsProps {
   onSaveDraft: () => Promise<void>;
   onPublish: () => Promise<void>;
-  onSchedule: (date: string) => Promise<void>;
+  onSchedule: () => Promise<void>;
+  onToggleEdit: () => void;
   isSaving: boolean;
   isPublishing: boolean;
   isScheduling: boolean;
+  isEditing: boolean;
   scheduledDate: string;
   setScheduledDate: (date: string) => void;
   hasContent: boolean;
@@ -20,15 +23,35 @@ export function PreviewActions({
   onSaveDraft,
   onPublish,
   onSchedule,
+  onToggleEdit,
   isSaving,
   isPublishing,
   isScheduling,
+  isEditing,
   scheduledDate,
   setScheduledDate,
   hasContent
 }: PreviewActionsProps) {
   return (
-    <div className="flex gap-3 mt-6">
+    <div className="flex flex-wrap gap-3 mt-6">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              variant={isEditing ? "default" : "outline"}
+              size="icon"
+              onClick={onToggleEdit}
+              className="relative"
+            >
+              <Edit2 className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{isEditing ? "Exit Edit Mode" : "Edit Content"}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+
       <Button
         variant="outline"
         className="flex-1"
@@ -56,7 +79,7 @@ export function PreviewActions({
             className="flex-1"
             disabled={!hasContent}
           >
-            <Clock className="w-4 h-4 mr-2" />
+            <Calendar className="w-4 h-4 mr-2" />
             Schedule Post
           </Button>
         </DialogTrigger>
@@ -75,9 +98,10 @@ export function PreviewActions({
             </div>
             <Button
               className="w-full"
-              onClick={() => onSchedule(scheduledDate)}
+              onClick={onSchedule}
               disabled={isScheduling || !scheduledDate}
             >
+              <Clock className="w-4 h-4 mr-2" />
               {isScheduling ? "Scheduling..." : "Confirm Schedule"}
             </Button>
           </div>

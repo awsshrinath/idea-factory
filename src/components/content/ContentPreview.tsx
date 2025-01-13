@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, ArrowUp, Edit2 } from "lucide-react";
+import { Eye } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -55,6 +55,13 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     };
     getCurrentUser();
   }, []);
+
+  useEffect(() => {
+    // Sync edited content with form data when not in edit mode
+    if (!isEditing) {
+      setEditedContent(formData.description);
+    }
+  }, [formData.description, isEditing]);
 
   const scrollToTop = () => {
     if (previewRef.current) {
@@ -177,18 +184,6 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           }
         }]);
 
-      await supabase
-        .from('user_metrics')
-        .upsert({
-          user_id: userId,
-          total_content: 1,
-          engagement_rate: Math.random() * 100,
-          top_content: {
-            recent_post: contentData?.id,
-            performance: 'Test Performance'
-          }
-        });
-
       toast({
         title: "Success",
         description: `Content published to: ${formData.platforms.join(', ')}`,
@@ -252,47 +247,33 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       ref={previewRef}
       className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl max-h-[600px] overflow-y-auto relative"
     >
-      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#1D2433] to-[#283047] z-10 flex flex-row items-center justify-between">
+      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#1D2433] to-[#283047] z-10">
         <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
           <Eye className="w-6 h-6" />
           Live Preview
         </CardTitle>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => setIsEditing(!isEditing)}
-          className={cn(
-            "transition-colors duration-300",
-            isEditing && "text-primary hover:text-primary/80"
-          )}
-        >
-          <Edit2 className="w-4 h-4" />
-        </Button>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-4">
-          {formData.platforms.map((platform) => {
-            const content = isEditing ? editedContent : formData.description;
-            return (
-              <div key={platform} className="space-y-2">
-                <div className="flex justify-between items-center">
-                  <h3 className="font-medium capitalize text-lg text-foreground group-hover:text-primary transition-colors duration-300">
-                    {platform}
-                  </h3>
-                  <CharacterCounter 
-                    platform={platform}
-                    count={content.length}
-                  />
-                </div>
-                <PlatformPreview
+          {formData.platforms.map((platform) => (
+            <div key={platform} className="space-y-2">
+              <div className="flex justify-between items-center">
+                <h3 className="font-medium capitalize text-lg text-foreground group-hover:text-primary transition-colors duration-300">
+                  {platform}
+                </h3>
+                <CharacterCounter 
                   platform={platform}
-                  content={content}
-                  isEditing={isEditing}
-                  onContentChange={setEditedContent}
+                  count={editedContent.length}
                 />
               </div>
-            );
-          })}
+              <PlatformPreview
+                platform={platform}
+                content={editedContent}
+                isEditing={isEditing}
+                onContentChange={setEditedContent}
+              />
+            </div>
+          ))}
 
           {formData.platforms.length === 0 && (
             <div className="text-center py-12 space-y-4">
@@ -309,9 +290,11 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             onSaveDraft={saveAsDraft}
             onPublish={publishNow}
             onSchedule={schedulePost}
+            onToggleEdit={() => setIsEditing(!isEditing)}
             isSaving={isSaving}
             isPublishing={isPublishing}
             isScheduling={isScheduling}
+            isEditing={isEditing}
             scheduledDate={scheduledDate}
             setScheduledDate={setScheduledDate}
             hasContent={Boolean(formData.description)}
@@ -328,7 +311,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         )}
         onClick={scrollToTop}
       >
-        <ArrowUp className="h-4 w-4" />
+        <Eye className="h-4 w-4" />
       </Button>
     </Card>
   );
