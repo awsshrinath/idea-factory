@@ -1,7 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,6 +10,7 @@ import { useNavigate } from "react-router-dom";
 import { PlatformPreview } from "./preview/PlatformPreview";
 import { PreviewActions } from "./preview/PreviewActions";
 import { CharacterCounter } from "./preview/CharacterCounter";
+import debounce from 'lodash/debounce';
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -27,23 +28,53 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const [editedContent, setEditedContent] = useState(formData.description);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const resizeObserver = useRef<ResizeObserver | null>(null);
 
-  useEffect(() => {
-    const handleScroll = () => {
+  // Debounced scroll handler
+  const handleScroll = useCallback(
+    debounce(() => {
       if (previewRef.current) {
         const scrollTop = previewRef.current.scrollTop;
         setShowScrollButton(scrollTop > 100);
       }
-    };
+    }, 100),
+    []
+  );
 
+  useEffect(() => {
     const previewElement = previewRef.current;
     if (previewElement) {
       previewElement.addEventListener('scroll', handleScroll);
     }
 
+    // Clean up resize observer and scroll listener
     return () => {
       if (previewElement) {
         previewElement.removeEventListener('scroll', handleScroll);
+      }
+      handleScroll.cancel();
+      if (resizeObserver.current) {
+        resizeObserver.current.disconnect();
+      }
+    };
+  }, [handleScroll]);
+
+  // Set up ResizeObserver with debouncing
+  useEffect(() => {
+    const debouncedResize = debounce(() => {
+      // Handle resize if needed
+    }, 100);
+
+    resizeObserver.current = new ResizeObserver(debouncedResize);
+    
+    if (previewRef.current) {
+      resizeObserver.current.observe(previewRef.current);
+    }
+
+    return () => {
+      debouncedResize.cancel();
+      if (resizeObserver.current) {
+        resizeObserver.current.disconnect();
       }
     };
   }, []);
