@@ -66,27 +66,22 @@ export function Content() {
 
           {/* Main Content Layout */}
           <div className="grid grid-cols-12 gap-8">
-            {/* Top Section - Content Form */}
-            <div className="col-span-12 transform hover:scale-[1.01] transition-transform duration-300">
-              <ContentForm
-                formData={formData}
-                onChange={setFormData}
-              />
-            </div>
-
-            {/* Middle Section - Preview */}
+            {/* Left Section - Content Form */}
             <div className="col-span-12 lg:col-span-8 space-y-8">
+              <div className="transform hover:scale-[1.01] transition-transform duration-300">
+                <ContentForm
+                  formData={formData}
+                  onChange={setFormData}
+                />
+              </div>
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
                 <ContentPreview formData={formData} />
               </div>
             </div>
 
-            {/* Right Section - Recent Content & Trending Topics */}
+            {/* Right Section - Trending Topics & Recent Content */}
             <div className="col-span-12 lg:col-span-4 space-y-8">
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
-                <RecentContent />
-              </div>
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
+              <div className="transform hover:scale-[1.01] transition-transform duration-300 sticky top-8">
                 <TrendingTopics
                   onSelect={(topic) =>
                     setFormData((prev) => ({
@@ -95,6 +90,9 @@ export function Content() {
                     }))
                   }
                 />
+              </div>
+              <div className="transform hover:scale-[1.01] transition-transform duration-300">
+                <RecentContent />
               </div>
             </div>
           </div>
