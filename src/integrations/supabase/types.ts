@@ -88,9 +88,11 @@ export type Database = {
           ai_model: string
           created_at: string | null
           description: string
+          edited_content: string | null
           generated_text: string | null
           hashtags: string[] | null
           id: string
+          is_edited: boolean | null
           language: string
           platform: string[]
           seo_score: number | null
@@ -104,9 +106,11 @@ export type Database = {
           ai_model?: string
           created_at?: string | null
           description: string
+          edited_content?: string | null
           generated_text?: string | null
           hashtags?: string[] | null
           id?: string
+          is_edited?: boolean | null
           language?: string
           platform: string[]
           seo_score?: number | null
@@ -120,9 +124,11 @@ export type Database = {
           ai_model?: string
           created_at?: string | null
           description?: string
+          edited_content?: string | null
           generated_text?: string | null
           hashtags?: string[] | null
           id?: string
+          is_edited?: boolean | null
           language?: string
           platform?: string[]
           seo_score?: number | null

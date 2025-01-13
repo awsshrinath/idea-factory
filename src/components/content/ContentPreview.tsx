@@ -1,16 +1,15 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, ArrowUp, Save, Send, Clock, Edit2 } from "lucide-react";
+import { Eye, ArrowUp, Edit2 } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
 import { useNavigate } from "react-router-dom";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { PlatformPreview } from "./preview/PlatformPreview";
+import { PreviewActions } from "./preview/PreviewActions";
+import { CharacterCounter } from "./preview/CharacterCounter";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -57,40 +56,6 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     getCurrentUser();
   }, []);
 
-  useEffect(() => {
-    let observer: ResizeObserver | null = null;
-    let animationFrameId: number | null = null;
-
-    const handleResize = (entries: ResizeObserverEntry[]) => {
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-      }
-
-      animationFrameId = requestAnimationFrame(() => {
-        entries.forEach(() => {
-          // Handle resize if needed in the future
-        });
-      });
-    };
-
-    if (previewRef.current) {
-      observer = new ResizeObserver((entries) => {
-        handleResize(entries);
-      });
-      
-      observer.observe(previewRef.current);
-    }
-
-    return () => {
-      if (observer) {
-        observer.disconnect();
-      }
-      if (animationFrameId !== null) {
-        cancelAnimationFrame(animationFrameId);
-      }
-    };
-  }, []);
-
   const scrollToTop = () => {
     if (previewRef.current) {
       previewRef.current.scrollTo({
@@ -110,22 +75,9 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       return;
     }
 
-    if (!formData.description) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please add some content before saving",
-      });
-      return;
-    }
-
     try {
       setIsSaving(true);
       
-      // Simulate a delay for testing
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      // Insert dummy data
       const { data: contentData, error: contentError } = await supabase
         .from('generated_content')
         .insert([{
@@ -137,18 +89,16 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           status: 'draft',
           version: 1,
           user_id: userId,
-          generated_text: `[DRAFT] Generated content for ${formData.platforms.join(', ')}`,
+          generated_text: editedContent,
+          edited_content: isEditing ? editedContent : null,
+          is_edited: isEditing,
           hashtags: ['#test', '#draft', '#demo']
         }])
         .select()
         .single();
 
-      if (contentError) {
-        console.error('Content Error:', contentError);
-        throw contentError;
-      }
+      if (contentError) throw contentError;
 
-      // Log dummy activity
       await supabase
         .from('recent_activity')
         .insert([{
@@ -157,17 +107,15 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           details: {
             content_id: contentData?.id,
             platforms: formData.platforms,
-            action: 'saved_draft',
-            test_mode: true
+            action: 'saved_draft'
           }
         }]);
 
       toast({
         title: "Success",
-        description: "Content saved as draft. This is a test version.",
+        description: "Content saved as draft",
       });
 
-      // Navigate to home after successful save
       navigate("/");
 
     } catch (error) {
@@ -192,31 +140,9 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       return;
     }
 
-    if (!formData.description) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please add some content before publishing",
-      });
-      return;
-    }
-
-    if (formData.platforms.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please select at least one platform to publish to",
-      });
-      return;
-    }
-
     try {
       setIsPublishing(true);
       
-      // Simulate a delay for testing
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      
-      // Insert dummy published content
       const { data: contentData, error: contentError } = await supabase
         .from('generated_content')
         .insert([{
@@ -228,19 +154,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           status: 'published',
           version: 1,
           user_id: userId,
-          generated_text: `[TEST] Published content for ${formData.platforms.join(', ')}`,
+          generated_text: editedContent,
+          edited_content: isEditing ? editedContent : null,
+          is_edited: isEditing,
           hashtags: ['#published', '#test', '#demo'],
-          seo_score: Math.random() * 100 // Random SEO score for testing
+          seo_score: Math.random() * 100
         }])
         .select()
         .single();
 
-      if (contentError) {
-        console.error('Content Error:', contentError);
-        throw contentError;
-      }
+      if (contentError) throw contentError;
 
-      // Log dummy activity
       await supabase
         .from('recent_activity')
         .insert([{
@@ -249,12 +173,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           details: {
             content_id: contentData?.id,
             platforms: formData.platforms,
-            action: 'published',
-            test_mode: true
+            action: 'published'
           }
         }]);
 
-      // Update test metrics
       await supabase
         .from('user_metrics')
         .upsert({
@@ -269,10 +191,9 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
       toast({
         title: "Success",
-        description: `Test publish successful! Content would be posted to: ${formData.platforms.join(', ')}`,
+        description: `Content published to: ${formData.platforms.join(', ')}`,
       });
 
-      // Navigate to home after successful publish
       navigate("/");
 
     } catch (error) {
@@ -302,7 +223,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       const { error: scheduledError } = await supabase
         .from('scheduled_posts')
         .insert({
-          content: formData.description,
+          content: editedContent,
           platform: formData.platforms,
           scheduled_date: scheduledDate,
           user_id: userId
@@ -323,122 +244,6 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       });
     } finally {
       setIsScheduling(false);
-    }
-  };
-
-  const getPreviewContent = () => {
-    if (!formData.description) {
-      return "Your content preview will appear here...";
-    }
-    return isEditing ? editedContent : formData.description;
-  };
-
-  const getCharacterLimit = (platform: string) => {
-    switch (platform) {
-      case "twitter":
-        return 280;
-      case "linkedin":
-        return 3000;
-      case "facebook":
-        return 2000;
-      default:
-        return Infinity;
-    }
-  };
-
-  const getPlatformPreview = (platform: string, content: string) => {
-    const commonClasses = "p-6 rounded-lg border transition-all duration-300 hover:shadow-xl group relative";
-    
-    switch (platform) {
-      case "linkedin":
-        return (
-          <div className={cn(
-            commonClasses,
-            "border-[#0077B5]/20 bg-white/5 hover:border-[#0077B5]/50"
-          )}>
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-12 w-12">
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <div>
-                <h4 className="font-semibold text-foreground">John Doe</h4>
-                <p className="text-sm text-muted-foreground">Marketing Director • 2nd</p>
-              </div>
-            </div>
-            <div 
-              className={cn(
-                "prose prose-invert max-w-none",
-                isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
-              )}
-              contentEditable={isEditing}
-              onBlur={(e) => setEditedContent(e.currentTarget.textContent || "")}
-              suppressContentEditableWarning
-            >
-              {content}
-            </div>
-          </div>
-        );
-      
-      case "twitter":
-        return (
-          <div className={cn(
-            commonClasses,
-            "border-[#1DA1F2]/20 bg-white/5 hover:border-[#1DA1F2]/50"
-          )}>
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <div>
-                <h4 className="font-semibold text-foreground">John Doe</h4>
-                <p className="text-sm text-muted-foreground">@johndoe</p>
-              </div>
-            </div>
-            <div 
-              className={cn(
-                "prose prose-invert max-w-none",
-                isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
-              )}
-              contentEditable={isEditing}
-              onBlur={(e) => setEditedContent(e.currentTarget.textContent || "")}
-              suppressContentEditableWarning
-            >
-              {content}
-            </div>
-          </div>
-        );
-      
-      case "facebook":
-        return (
-          <div className={cn(
-            commonClasses,
-            "border-[#1877F2]/20 bg-white/5 hover:border-[#1877F2]/50"
-          )}>
-            <div className="flex items-center gap-3 mb-4">
-              <Avatar className="h-10 w-10">
-                <AvatarImage src="/placeholder.svg" />
-                <AvatarFallback>JD</AvatarFallback>
-              </Avatar>
-              <div>
-                <h4 className="font-semibold text-foreground">John Doe</h4>
-                <p className="text-xs text-muted-foreground">Just now • 🌎</p>
-              </div>
-            </div>
-            <div 
-              className={cn(
-                "prose prose-invert max-w-none",
-                isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
-              )}
-              contentEditable={isEditing}
-              onBlur={(e) => setEditedContent(e.currentTarget.textContent || "")}
-              suppressContentEditableWarning
-            >
-              {content}
-            </div>
-          </div>
-        );
     }
   };
 
@@ -467,24 +272,24 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       <CardContent className="p-6">
         <div className="space-y-4">
           {formData.platforms.map((platform) => {
-            const content = getPreviewContent();
-            const limit = getCharacterLimit(platform);
-            const count = content.length;
-
+            const content = isEditing ? editedContent : formData.description;
             return (
               <div key={platform} className="space-y-2">
                 <div className="flex justify-between items-center">
                   <h3 className="font-medium capitalize text-lg text-foreground group-hover:text-primary transition-colors duration-300">
                     {platform}
                   </h3>
-                  <span className={cn(
-                    "text-sm",
-                    count > limit ? "text-destructive" : "text-muted-foreground"
-                  )}>
-                    {count}/{limit} characters
-                  </span>
+                  <CharacterCounter 
+                    platform={platform}
+                    count={content.length}
+                  />
                 </div>
-                {getPlatformPreview(platform, content)}
+                <PlatformPreview
+                  platform={platform}
+                  content={content}
+                  isEditing={isEditing}
+                  onContentChange={setEditedContent}
+                />
               </div>
             );
           })}
@@ -500,62 +305,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             </div>
           )}
 
-          <div className="flex gap-3 mt-6">
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={saveAsDraft}
-              disabled={isSaving || !formData.description}
-            >
-              <Save className="w-4 h-4 mr-2" />
-              {isSaving ? "Saving..." : "Save as Draft"}
-            </Button>
-            
-            <Button
-              variant="outline"
-              className="flex-1"
-              onClick={publishNow}
-              disabled={isPublishing || !formData.description}
-            >
-              <Send className="w-4 h-4 mr-2" />
-              {isPublishing ? "Publishing..." : "Publish Now"}
-            </Button>
-
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button
-                  variant="outline"
-                  className="flex-1"
-                  disabled={!formData.description}
-                >
-                  <Clock className="w-4 h-4 mr-2" />
-                  Schedule Post
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Schedule Post</DialogTitle>
-                </DialogHeader>
-                <div className="space-y-4 py-4">
-                  <div className="space-y-2">
-                    <Label>Schedule Date and Time</Label>
-                    <Input
-                      type="datetime-local"
-                      value={scheduledDate}
-                      onChange={(e) => setScheduledDate(e.target.value)}
-                    />
-                  </div>
-                  <Button
-                    className="w-full"
-                    onClick={schedulePost}
-                    disabled={isScheduling || !scheduledDate}
-                  >
-                    {isScheduling ? "Scheduling..." : "Confirm Schedule"}
-                  </Button>
-                </div>
-              </DialogContent>
-            </Dialog>
-          </div>
+          <PreviewActions
+            onSaveDraft={saveAsDraft}
+            onPublish={publishNow}
+            onSchedule={schedulePost}
+            isSaving={isSaving}
+            isPublishing={isPublishing}
+            isScheduling={isScheduling}
+            scheduledDate={scheduledDate}
+            setScheduledDate={setScheduledDate}
+            hasContent={Boolean(formData.description)}
+          />
         </div>
       </CardContent>
 
