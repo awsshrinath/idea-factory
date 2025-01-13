@@ -40,3 +40,30 @@
 .read-the-docs {
   color: #888;
 }
+
+/* Responsive Grid Adjustments */
+@media (max-width: 1024px) {
+  .grid-cols-12 > * {
+    grid-column: span 12 !important;
+  }
+}
+
+/* Enhanced Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}

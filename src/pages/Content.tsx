@@ -64,24 +64,27 @@ export function Content() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Form and Recent Content */}
-            <div className="lg:col-span-2 space-y-8">
+          {/* Main Content Layout */}
+          <div className="grid grid-cols-12 gap-8">
+            {/* Top Section - Content Form */}
+            <div className="col-span-12 transform hover:scale-[1.01] transition-transform duration-300">
+              <ContentForm
+                formData={formData}
+                onChange={setFormData}
+              />
+            </div>
+
+            {/* Middle Section - Preview */}
+            <div className="col-span-12 lg:col-span-8 space-y-8">
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
-                <ContentForm
-                  formData={formData}
-                  onChange={setFormData}
-                />
-              </div>
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
-                <RecentContent />
+                <ContentPreview formData={formData} />
               </div>
             </div>
 
-            {/* Right Column - Preview and Trending Topics */}
-            <div className="space-y-8">
+            {/* Right Section - Recent Content & Trending Topics */}
+            <div className="col-span-12 lg:col-span-4 space-y-8">
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
-                <ContentPreview formData={formData} />
+                <RecentContent />
               </div>
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
                 <TrendingTopics
