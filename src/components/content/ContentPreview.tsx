@@ -1,5 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, ArrowUp, Save, Send, Clock } from "lucide-react";
+import { Eye, ArrowUp, Save, Send, Clock, Edit2 } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
 import { useEffect, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -10,6 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useNavigate } from "react-router-dom";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -23,6 +24,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
   const [userId, setUserId] = useState<string | null>(null);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState(formData.description);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -59,12 +62,10 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     let animationFrameId: number | null = null;
 
     const handleResize = (entries: ResizeObserverEntry[]) => {
-      // Cancel any pending animation frame
       if (animationFrameId !== null) {
         cancelAnimationFrame(animationFrameId);
       }
 
-      // Schedule the resize handling in the next animation frame
       animationFrameId = requestAnimationFrame(() => {
         entries.forEach(() => {
           // Handle resize if needed in the future
@@ -329,7 +330,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     if (!formData.description) {
       return "Your content preview will appear here...";
     }
-    return formData.description;
+    return isEditing ? editedContent : formData.description;
   };
 
   const getCharacterLimit = (platform: string) => {
@@ -345,16 +346,123 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     }
   };
 
+  const getPlatformPreview = (platform: string, content: string) => {
+    const commonClasses = "p-6 rounded-lg border transition-all duration-300 hover:shadow-xl group relative";
+    
+    switch (platform) {
+      case "linkedin":
+        return (
+          <div className={cn(
+            commonClasses,
+            "border-[#0077B5]/20 bg-white/5 hover:border-[#0077B5]/50"
+          )}>
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-12 w-12">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <div>
+                <h4 className="font-semibold text-foreground">John Doe</h4>
+                <p className="text-sm text-muted-foreground">Marketing Director • 2nd</p>
+              </div>
+            </div>
+            <div 
+              className={cn(
+                "prose prose-invert max-w-none",
+                isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
+              )}
+              contentEditable={isEditing}
+              onBlur={(e) => setEditedContent(e.currentTarget.textContent || "")}
+              suppressContentEditableWarning
+            >
+              {content}
+            </div>
+          </div>
+        );
+      
+      case "twitter":
+        return (
+          <div className={cn(
+            commonClasses,
+            "border-[#1DA1F2]/20 bg-white/5 hover:border-[#1DA1F2]/50"
+          )}>
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <div>
+                <h4 className="font-semibold text-foreground">John Doe</h4>
+                <p className="text-sm text-muted-foreground">@johndoe</p>
+              </div>
+            </div>
+            <div 
+              className={cn(
+                "prose prose-invert max-w-none",
+                isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
+              )}
+              contentEditable={isEditing}
+              onBlur={(e) => setEditedContent(e.currentTarget.textContent || "")}
+              suppressContentEditableWarning
+            >
+              {content}
+            </div>
+          </div>
+        );
+      
+      case "facebook":
+        return (
+          <div className={cn(
+            commonClasses,
+            "border-[#1877F2]/20 bg-white/5 hover:border-[#1877F2]/50"
+          )}>
+            <div className="flex items-center gap-3 mb-4">
+              <Avatar className="h-10 w-10">
+                <AvatarImage src="/placeholder.svg" />
+                <AvatarFallback>JD</AvatarFallback>
+              </Avatar>
+              <div>
+                <h4 className="font-semibold text-foreground">John Doe</h4>
+                <p className="text-xs text-muted-foreground">Just now • 🌎</p>
+              </div>
+            </div>
+            <div 
+              className={cn(
+                "prose prose-invert max-w-none",
+                isEditing ? "border border-dashed border-primary/50 p-2 rounded" : ""
+              )}
+              contentEditable={isEditing}
+              onBlur={(e) => setEditedContent(e.currentTarget.textContent || "")}
+              suppressContentEditableWarning
+            >
+              {content}
+            </div>
+          </div>
+        );
+    }
+  };
+
   return (
     <Card 
       ref={previewRef}
       className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl max-h-[600px] overflow-y-auto relative"
     >
-      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#1D2433] to-[#283047] z-10">
+      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#1D2433] to-[#283047] z-10 flex flex-row items-center justify-between">
         <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
           <Eye className="w-6 h-6" />
           Live Preview
         </CardTitle>
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => setIsEditing(!isEditing)}
+          className={cn(
+            "transition-colors duration-300",
+            isEditing && "text-primary hover:text-primary/80"
+          )}
+        >
+          <Edit2 className="w-4 h-4" />
+        </Button>
       </CardHeader>
       <CardContent className="p-6">
         <div className="space-y-4">
@@ -364,28 +472,31 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             const count = content.length;
 
             return (
-              <div
-                key={platform}
-                className="p-6 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
-              >
-                <div className="flex justify-between items-center mb-3">
+              <div key={platform} className="space-y-2">
+                <div className="flex justify-between items-center">
                   <h3 className="font-medium capitalize text-lg text-foreground group-hover:text-primary transition-colors duration-300">
                     {platform}
                   </h3>
-                  <span className="text-sm text-muted-foreground">
+                  <span className={cn(
+                    "text-sm",
+                    count > limit ? "text-destructive" : "text-muted-foreground"
+                  )}>
                     {count}/{limit} characters
                   </span>
                 </div>
-                <p className="text-sm whitespace-pre-wrap text-foreground/90 leading-relaxed">
-                  {content}
-                </p>
+                {getPlatformPreview(platform, content)}
               </div>
             );
           })}
 
           {formData.platforms.length === 0 && (
-            <div className="text-center text-muted-foreground py-12 animate-pulse">
-              Select a platform to see the preview
+            <div className="text-center py-12 space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-muted/20 flex items-center justify-center">
+                <Eye className="w-8 h-8 text-muted-foreground" />
+              </div>
+              <p className="text-muted-foreground animate-pulse">
+                Select a platform to see the preview
+              </p>
             </div>
           )}
 
