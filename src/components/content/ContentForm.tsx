@@ -5,7 +5,6 @@ import { ContentFormData, Platform, Tone, AIModel, Language } from "@/pages/Cont
 import { Sparkles, Wand2, AlertCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 import { PlatformSelector } from "./PlatformSelector";
 import { ToneSelector } from "./ToneSelector";
@@ -22,7 +21,6 @@ const PLACEHOLDER_TEXT = "Write a professional LinkedIn post about AI in healthc
 
 export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isTesting, setIsTesting] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [showError, setShowError] = useState(false);
   const { toast } = useToast();
@@ -61,12 +59,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         },
       });
 
-      console.log("Response from generate-content:", data);
-
-      if (error) {
-        console.error('Function invocation error:', error);
-        throw error;
-      }
+      if (error) throw error;
 
       if (data?.content) {
         onChange({
@@ -90,36 +83,6 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
       });
     } finally {
       setIsGenerating(false);
-    }
-  };
-
-  const testOpenAIConnection = async () => {
-    setIsTesting(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('test-openai');
-      
-      if (error) {
-        console.error('Function invocation error:', error);
-        throw error;
-      }
-
-      if (data?.success) {
-        toast({
-          title: "OpenAI Connection Test",
-          description: "Connection successful! API key is working correctly.",
-        });
-      } else {
-        throw new Error(data?.error || 'Failed to test OpenAI connection');
-      }
-    } catch (error) {
-      console.error('Error testing OpenAI connection:', error);
-      toast({
-        variant: "destructive",
-        title: "OpenAI Connection Test Failed",
-        description: error.message || "Failed to connect to OpenAI API. Please check your API key.",
-      });
-    } finally {
-      setIsTesting(false);
     }
   };
 
@@ -183,40 +146,25 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           onToneSelect={(tone) => onChange({ ...formData, tone: tone })}
         />
 
-        <div className="flex gap-4">
-          <Button
-            type="button"
-            variant="outline"
-            onClick={testOpenAIConnection}
-            className={cn(
-              "w-full transition-all duration-300 border-accent/20 hover:border-primary/50",
-              isTesting && "animate-pulse"
-            )}
-            disabled={isTesting}
-          >
-            {isTesting ? "Testing..." : "Test OpenAI Connection"}
-          </Button>
-          
-          <Button
-            type="submit"
-            size="lg"
-            className={cn(
-              "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-105",
-              isGenerating && "animate-pulse"
-            )}
-            disabled={!formData.description || formData.platforms.length === 0 || isGenerating || charCount > MAX_CHARS}
-          >
-            <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-            {isGenerating ? (
-              <span className="flex items-center gap-2">
-                <span className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent" />
-                Generating...
-              </span>
-            ) : (
-              "Generate Content"
-            )}
-          </Button>
-        </div>
+        <Button
+          type="submit"
+          size="lg"
+          className={cn(
+            "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-105",
+            isGenerating && "animate-pulse"
+          )}
+          disabled={!formData.description || formData.platforms.length === 0 || isGenerating || charCount > MAX_CHARS}
+        >
+          <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+          {isGenerating ? (
+            <span className="flex items-center gap-2">
+              <span className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent" />
+              Generating...
+            </span>
+          ) : (
+            "Generate Content"
+          )}
+        </Button>
 
         {formData.platforms.length === 0 && (
           <Alert className="bg-muted border-accent/20">

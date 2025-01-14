@@ -107,7 +107,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     if (!userId) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Authentication Required",
         description: "You must be logged in to save content",
       });
       return;
@@ -137,13 +137,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
       if (contentError) throw contentError;
 
+      if (!contentData) {
+        throw new Error('No data returned after saving');
+      }
+
       await supabase
         .from('recent_activity')
         .insert([{
           user_id: userId,
           activity_type: 'content_draft',
           details: {
-            content_id: contentData?.id,
+            content_id: contentData.id,
             platforms: formData.platforms,
             action: 'saved_draft'
           }
@@ -172,8 +176,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     if (!userId) {
       toast({
         variant: "destructive",
-        title: "Error",
+        title: "Authentication Required",
         description: "You must be logged in to publish content",
+      });
+      return;
+    }
+
+    if (!formData.platforms.length) {
+      toast({
+        variant: "destructive",
+        title: "Platform Required",
+        description: "Please select at least one platform to publish to",
       });
       return;
     }
@@ -203,13 +216,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
       if (contentError) throw contentError;
 
+      if (!contentData) {
+        throw new Error('No data returned after publishing');
+      }
+
       await supabase
         .from('recent_activity')
         .insert([{
           user_id: userId,
           activity_type: 'content_published',
           details: {
-            content_id: contentData?.id,
+            content_id: contentData.id,
             platforms: formData.platforms,
             action: 'published'
           }
