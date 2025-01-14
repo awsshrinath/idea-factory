@@ -10,6 +10,7 @@ import { PlatformSelector } from "./PlatformSelector";
 import { ToneSelector } from "./ToneSelector";
 import { ModelLanguageSelector } from "./ModelLanguageSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { supabase } from "@/integrations/supabase/client";
 
 interface ContentFormProps {
   formData: ContentFormData;
