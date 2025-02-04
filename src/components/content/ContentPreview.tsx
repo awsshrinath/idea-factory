@@ -23,85 +23,17 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const [isPublishing, setIsPublishing] = useState(false);
   const [isScheduling, setIsScheduling] = useState(false);
   const [scheduledDate, setScheduledDate] = useState("");
-  const [userId, setUserId] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(formData.description);
   const { toast } = useToast();
   const navigate = useNavigate();
-  const resizeObserver = useRef<ResizeObserver | null>(null);
 
-  // Debounced scroll handler
-  const handleScroll = useCallback(
-    debounce(() => {
-      if (previewRef.current) {
-        const scrollTop = previewRef.current.scrollTop;
-        setShowScrollButton(scrollTop > 100);
-      }
-    }, 100),
-    []
-  );
-
+  // Sync edited content with form data when not in edit mode
   useEffect(() => {
-    const previewElement = previewRef.current;
-    if (previewElement) {
-      previewElement.addEventListener('scroll', handleScroll);
-    }
-
-    // Clean up resize observer and scroll listener
-    return () => {
-      if (previewElement) {
-        previewElement.removeEventListener('scroll', handleScroll);
-      }
-      handleScroll.cancel();
-      if (resizeObserver.current) {
-        resizeObserver.current.disconnect();
-      }
-    };
-  }, [handleScroll]);
-
-  // Set up ResizeObserver with debouncing
-  useEffect(() => {
-    const debouncedResize = debounce(() => {
-      // Handle resize if needed
-    }, 100);
-
-    resizeObserver.current = new ResizeObserver(debouncedResize);
-    
-    if (previewRef.current) {
-      resizeObserver.current.observe(previewRef.current);
-    }
-
-    return () => {
-      debouncedResize.cancel();
-      if (resizeObserver.current) {
-        resizeObserver.current.disconnect();
-      }
-    };
-  }, []);
-
-  useEffect(() => {
-    const getCurrentUser = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      setUserId(user?.id || null);
-    };
-    getCurrentUser();
-  }, []);
-
-  useEffect(() => {
-    // Sync edited content with form data when not in edit mode
     if (!isEditing) {
       setEditedContent(formData.description);
     }
   }, [formData.description, isEditing]);
-
-  const scrollToTop = () => {
-    if (previewRef.current) {
-      previewRef.current.scrollTo({
-        top: 0,
-        behavior: 'smooth'
-      });
-    }
-  };
 
   const validateFormData = () => {
     if (!formData.description.trim()) {
@@ -279,16 +211,22 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   const schedulePost = async () => {
-    if (!userId) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "You must be logged in to schedule posts",
-      });
-      return;
-    }
-
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "You must be logged in to schedule posts",
+        });
+        return;
+      }
+
+      if (!validateFormData()) {
+        return;
+      }
+
       setIsScheduling(true);
       const { error: scheduledError } = await supabase
         .from('scheduled_posts')
@@ -296,7 +234,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           content: editedContent,
           platform: formData.platforms,
           scheduled_date: scheduledDate,
-          user_id: userId
+          user_id: user.id
         });
 
       if (scheduledError) throw scheduledError;
@@ -305,12 +243,12 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         title: "Success",
         description: "Post scheduled successfully",
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error scheduling post:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to schedule post",
+        description: error.message || "Failed to schedule post",
       });
     } finally {
       setIsScheduling(false);
@@ -376,18 +314,6 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           />
         </div>
       </CardContent>
-
-      <Button
-        size="icon"
-        variant="secondary"
-        className={cn(
-          "fixed bottom-4 right-4 rounded-full transition-all duration-300 opacity-0 translate-y-full",
-          showScrollButton && "opacity-100 translate-y-0"
-        )}
-        onClick={scrollToTop}
-      >
-        <Eye className="h-4 w-4" />
-      </Button>
     </Card>
   );
 }
