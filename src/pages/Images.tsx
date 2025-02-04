@@ -3,8 +3,16 @@ import { ImageGenerationForm } from "@/components/images/ImageGenerationForm";
 import { ImageHistory } from "@/components/images/ImageHistory";
 import { Card } from "@/components/ui/card";
 import { Wand2 } from "lucide-react";
+import { useState } from "react";
 
 export function Images() {
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+
+  const handleImageGenerated = () => {
+    // Increment the refresh trigger to cause ImageHistory to reload
+    setRefreshTrigger(prev => prev + 1);
+  };
+
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar />
@@ -26,7 +34,7 @@ export function Images() {
                 <Wand2 className="h-6 w-6 text-primary" />
                 Generate New Image
               </h2>
-              <ImageGenerationForm />
+              <ImageGenerationForm onImageGenerated={handleImageGenerated} />
             </Card>
 
             <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
@@ -41,7 +49,7 @@ export function Images() {
 
           <div className="animate-fadeIn">
             <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">Generated Images</h2>
-            <ImageHistory />
+            <ImageHistory key={refreshTrigger} />
           </div>
         </div>
       </main>
