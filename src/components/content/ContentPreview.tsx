@@ -103,17 +103,45 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     }
   };
 
-  const saveAsDraft = async () => {
-    if (!userId) {
+  const validateFormData = () => {
+    if (!formData.description.trim()) {
       toast({
         variant: "destructive",
-        title: "Authentication Required",
-        description: "You must be logged in to save content",
+        title: "Validation Error",
+        description: "Please enter a description for your content",
       });
-      return;
+      return false;
     }
 
+    if (formData.platforms.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Validation Error",
+        description: "Please select at least one platform",
+      });
+      return false;
+    }
+
+    return true;
+  };
+
+  const saveAsDraft = async () => {
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "You must be logged in to save content",
+        });
+        return;
+      }
+
+      if (!validateFormData()) {
+        return;
+      }
+
       setIsSaving(true);
       
       const { data: contentData, error: contentError } = await supabase
@@ -126,7 +154,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           ai_model: formData.aiModel,
           status: 'draft',
           version: 1,
-          user_id: userId,
+          user_id: user.id,
           generated_text: editedContent,
           edited_content: isEditing ? editedContent : null,
           is_edited: isEditing,
@@ -145,7 +173,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       await supabase
         .from('recent_activity')
         .insert([{
-          user_id: userId,
+          user_id: user.id,
           activity_type: 'content_draft',
           details: {
             content_id: contentData.id,
@@ -174,25 +202,22 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   };
 
   const publishNow = async () => {
-    if (!userId) {
-      toast({
-        variant: "destructive",
-        title: "Authentication Required",
-        description: "You must be logged in to publish content",
-      });
-      return;
-    }
-
-    if (!formData.platforms.length) {
-      toast({
-        variant: "destructive",
-        title: "Platform Required",
-        description: "Please select at least one platform to publish to",
-      });
-      return;
-    }
-
     try {
+      const { data: { user } } = await supabase.auth.getUser();
+      
+      if (!user) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "You must be logged in to publish content",
+        });
+        return;
+      }
+
+      if (!validateFormData()) {
+        return;
+      }
+
       setIsPublishing(true);
       
       const { data: contentData, error: contentError } = await supabase
@@ -205,7 +230,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           ai_model: formData.aiModel,
           status: 'published',
           version: 1,
-          user_id: userId,
+          user_id: user.id,
           generated_text: editedContent,
           edited_content: isEditing ? editedContent : null,
           is_edited: isEditing,
@@ -225,7 +250,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
       await supabase
         .from('recent_activity')
         .insert([{
-          user_id: userId,
+          user_id: user.id,
           activity_type: 'content_published',
           details: {
             content_id: contentData.id,
