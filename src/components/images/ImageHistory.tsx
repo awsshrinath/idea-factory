@@ -1,10 +1,116 @@
 import { Card } from "@/components/ui/card";
 import { Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/components/ui/use-toast";
+
+interface GeneratedImage {
+  id: string;
+  prompt: string;
+  image_path: string;
+  created_at: string;
+}
 
 export function ImageHistory() {
-  // TODO: Implement image history fetching
-  const images = [];
+  const [images, setImages] = useState<GeneratedImage[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchImages = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('generated_images')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+
+      setImages(data || []);
+    } catch (error: any) {
+      console.error('Error fetching images:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load images. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchImages();
+  }, []);
+
+  const handleDelete = async (id: string) => {
+    try {
+      const imageToDelete = images.find(img => img.id === id);
+      if (!imageToDelete) return;
+
+      const { error: storageError } = await supabase
+        .storage
+        .from('ai_generated_images')
+        .remove([imageToDelete.image_path]);
+
+      if (storageError) throw storageError;
+
+      const { error: dbError } = await supabase
+        .from('generated_images')
+        .delete()
+        .eq('id', id);
+
+      if (dbError) throw dbError;
+
+      setImages(images.filter(img => img.id !== id));
+      toast({
+        title: "Success",
+        description: "Image deleted successfully",
+      });
+    } catch (error: any) {
+      console.error('Error deleting image:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete image. Please try again.",
+      });
+    }
+  };
+
+  const handleDownload = async (image: GeneratedImage) => {
+    try {
+      const { data, error } = await supabase
+        .storage
+        .from('ai_generated_images')
+        .download(image.image_path);
+
+      if (error) throw error;
+
+      const url = window.URL.createObjectURL(data);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `generated-image-${image.id}.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (error: any) {
+      console.error('Error downloading image:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to download image. Please try again.",
+      });
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="text-center text-muted-foreground py-8">
+        Loading images...
+      </div>
+    );
+  }
 
   if (images.length === 0) {
     return (
@@ -19,7 +125,7 @@ export function ImageHistory() {
       {images.map((image) => (
         <Card key={image.id} className="p-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
           <img
-            src={image.url}
+            src={supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl}
             alt={image.prompt}
             className="w-full h-48 object-cover rounded-md mb-4 border border-white/10"
           />
@@ -31,6 +137,7 @@ export function ImageHistory() {
               variant="outline" 
               size="sm"
               className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
+              onClick={() => handleDownload(image)}
             >
               <Download className="h-4 w-4 mr-2" />
               Download
@@ -39,6 +146,7 @@ export function ImageHistory() {
               variant="outline" 
               size="sm"
               className="flex-1 hover:bg-gradient-primary transition-all duration-300"
+              onClick={() => handleDelete(image.id)}
             >
               <Trash2 className="h-4 w-4 mr-2" />
               Delete

@@ -21,6 +21,7 @@ import {
 import { Paintbrush, ImageIcon, Wand2 } from "lucide-react";
 import { useState } from "react";
 import { useToast } from "@/components/ui/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please enter a prompt"),
@@ -42,7 +43,7 @@ const aspectRatios = [
   { value: "4:3", label: "Classic (4:3)" },
 ];
 
-export function ImageGenerationForm() {
+export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: () => void }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -58,16 +59,51 @@ export function ImageGenerationForm() {
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsGenerating(true);
     try {
-      console.log(values);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "Please log in to generate images.",
+        });
+        return;
+      }
+
       toast({
-        title: "Image generation started",
-        description: "Your image will be ready soon.",
+        title: "Starting image generation",
+        description: "This may take a minute...",
       });
-    } catch (error) {
+
+      const response = await fetch('/functions/v1/generate-image', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(values),
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      toast({
+        title: "Success",
+        description: "Image generated successfully!",
+      });
+
+      // Reset form and notify parent component
+      form.reset();
+      onImageGenerated();
+    } catch (error: any) {
+      console.error('Error generating image:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to generate image. Please try again.",
+        description: error.message || "Failed to generate image. Please try again.",
       });
     } finally {
       setIsGenerating(false);
