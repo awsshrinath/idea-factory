@@ -130,7 +130,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           generated_text: editedContent,
           edited_content: isEditing ? editedContent : null,
           is_edited: isEditing,
-          hashtags: ['#test', '#draft', '#demo']
+          hashtags: []
         }])
         .select()
         .single();
@@ -141,6 +141,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         throw new Error('No data returned after saving');
       }
 
+      // Record the activity
       await supabase
         .from('recent_activity')
         .insert([{
@@ -160,12 +161,12 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
       navigate("/");
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving draft:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to save draft. Please try again.",
+        description: error.message || "Failed to save draft. Please try again.",
       });
     } finally {
       setIsSaving(false);
@@ -208,8 +209,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
           generated_text: editedContent,
           edited_content: isEditing ? editedContent : null,
           is_edited: isEditing,
-          hashtags: ['#published', '#test', '#demo'],
-          seo_score: Math.random() * 100
+          hashtags: [],
+          seo_score: Math.floor(Math.random() * 100)
         }])
         .select()
         .single();
@@ -220,6 +221,7 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
         throw new Error('No data returned after publishing');
       }
 
+      // Record the activity
       await supabase
         .from('recent_activity')
         .insert([{
@@ -239,12 +241,12 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
 
       navigate("/");
 
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error publishing:', error);
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Failed to publish content. Please try again.",
+        description: error.message || "Failed to publish content. Please try again.",
       });
     } finally {
       setIsPublishing(false);
