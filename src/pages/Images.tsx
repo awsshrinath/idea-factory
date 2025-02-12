@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { ImageGenerationForm } from "@/components/images/ImageGenerationForm";
 import { ImageHistory } from "@/components/images/ImageHistory";
@@ -7,8 +8,10 @@ import { useState } from "react";
 
 export function Images() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  const handleImageGenerated = () => {
+  const handleImageGenerated = (imageUrl: string) => {
+    setPreviewImage(imageUrl);
     // Increment the refresh trigger to cause ImageHistory to reload
     setRefreshTrigger(prev => prev + 1);
   };
@@ -39,10 +42,18 @@ export function Images() {
 
             <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
               <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">Preview</h2>
-              <div className="aspect-square bg-muted rounded-lg flex items-center justify-center border border-white/10">
-                <p className="text-muted-foreground">
-                  Generated image will appear here
-                </p>
+              <div className="aspect-square bg-muted rounded-lg flex items-center justify-center border border-white/10 overflow-hidden">
+                {previewImage ? (
+                  <img 
+                    src={previewImage} 
+                    alt="Generated preview" 
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <p className="text-muted-foreground">
+                    Generated image will appear here
+                  </p>
+                )}
               </div>
             </Card>
           </div>

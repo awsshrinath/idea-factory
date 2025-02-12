@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -43,7 +44,7 @@ const aspectRatios = [
   { value: "4:3", label: "Classic (4:3)" },
 ];
 
-export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: () => void }) {
+export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (imageUrl: string) => void }) {
   const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
@@ -95,9 +96,11 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
         description: "Image generated successfully!",
       });
 
-      // Reset form and notify parent component
+      // Call the callback with the image URL
+      onImageGenerated(data.imageUrl);
+
+      // Reset form
       form.reset();
-      onImageGenerated();
     } catch (error: any) {
       console.error('Error generating image:', error);
       toast({
