@@ -1,5 +1,7 @@
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import "https://deno.land/x/xhr@0.1.0/mod.ts";
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
 const openAIApiKey = Deno.env.get('OPENAI_API_KEY');
 
@@ -22,20 +24,37 @@ serve(async (req) => {
       throw new Error('No authorization header');
     }
 
+    // Create Supabase client
+    const supabaseClient = createClient(
+      Deno.env.get('SUPABASE_URL') ?? '',
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      { global: { headers: { Authorization: authHeader } } }
+    );
+
+    // Get user ID from the session
+    const {
+      data: { user },
+      error: userError,
+    } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
+
+    if (userError || !user) {
+      throw new Error('Unauthorized');
+    }
+
     // Enhance the prompt based on the selected style
     let enhancedPrompt = prompt;
     switch (style) {
       case 'realistic':
-        enhancedPrompt += ', photorealistic, highly detailed';
+        enhancedPrompt += ', photorealistic, highly detailed, 8k resolution';
         break;
       case 'artistic':
-        enhancedPrompt += ', artistic style, creative interpretation';
+        enhancedPrompt += ', artistic style, creative interpretation, digital art';
         break;
       case 'cartoon':
-        enhancedPrompt += ', cartoon style, vibrant colors';
+        enhancedPrompt += ', cartoon style, vibrant colors, animated look';
         break;
       case '3d':
-        enhancedPrompt += ', 3D rendered, cinema 4d style';
+        enhancedPrompt += ', 3D rendered, cinema 4d style, octane render';
         break;
     }
 
@@ -53,6 +72,7 @@ serve(async (req) => {
         break;
     }
 
+    console.log('Generating image with prompt:', enhancedPrompt);
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -69,6 +89,7 @@ serve(async (req) => {
     });
 
     const data = await response.json();
+    console.log('OpenAI response:', data);
 
     if (data.error) {
       throw new Error(data.error.message);
@@ -79,17 +100,12 @@ serve(async (req) => {
     const imageResponse = await fetch(imageUrl);
     const imageBlob = await imageResponse.blob();
 
-    // Get the supabase client
-    const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-      { global: { headers: { Authorization: req.headers.get('Authorization')! } } }
-    );
-
     // Upload to Storage
     const timestamp = new Date().getTime();
     const fileName = `${timestamp}-${Math.random().toString(36).substring(7)}.png`;
-    const { data: uploadData, error: uploadError } = await supabaseClient
+    
+    console.log('Uploading image to Supabase Storage...');
+    const { error: uploadError } = await supabaseClient
       .storage
       .from('ai_generated_images')
       .upload(fileName, imageBlob, {
@@ -98,6 +114,7 @@ serve(async (req) => {
       });
 
     if (uploadError) {
+      console.error('Storage upload error:', uploadError);
       throw new Error(uploadError.message);
     }
 
@@ -107,10 +124,12 @@ serve(async (req) => {
       .from('ai_generated_images')
       .getPublicUrl(fileName);
 
+    console.log('Saving to generated_images table...');
     // Save to generated_images table
     const { error: dbError } = await supabaseClient
       .from('generated_images')
       .insert({
+        user_id: user.id,
         prompt: prompt,
         style: style,
         aspect_ratio: aspectRatio,
@@ -118,6 +137,7 @@ serve(async (req) => {
       });
 
     if (dbError) {
+      console.error('Database insert error:', dbError);
       throw new Error(dbError.message);
     }
 
@@ -134,7 +154,7 @@ serve(async (req) => {
       }
     );
   } catch (error) {
-    console.error('Error:', error);
+    console.error('Error in generate-image function:', error);
     return new Response(
       JSON.stringify({ error: error.message }),
       { 
