@@ -11,35 +11,53 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    console.log("Request received for image generation");
     const { prompt, style, aspectRatio } = await req.json();
+    console.log("Request data:", { prompt, style, aspectRatio });
 
     // Get user information from the request
     const authHeader = req.headers.get('Authorization');
     if (!authHeader) {
+      console.error("No authorization header");
       throw new Error('No authorization header');
     }
 
     // Create Supabase client
+    const supabaseUrl = Deno.env.get('SUPABASE_URL') || '';
+    const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || '';
+    
+    console.log("Creating Supabase client with URL:", supabaseUrl);
+    
     const supabaseClient = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
+      supabaseUrl,
+      supabaseServiceKey,
       { global: { headers: { Authorization: authHeader } } }
     );
 
     // Get user ID from the session
+    console.log("Getting user from auth token");
     const {
       data: { user },
       error: userError,
     } = await supabaseClient.auth.getUser(authHeader.replace('Bearer ', ''));
 
-    if (userError || !user) {
-      throw new Error('Unauthorized');
+    if (userError) {
+      console.error("User error:", userError);
+      throw new Error(`Unauthorized: ${userError.message}`);
     }
+    
+    if (!user) {
+      console.error("No user found");
+      throw new Error('Unauthorized: No user found');
+    }
+    
+    console.log("User authenticated:", user.id);
 
     // Enhance the prompt based on the selected style
     let enhancedPrompt = prompt;
@@ -73,6 +91,13 @@ serve(async (req) => {
     }
 
     console.log('Generating image with prompt:', enhancedPrompt);
+    console.log('Using OpenAI API with key length:', openAIApiKey ? openAIApiKey.length : 0);
+    
+    if (!openAIApiKey) {
+      throw new Error('OpenAI API key is not configured');
+    }
+    
+    console.log('Making request to OpenAI API');
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
@@ -88,26 +113,50 @@ serve(async (req) => {
       }),
     });
 
+    console.log('OpenAI response status:', response.status);
     const data = await response.json();
     console.log('OpenAI response:', data);
 
     if (data.error) {
+      console.error('OpenAI API error:', data.error);
       throw new Error(data.error.message || 'Error from OpenAI API');
     }
 
     // Store the generated image in Supabase
     const imageUrl = data.data[0].url;
+    console.log('Image URL received:', imageUrl);
+    
+    console.log('Fetching image from URL');
     const imageResponse = await fetch(imageUrl);
     
     if (!imageResponse.ok) {
+      console.error('Failed to fetch image:', imageResponse.status);
       throw new Error(`Failed to fetch image: ${imageResponse.status}`);
     }
     
     const imageBlob = await imageResponse.blob();
+    console.log('Image blob size:', imageBlob.size);
 
     // Upload to Storage
     const timestamp = new Date().getTime();
     const fileName = `${timestamp}-${Math.random().toString(36).substring(7)}.png`;
+    
+    console.log('Creating storage bucket if it does not exist');
+    const { error: bucketError } = await supabaseClient
+      .storage
+      .createBucket('ai_generated_images', {
+        public: true,
+        fileSizeLimit: 10485760, // 10MB
+      })
+      .catch(e => {
+        // Bucket might already exist, which is fine
+        console.log('Bucket may already exist:', e.message);
+        return { error: null };
+      });
+
+    if (bucketError) {
+      console.error('Storage bucket creation error:', bucketError);
+    }
     
     console.log('Uploading image to Supabase Storage...');
     const { error: uploadError, data: uploadData } = await supabaseClient
@@ -120,7 +169,7 @@ serve(async (req) => {
 
     if (uploadError) {
       console.error('Storage upload error:', uploadError);
-      throw new Error(uploadError.message);
+      throw new Error(`Storage upload error: ${uploadError.message}`);
     }
 
     // Get the public URL
@@ -128,6 +177,30 @@ serve(async (req) => {
       .storage
       .from('ai_generated_images')
       .getPublicUrl(fileName);
+
+    console.log('Public URL:', publicUrlData.publicUrl);
+
+    console.log('Checking if table exists and creating if needed');
+    // Create the table if it doesn't exist (this is a simple approach for demo purposes)
+    // In production, you'd want to use proper migrations
+    try {
+      const { error: tableCheckError } = await supabaseClient
+        .from('generated_images')
+        .select('id')
+        .limit(1);
+      
+      if (tableCheckError && tableCheckError.code === '42P01') { // table doesn't exist error code
+        console.log('Table does not exist, creating it');
+        // Create the table using SQL
+        const { error: createTableError } = await supabaseClient.rpc('create_generated_images_table');
+        if (createTableError) {
+          console.error('Error creating table:', createTableError);
+        }
+      }
+    } catch (e) {
+      console.log('Error checking table existence:', e);
+      // Continue anyway as the table might already exist
+    }
 
     console.log('Saving to generated_images table...');
     // Save to generated_images table
@@ -143,9 +216,11 @@ serve(async (req) => {
 
     if (dbError) {
       console.error('Database insert error:', dbError);
-      throw new Error(dbError.message);
+      // Don't throw here, we still want to return the image URL
+      console.log('Continuing despite database error');
     }
 
+    console.log('Returning success response with image URL');
     return new Response(
       JSON.stringify({ 
         imageUrl: publicUrlData.publicUrl,

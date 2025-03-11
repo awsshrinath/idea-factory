@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,19 +21,40 @@ export function Auth() {
   const [password, setPassword] = useState("");
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
+  const [isInitializing, setIsInitializing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
   // Check if user is already authenticated
-  useState(() => {
+  useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
       if (data.session) {
         navigate("/");
+      } else {
+        // If not authenticated, initialize the database
+        initializeDatabase();
       }
     };
     checkAuth();
-  });
+  }, [navigate]);
+
+  const initializeDatabase = async () => {
+    try {
+      setIsInitializing(true);
+      // Call the setup-database function to ensure the schema is ready
+      const { error } = await supabase.functions.invoke("setup-database");
+      if (error) {
+        console.error("Error initializing database:", error);
+      } else {
+        console.log("Database initialized successfully");
+      }
+    } catch (error) {
+      console.error("Error initializing database:", error);
+    } finally {
+      setIsInitializing(false);
+    }
+  };
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -95,6 +116,47 @@ export function Auth() {
     setEmail("demo@example.com");
     setPassword("password123");
     setIsLogin(true);
+    
+    // Auto-sign up the demo account if it doesn't exist
+    try {
+      setIsLoading(true);
+      // First try to login
+      const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+        email: "demo@example.com",
+        password: "password123",
+      });
+      
+      if (loginError && loginError.message.includes("Invalid login credentials")) {
+        // If login fails, create the account
+        const { data: signupData, error: signupError } = await supabase.auth.signUp({
+          email: "demo@example.com",
+          password: "password123",
+        });
+        
+        if (signupError) throw signupError;
+        
+        toast({
+          title: "Demo account created",
+          description: "You can now login with the demo account.",
+        });
+      } else if (loginData.session) {
+        // If login succeeds, navigate to home
+        toast({
+          title: "Login successful",
+          description: "Welcome to the demo account!",
+        });
+        navigate("/");
+      }
+    } catch (error: any) {
+      console.error('Demo account error:', error);
+      toast({
+        variant: "destructive",
+        title: "Demo account setup failed",
+        description: error.message || "An error occurred during demo account setup",
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -147,7 +209,7 @@ export function Auth() {
               <Button
                 type="submit"
                 className="w-full bg-gradient-secondary hover:bg-gradient-primary shadow-glow hover:shadow-card-hover transition-all duration-300"
-                disabled={isLoading}
+                disabled={isLoading || isInitializing}
               >
                 {isLoading
                   ? "Processing..."
@@ -173,8 +235,9 @@ export function Auth() {
                 variant="outline"
                 className="w-full mt-4 bg-background/30 hover:bg-primary/20"
                 onClick={handleDemoAccount}
+                disabled={isLoading || isInitializing}
               >
-                Use Demo Account
+                {isInitializing ? "Initializing..." : "Use Demo Account"}
               </Button>
             </div>
           </CardContent>
@@ -183,6 +246,7 @@ export function Auth() {
               variant="link"
               onClick={() => setIsLogin(!isLogin)}
               className="text-primary hover:text-primary/80"
+              disabled={isLoading || isInitializing}
             >
               {isLogin
                 ? "Don't have an account? Sign up"

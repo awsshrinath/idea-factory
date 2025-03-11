@@ -107,30 +107,20 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
 
       console.log("Sending request to edge function with values:", values);
       
-      // Use the full Supabase URL for the function call
-      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://nphkufnrodsvvyxyaglc.supabase.co";
-      const functionUrl = `${supabaseUrl}/functions/v1/generate-image`;
-      
-      const response = await fetch(functionUrl, {
-        method: 'POST',
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(values),
+      // Use supabase's function invocation rather than direct fetch
+      const { data, error } = await supabase.functions.invoke("generate-image", {
+        body: values,
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error('Error response:', errorText);
-        throw new Error(`API returned ${response.status}: ${errorText}`);
+      
+      if (error) {
+        console.error("Error from edge function:", error);
+        throw new Error(error.message || "Failed to invoke function");
       }
-
-      const data = await response.json();
+      
       console.log("Response from edge function:", data);
 
-      if (data.error) {
-        throw new Error(data.error);
+      if (!data || !data.imageUrl) {
+        throw new Error("Invalid response from server");
       }
 
       toast({
