@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -9,6 +10,7 @@ import { Images } from "./pages/Images";
 import { Videos } from "./pages/Videos";
 import { Schedule } from "./pages/Schedule";
 import { Settings } from "./pages/Settings";
+import { Auth } from "./pages/Auth";
 
 const App = () => {
   const [queryClient] = useState(
@@ -30,6 +32,7 @@ const App = () => {
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/auth" element={<Auth />} />
             <Route path="/content" element={<Content />} />
             <Route path="/images" element={<Images />} />
             <Route path="/videos" element={<Videos />} />
