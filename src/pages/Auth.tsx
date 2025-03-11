@@ -16,6 +16,7 @@ export function Auth() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
   
   // Check if user is already logged in
   useEffect(() => {
@@ -43,14 +44,20 @@ export function Auth() {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     
     try {
+      console.log("Attempting login with:", { email, password });
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
       
       toast({
         title: "Login successful",
@@ -59,11 +66,21 @@ export function Auth() {
       
       navigate('/images');
     } catch (error: any) {
+      const errorMsg = error.message || "Failed to login. Please try again.";
+      console.error("Login failed:", errorMsg);
+      setErrorMessage(errorMsg);
+      
       toast({
         variant: "destructive",
         title: "Login failed",
-        description: error.message || "Failed to login. Please try again.",
+        description: errorMsg,
       });
+      
+      // If the error is about invalid credentials and we're using demo@example.com,
+      // suggest creating the account first
+      if (errorMsg.includes("Invalid login credentials") && email === "demo@example.com") {
+        setErrorMessage("Demo account doesn't exist yet. Please sign up first using the Sign Up tab.");
+      }
     } finally {
       setLoading(false);
     }
@@ -72,24 +89,52 @@ export function Auth() {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setErrorMessage("");
     
     try {
+      console.log("Attempting signup with:", { email, password });
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+          emailRedirectTo: window.location.origin,
+        }
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
+      
+      if (data.user && data.user.identities && data.user.identities.length === 0) {
+        throw new Error("Email already registered. Please log in instead.");
+      }
       
       toast({
         title: "Signup successful",
-        description: "Please check your email to confirm your account.",
+        description: "Account created! You can now log in.",
       });
+      
+      // If email confirmation is required
+      if (data.user && !data.session) {
+        toast({
+          title: "Email verification required",
+          description: "Please check your email to confirm your account.",
+        });
+      } else if (data.session) {
+        // If no email confirmation required, user is signed in automatically
+        navigate('/images');
+      }
     } catch (error: any) {
+      const errorMsg = error.message || "Failed to create account. Please try again.";
+      console.error("Signup failed:", errorMsg);
+      setErrorMessage(errorMsg);
+      
       toast({
         variant: "destructive",
         title: "Signup failed",
-        description: error.message || "Failed to create account. Please try again.",
+        description: errorMsg,
       });
     } finally {
       setLoading(false);
@@ -112,6 +157,12 @@ export function Auth() {
             Login or create an account to generate AI images
           </p>
         </div>
+        
+        {errorMessage && (
+          <div className="bg-destructive/10 border border-destructive/20 text-destructive rounded-md p-3 mb-4 text-sm">
+            {errorMessage}
+          </div>
+        )}
         
         <Tabs defaultValue="login" className="mb-4">
           <TabsList className="grid grid-cols-2 mb-6">

@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { LogIn, LogOut, User } from "lucide-react";
+import { LogIn, LogOut, User, Loader2 } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
 
@@ -14,9 +14,20 @@ export function AuthStatus() {
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data } = await supabase.auth.getSession();
-      setUser(data.session?.user || null);
-      setLoading(false);
+      try {
+        const { data, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error("Error getting session:", error);
+          setUser(null);
+        } else {
+          setUser(data.session?.user || null);
+        }
+      } catch (error) {
+        console.error("Error in checkUser:", error);
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     checkUser();
@@ -32,12 +43,25 @@ export function AuthStatus() {
   }, []);
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    toast({
-      title: "Logged out",
-      description: "You have been logged out successfully.",
-    });
-    navigate("/auth");
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        throw error;
+      }
+      
+      toast({
+        title: "Logged out",
+        description: "You have been logged out successfully.",
+      });
+      navigate("/auth");
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        variant: "destructive",
+        title: "Logout failed",
+        description: error.message || "An error occurred during logout.",
+      });
+    }
   };
 
   const handleLogin = () => {
@@ -45,7 +69,11 @@ export function AuthStatus() {
   };
 
   if (loading) {
-    return <div className="w-24"></div>;
+    return (
+      <div className="w-24 flex items-center justify-center">
+        <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
+      </div>
+    );
   }
 
   if (!user) {
