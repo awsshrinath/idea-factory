@@ -106,7 +106,12 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
       });
 
       console.log("Sending request to edge function with values:", values);
-      const response = await fetch('/functions/v1/generate-image', {
+      
+      // Use the full Supabase URL for the function call
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || "https://nphkufnrodsvvyxyaglc.supabase.co";
+      const functionUrl = `${supabaseUrl}/functions/v1/generate-image`;
+      
+      const response = await fetch(functionUrl, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${session.access_token}`,
