@@ -92,12 +92,17 @@ serve(async (req) => {
     console.log('OpenAI response:', data);
 
     if (data.error) {
-      throw new Error(data.error.message);
+      throw new Error(data.error.message || 'Error from OpenAI API');
     }
 
     // Store the generated image in Supabase
     const imageUrl = data.data[0].url;
     const imageResponse = await fetch(imageUrl);
+    
+    if (!imageResponse.ok) {
+      throw new Error(`Failed to fetch image: ${imageResponse.status}`);
+    }
+    
     const imageBlob = await imageResponse.blob();
 
     // Upload to Storage
@@ -105,7 +110,7 @@ serve(async (req) => {
     const fileName = `${timestamp}-${Math.random().toString(36).substring(7)}.png`;
     
     console.log('Uploading image to Supabase Storage...');
-    const { error: uploadError } = await supabaseClient
+    const { error: uploadError, data: uploadData } = await supabaseClient
       .storage
       .from('ai_generated_images')
       .upload(fileName, imageBlob, {
@@ -156,7 +161,7 @@ serve(async (req) => {
   } catch (error) {
     console.error('Error in generate-image function:', error);
     return new Response(
-      JSON.stringify({ error: error.message }),
+      JSON.stringify({ error: error.message || 'Unknown error occurred' }),
       { 
         status: 500,
         headers: { 

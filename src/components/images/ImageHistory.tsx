@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Download, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -15,9 +16,39 @@ interface GeneratedImage {
 export function ImageHistory() {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
 
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+      if (data.session) {
+        fetchImages();
+      } else {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+      if (session) {
+        fetchImages();
+      } else {
+        setImages([]);
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+
   const fetchImages = async () => {
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('generated_images')
@@ -26,6 +57,7 @@ export function ImageHistory() {
 
       if (error) throw error;
 
+      console.log("Fetched images:", data);
       setImages(data || []);
     } catch (error: any) {
       console.error('Error fetching images:', error);
@@ -38,10 +70,6 @@ export function ImageHistory() {
       setIsLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchImages();
-  }, []);
 
   const handleDelete = async (id: string) => {
     try {
@@ -104,6 +132,14 @@ export function ImageHistory() {
     }
   };
 
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 rounded-lg shadow-card">
+        Please log in to view your generated images.
+      </div>
+    );
+  }
+
   if (isLoading) {
     return (
       <div className="text-center text-muted-foreground py-8">
@@ -122,38 +158,45 @@ export function ImageHistory() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {images.map((image) => (
-        <Card key={image.id} className="p-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
-          <img
-            src={supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl}
-            alt={image.prompt}
-            className="w-full h-48 object-cover rounded-md mb-4 border border-white/10"
-          />
-          <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-            {image.prompt}
-          </p>
-          <div className="flex justify-between gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
-              onClick={() => handleDownload(image)}
-            >
-              <Download className="h-4 w-4 mr-2" />
-              Download
-            </Button>
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="flex-1 hover:bg-gradient-primary transition-all duration-300"
-              onClick={() => handleDelete(image.id)}
-            >
-              <Trash2 className="h-4 w-4 mr-2" />
-              Delete
-            </Button>
-          </div>
-        </Card>
-      ))}
+      {images.map((image) => {
+        const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
+        return (
+          <Card key={image.id} className="p-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
+            <img
+              src={imageUrl}
+              alt={image.prompt}
+              className="w-full h-48 object-cover rounded-md mb-4 border border-white/10"
+              onError={(e) => {
+                console.error('Error loading image:', e);
+                (e.target as HTMLImageElement).src = '/placeholder.svg';
+              }}
+            />
+            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+              {image.prompt}
+            </p>
+            <div className="flex justify-between gap-2">
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
+                onClick={() => handleDownload(image)}
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm"
+                className="flex-1 hover:bg-gradient-primary transition-all duration-300"
+                onClick={() => handleDelete(image.id)}
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
+          </Card>
+        );
+      })}
     </div>
   );
 }

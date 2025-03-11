@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Paintbrush, ImageIcon, Wand2 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -46,7 +46,27 @@ const aspectRatios = [
 
 export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (imageUrl: string) => void }) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
+
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+    };
+
+    checkAuth();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -60,6 +80,15 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsGenerating(true);
     try {
+      if (!isAuthenticated) {
+        toast({
+          variant: "destructive",
+          title: "Authentication Required",
+          description: "Please log in to generate images.",
+        });
+        return;
+      }
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session) {
@@ -76,6 +105,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
         description: "This may take a minute...",
       });
 
+      console.log("Sending request to edge function with values:", values);
       const response = await fetch('/functions/v1/generate-image', {
         method: 'POST',
         headers: {
@@ -85,7 +115,14 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
         body: JSON.stringify(values),
       });
 
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error('Error response:', errorText);
+        throw new Error(`API returned ${response.status}: ${errorText}`);
+      }
+
       const data = await response.json();
+      console.log("Response from edge function:", data);
 
       if (data.error) {
         throw new Error(data.error);
@@ -205,10 +242,10 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
         <Button
           type="submit"
           className="w-full bg-gradient-secondary hover:bg-gradient-primary shadow-glow hover:shadow-card-hover transition-all duration-300 group"
-          disabled={isGenerating}
+          disabled={isGenerating || !isAuthenticated}
         >
           <Wand2 className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
-          {isGenerating ? "Generating..." : "Generate Image"}
+          {isGenerating ? "Generating..." : isAuthenticated ? "Generate Image" : "Login Required"}
         </Button>
       </form>
     </Form>
