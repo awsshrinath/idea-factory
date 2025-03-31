@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -89,7 +90,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-4 bg-gradient-to-br from-[#1D2433] to-[#283047] p-8 rounded-xl shadow-[0_8px_32px_rgba(0,0,0,0.2)] border border-white/10 backdrop-blur-sm">
+      <div className="space-y-4 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-6 md:p-8 rounded-xl shadow-[0_8px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
             Content Description

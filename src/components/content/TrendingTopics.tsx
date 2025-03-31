@@ -1,3 +1,4 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -31,14 +32,14 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
 
   if (isLoading) {
     return (
-      <Card className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in rounded-xl">
-        <CardHeader className="p-6">
+      <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in rounded-xl">
+        <CardHeader className="p-6 md:p-8">
           <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
             <Sparkles className="w-6 h-6" />
             Trending Topics
           </CardTitle>
         </CardHeader>
-        <CardContent className="p-6">
+        <CardContent className="p-6 md:p-8">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div
@@ -53,14 +54,14 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
   }
 
   return (
-    <Card className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl">
-      <CardHeader className="p-6">
+    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl">
+      <CardHeader className="p-6 md:p-8">
         <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
           <Sparkles className="w-6 h-6" />
           Trending Topics
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-6 md:p-8">
         <div className="space-y-4">
           {topics?.map((topic) => (
             <div

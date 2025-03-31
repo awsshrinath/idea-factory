@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Pencil, RefreshCw } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
@@ -33,7 +32,6 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
   const { toast } = useToast();
   const navigate = useNavigate();
 
-  // Sync edited content with form data when not in edit mode
   useEffect(() => {
     if (!isEditing) {
       setEditedContent(formData.description);
@@ -106,7 +104,6 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
         throw new Error('No data returned after saving');
       }
 
-      // Record the activity
       await supabase
         .from('recent_activity')
         .insert([{
@@ -183,7 +180,6 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
         throw new Error('No data returned after publishing');
       }
 
-      // Record the activity
       await supabase
         .from('recent_activity')
         .insert([{
@@ -263,7 +259,6 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
   const handleToggleEdit = () => {
     setIsEditing(!isEditing);
     if (isEditing) {
-      // When exiting edit mode, apply the changes
       onContentChange(editedContent);
     }
   };
@@ -315,16 +310,15 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
   return (
     <Card 
       ref={previewRef}
-      className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl max-h-[600px] overflow-y-auto relative"
+      className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl max-h-[600px] overflow-y-auto relative"
     >
-      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#1D2433] to-[#283047] z-10">
+      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#121212] to-[#1a1a1a] z-10">
         <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent justify-between">
           <div className="flex items-center gap-2">
             <Eye className="w-6 h-6" />
             Live Preview
           </div>
           
-          {/* Edit button */}
           <Button
             variant="ghost"
             size="icon"
@@ -338,7 +332,7 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
           </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-6">
+      <CardContent className="p-6 md:p-8">
         <div className="space-y-4">
           {formData.platforms.map((platform) => (
             <div key={platform} className="space-y-2">
@@ -371,7 +365,6 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
             </div>
           )}
 
-          {/* Regenerate Section */}
           {formData.platforms.length > 0 && (
             <div className="mt-6 pt-4 border-t border-white/10">
               <RegenerateOptions 

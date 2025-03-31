@@ -1,3 +1,4 @@
+
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
@@ -10,18 +11,18 @@ interface PlatformPreviewProps {
 }
 
 export function PlatformPreview({ platform, content, isEditing, onContentChange }: PlatformPreviewProps) {
-  const commonClasses = "p-6 rounded-lg border transition-all duration-300 hover:shadow-xl group relative";
+  const commonClasses = "p-6 rounded-lg border transition-all duration-300 hover:shadow-xl group relative shadow-[0_4px_8px_rgba(0,0,0,0.15)]";
 
   const getPlatformStyles = () => {
     switch (platform) {
       case "linkedin":
-        return "border-[#0077B5]/20 bg-white/5 hover:border-[#0077B5]/50";
+        return "border-[#0077B5]/20 bg-gradient-to-br from-[#131820] to-[#1a202c] hover:border-[#0077B5]/50";
       case "twitter":
-        return "border-[#1DA1F2]/20 bg-white/5 hover:border-[#1DA1F2]/50";
+        return "border-[#1DA1F2]/20 bg-gradient-to-br from-[#131820] to-[#1a2030] hover:border-[#1DA1F2]/50";
       case "facebook":
-        return "border-[#1877F2]/20 bg-white/5 hover:border-[#1877F2]/50";
+        return "border-[#1877F2]/20 bg-gradient-to-br from-[#131820] to-[#1a2033] hover:border-[#1877F2]/50";
       default:
-        return "";
+        return "bg-gradient-to-br from-[#121212] to-[#1a1a1a]";
     }
   };
 

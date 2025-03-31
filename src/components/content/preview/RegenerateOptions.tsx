@@ -25,7 +25,7 @@ export function RegenerateOptions({
   onRegenerate,
 }: RegenerateOptionsProps) {
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 p-6 bg-gradient-to-br from-[#121212] to-[#1a1a1a] rounded-xl shadow-[0_8px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
       <div className="flex flex-wrap gap-4 items-end justify-between">
         <div className="space-y-2 min-w-[150px]">
           <Label htmlFor="regeneration-model" className="text-sm text-muted-foreground">
