@@ -11,7 +11,7 @@ interface PlatformPreviewProps {
 }
 
 export function PlatformPreview({ platform, content, isEditing, onContentChange }: PlatformPreviewProps) {
-  const commonClasses = "p-6 rounded-lg border transition-all duration-300 hover:shadow-xl group relative shadow-[0_4px_8px_rgba(0,0,0,0.15)]";
+  const commonClasses = "p-[24px] rounded-[12px] border transition-all duration-300 hover:shadow-xl group relative shadow-[0_12px_12px_rgba(0,0,0,0.2)]";
 
   const getPlatformStyles = () => {
     switch (platform) {
@@ -34,7 +34,7 @@ export function PlatformPreview({ platform, content, isEditing, onContentChange 
           <AvatarFallback>JD</AvatarFallback>
         </Avatar>
         <div>
-          <h4 className="font-semibold text-foreground">John Doe</h4>
+          <h4 className="font-[600] text-[18px] text-foreground mb-[16px]">John Doe</h4>
           <p className="text-sm text-muted-foreground">
             {platform === "linkedin" && "Marketing Director • 2nd"}
             {platform === "twitter" && "@johndoe"}
@@ -52,7 +52,7 @@ export function PlatformPreview({ platform, content, isEditing, onContentChange 
         <Textarea
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
-          className="min-h-[120px] bg-background/50 border-primary/30 focus:border-primary"
+          className="min-h-[120px] bg-background/50 border-primary/30 focus:border-primary mt-[12px]"
           placeholder={`Write your ${platform} post here...`}
         />
       ) : (

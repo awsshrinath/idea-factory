@@ -90,9 +90,9 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-4 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-6 md:p-8 rounded-xl shadow-[0_8px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
+      <div className="space-y-4 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-6 md:p-8 rounded-xl shadow-[0_12px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+          <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
             Content Description
             <Tooltip>
               <TooltipTrigger>
@@ -111,7 +111,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               setCharCount(e.target.value.length);
             }}
             className={cn(
-              "h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50",
+              "h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50 mt-[12px]",
               showError && "border-red-500 focus:border-red-500"
             )}
           />

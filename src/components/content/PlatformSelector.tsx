@@ -1,3 +1,4 @@
+
 import { Platform } from "@/pages/Content";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -18,7 +19,7 @@ const platforms: { value: Platform; icon: React.ReactNode; label: string }[] = [
 export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: PlatformSelectorProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
         Select Platforms
         <Tooltip>
           <TooltipTrigger>
@@ -29,7 +30,7 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
           </TooltipContent>
         </Tooltip>
       </label>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex flex-wrap gap-2 mt-[12px]">
         {platforms.map(({ value, icon, label }) => (
           <Button
             key={value}

@@ -1,3 +1,4 @@
+
 import { AIModel, Language } from "@/pages/Content";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -41,7 +42,7 @@ export function ModelLanguageSelector({
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+        <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
           AI Model
           <Tooltip>
             <TooltipTrigger>
@@ -52,7 +53,7 @@ export function ModelLanguageSelector({
             </TooltipContent>
           </Tooltip>
         </label>
-        <div className="relative">
+        <div className="relative mt-[12px]">
           <Select value={selectedModel} onValueChange={onModelSelect}>
             <SelectTrigger 
               className={cn(
@@ -86,7 +87,7 @@ export function ModelLanguageSelector({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+        <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
           Language
           <Tooltip>
             <TooltipTrigger>
@@ -97,7 +98,7 @@ export function ModelLanguageSelector({
             </TooltipContent>
           </Tooltip>
         </label>
-        <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
+        <Select value={selectedLanguage} onValueChange={onLanguageSelect} className="mt-[12px]">
           <SelectTrigger 
             className={cn(
               "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",

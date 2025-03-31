@@ -1,3 +1,4 @@
+
 import { Tone } from "@/pages/Content";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,7 +35,7 @@ const gradients = {
 export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) {
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-foreground/80 italic flex items-center gap-2">
+      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
         Select Tone
         <Tooltip>
           <TooltipTrigger>
@@ -45,7 +46,7 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
           </TooltipContent>
         </Tooltip>
       </label>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-[12px]">
         {tones.map(({ value, icon, label }) => (
           <Button
             key={value}
