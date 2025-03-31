@@ -98,23 +98,25 @@ export function ModelLanguageSelector({
             </TooltipContent>
           </Tooltip>
         </label>
-        <Select value={selectedLanguage} onValueChange={onLanguageSelect} className="mt-[12px]">
-          <SelectTrigger 
-            className={cn(
-              "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
-              "focus:ring-primary/20 focus:border-primary"
-            )}
-          >
-            <SelectValue placeholder="Select Language" />
-          </SelectTrigger>
-          <SelectContent>
-            {languages.map((lang) => (
-              <SelectItem key={lang.value} value={lang.value} className="cursor-pointer">
-                {lang.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="mt-[12px]">
+          <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
+            <SelectTrigger 
+              className={cn(
+                "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
+                "focus:ring-primary/20 focus:border-primary"
+              )}
+            >
+              <SelectValue placeholder="Select Language" />
+            </SelectTrigger>
+            <SelectContent>
+              {languages.map((lang) => (
+                <SelectItem key={lang.value} value={lang.value} className="cursor-pointer">
+                  {lang.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     </div>
   );
