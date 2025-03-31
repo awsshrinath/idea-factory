@@ -1,7 +1,8 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye } from "lucide-react";
+import { Eye, Pencil, RefreshCw } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useRef, useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,13 +11,15 @@ import { useNavigate } from "react-router-dom";
 import { PlatformPreview } from "./preview/PlatformPreview";
 import { PreviewActions } from "./preview/PreviewActions";
 import { CharacterCounter } from "./preview/CharacterCounter";
+import { RegenerateOptions } from "./preview/RegenerateOptions";
 import debounce from 'lodash/debounce';
 
 interface ContentPreviewProps {
   formData: ContentFormData;
+  onContentChange: (content: string) => void;
 }
 
-export function ContentPreview({ formData }: ContentPreviewProps) {
+export function ContentPreview({ formData, onContentChange }: ContentPreviewProps) {
   const previewRef = useRef<HTMLDivElement>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -25,6 +28,8 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
   const [scheduledDate, setScheduledDate] = useState("");
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(formData.description);
+  const [isRegenerating, setIsRegenerating] = useState(false);
+  const [selectedModelForRegeneration, setSelectedModelForRegeneration] = useState<"chatgpt" | "deepseek">(formData.aiModel);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -255,15 +260,82 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
     }
   };
 
+  const handleToggleEdit = () => {
+    setIsEditing(!isEditing);
+    if (isEditing) {
+      // When exiting edit mode, apply the changes
+      onContentChange(editedContent);
+    }
+  };
+
+  const regenerateContent = async () => {
+    try {
+      if (!validateFormData()) {
+        return;
+      }
+
+      setIsRegenerating(true);
+      console.log("Regenerating content with model:", selectedModelForRegeneration);
+
+      const { data, error } = await supabase.functions.invoke('generate-content', {
+        body: {
+          description: formData.description,
+          platform: formData.platforms[0],
+          tone: formData.tone,
+          language: formData.language,
+          aiModel: selectedModelForRegeneration,
+        },
+      });
+
+      if (error) throw error;
+
+      if (data?.content) {
+        setEditedContent(data.content);
+        onContentChange(data.content);
+
+        toast({
+          title: "Content regenerated!",
+          description: "Your content has been updated in the preview.",
+        });
+      } else {
+        throw new Error(data?.error || 'Failed to regenerate content');
+      }
+    } catch (error: any) {
+      console.error('Error regenerating content:', error);
+      toast({
+        variant: "destructive",
+        title: "Error regenerating content",
+        description: error.message || "An unexpected error occurred",
+      });
+    } finally {
+      setIsRegenerating(false);
+    }
+  };
+
   return (
     <Card 
       ref={previewRef}
       className="border border-white/10 shadow-[0_8px_32px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#1D2433] to-[#283047] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-xl max-h-[600px] overflow-y-auto relative"
     >
       <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#1D2433] to-[#283047] z-10">
-        <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
-          <Eye className="w-6 h-6" />
-          Live Preview
+        <CardTitle className="flex items-center gap-2 text-2xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent justify-between">
+          <div className="flex items-center gap-2">
+            <Eye className="w-6 h-6" />
+            Live Preview
+          </div>
+          
+          {/* Edit button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={handleToggleEdit}
+            className={cn(
+              "h-8 w-8 rounded-full hover:bg-primary/20 transition-colors",
+              isEditing && "bg-primary/20 text-primary"
+            )}
+          >
+            <Pencil className="h-4 w-4" />
+          </Button>
         </CardTitle>
       </CardHeader>
       <CardContent className="p-6">
@@ -299,11 +371,23 @@ export function ContentPreview({ formData }: ContentPreviewProps) {
             </div>
           )}
 
+          {/* Regenerate Section */}
+          {formData.platforms.length > 0 && (
+            <div className="mt-6 pt-4 border-t border-white/10">
+              <RegenerateOptions 
+                isRegenerating={isRegenerating}
+                selectedModel={selectedModelForRegeneration}
+                onModelChange={setSelectedModelForRegeneration}
+                onRegenerate={regenerateContent}
+              />
+            </div>
+          )}
+
           <PreviewActions
             onSaveDraft={saveAsDraft}
             onPublish={publishNow}
             onSchedule={schedulePost}
-            onToggleEdit={() => setIsEditing(!isEditing)}
+            onToggleEdit={handleToggleEdit}
             isSaving={isSaving}
             isPublishing={isPublishing}
             isScheduling={isScheduling}

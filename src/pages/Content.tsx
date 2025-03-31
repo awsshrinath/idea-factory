@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ContentForm } from "@/components/content/ContentForm";
@@ -64,24 +65,31 @@ export function Content() {
             </p>
           </div>
 
-          {/* Main Content Layout */}
-          <div className="grid grid-cols-12 gap-8">
-            {/* Left Section - Content Form */}
-            <div className="col-span-12 lg:col-span-8 space-y-8">
+          {/* Main Content Layout - Restructured */}
+          <div className="space-y-8">
+            {/* Content Form */}
+            <div className="transform hover:scale-[1.01] transition-transform duration-300">
+              <ContentForm
+                formData={formData}
+                onChange={setFormData}
+              />
+            </div>
+            
+            {/* Live Preview Section - Now Full Width */}
+            <div className="w-full">
+              <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2">
+                Live Preview
+              </h2>
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
-                <ContentForm
-                  formData={formData}
-                  onChange={setFormData}
-                />
-              </div>
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
-                <ContentPreview formData={formData} />
+                <ContentPreview formData={formData} onContentChange={(newContent) => {
+                  setFormData(prev => ({...prev, description: newContent}));
+                }} />
               </div>
             </div>
-
-            {/* Right Section - Trending Topics & Recent Content */}
-            <div className="col-span-12 lg:col-span-4 space-y-8">
-              <div className="transform hover:scale-[1.01] transition-transform duration-300 sticky top-8">
+            
+            {/* Sidebar Content Moved Below - Two Column Layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              <div className="transform hover:scale-[1.01] transition-transform duration-300">
                 <TrendingTopics
                   onSelect={(topic) =>
                     setFormData((prev) => ({
