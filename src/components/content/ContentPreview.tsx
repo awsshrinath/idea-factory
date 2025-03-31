@@ -1,3 +1,4 @@
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Pencil, RefreshCw } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
@@ -335,7 +336,7 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
   return (
     <Card 
       ref={previewRef}
-      className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px] max-h-[600px] overflow-y-auto relative"
+      className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px] max-h-[600px] min-h-[320px] overflow-y-auto relative"
     >
       <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#121212] to-[#1a1a1a] z-10">
         <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent justify-between mb-[16px]">
@@ -360,7 +361,7 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
       <CardContent className="p-[24px]">
         <div className="space-y-4">
           {formData.platforms.map((platform) => (
-            <div key={platform} className="space-y-2">
+            <div key={platform} className="space-y-2 animate-[fadeIn_0.4s_ease]">
               <div className="flex justify-between items-center">
                 <h3 className="font-[600] capitalize text-[18px] text-foreground group-hover:text-primary transition-colors duration-300 mb-[16px]">
                   {platform}
