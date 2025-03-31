@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, CheckCircle } from "lucide-react";
 import { AIModel } from "@/pages/Content";
 import {
   Select,
@@ -48,10 +48,11 @@ export function RegenerateOptions({
         
         <Button
           onClick={onRegenerate}
+          isLoading={isRegenerating}
           disabled={isRegenerating}
-          className="group bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-lg"
+          className="group bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-[0_0_15px_rgba(79,70,229,0.6)] hover:scale-[1.03]"
         >
-          <RefreshCw className={`w-4 h-4 mr-2 ${isRegenerating ? 'animate-spin' : 'group-hover:rotate-180 transition-transform duration-500'}`} />
+          <RefreshCw className={`w-4 h-4 mr-2 ${!isRegenerating ? 'group-hover:rotate-180 transition-transform duration-500' : ''}`} />
           {isRegenerating ? "Regenerating..." : "Regenerate Content"}
         </Button>
       </div>

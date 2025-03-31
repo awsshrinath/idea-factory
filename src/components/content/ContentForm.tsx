@@ -1,12 +1,11 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ContentFormData, Platform, Tone, AIModel, Language } from "@/pages/Content";
-import { Sparkles, Wand2, AlertCircle } from "lucide-react";
+import { Sparkles, Wand2, AlertCircle, CheckCircle } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { PlatformSelector } from "./PlatformSelector";
 import { ToneSelector } from "./ToneSelector";
 import { ModelLanguageSelector } from "./ModelLanguageSelector";
@@ -70,8 +69,14 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         });
 
         toast({
-          title: "Content generated successfully!",
-          description: "Your content has been updated in the preview.",
+          title: "Success",
+          description: "Content generated successfully!",
+          variant: "default",
+          action: (
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-1 text-accent" />
+            </div>
+          ),
         });
       } else {
         throw new Error(data?.error || 'Failed to generate content');
@@ -151,21 +156,14 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         <Button
           type="submit"
           size="lg"
+          isLoading={isGenerating}
           className={cn(
-            "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-105",
-            isGenerating && "animate-pulse"
+            "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
           )}
           disabled={!formData.description || formData.platforms.length === 0 || isGenerating || charCount > MAX_CHARS}
         >
           <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-          {isGenerating ? (
-            <span className="flex items-center gap-2">
-              <span className="animate-spin rounded-full h-4 w-4 border-2 border-primary-foreground border-t-transparent" />
-              Generating...
-            </span>
-          ) : (
-            "Generate Content"
-          )}
+          {isGenerating ? "Generating..." : "Generate Content"}
         </Button>
 
         {formData.platforms.length === 0 && (

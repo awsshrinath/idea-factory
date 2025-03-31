@@ -1,5 +1,6 @@
+
 import { Button } from "@/components/ui/button";
-import { Calendar, Save, Send, Clock, Edit2 } from "lucide-react";
+import { Calendar, Save, Send, Clock, Edit2, CheckCircle } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -41,7 +42,7 @@ export function PreviewActions({
               variant={isEditing ? "default" : "outline"}
               size="icon"
               onClick={onToggleEdit}
-              className="relative"
+              className="relative hover:shadow-[0_0_8px_rgba(255,255,255,0.2)]"
             >
               <Edit2 className="w-4 h-4" />
             </Button>
@@ -54,8 +55,9 @@ export function PreviewActions({
 
       <Button
         variant="outline"
-        className="flex-1"
+        className="flex-1 transition-all duration-300 hover:shadow-[0_0_12px_rgba(66,230,149,0.4)]"
         onClick={onSaveDraft}
+        isLoading={isSaving}
         disabled={isSaving || !hasContent}
       >
         <Save className="w-4 h-4 mr-2" />
@@ -64,8 +66,9 @@ export function PreviewActions({
       
       <Button
         variant="outline"
-        className="flex-1"
+        className="flex-1 transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,198,255,0.4)]"
         onClick={onPublish}
+        isLoading={isPublishing}
         disabled={isPublishing || !hasContent}
       >
         <Send className="w-4 h-4 mr-2" />
@@ -76,7 +79,7 @@ export function PreviewActions({
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="flex-1"
+            className="flex-1 transition-all duration-300 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)]"
             disabled={!hasContent}
           >
             <Calendar className="w-4 h-4 mr-2" />
@@ -97,8 +100,9 @@ export function PreviewActions({
               />
             </div>
             <Button
-              className="w-full"
+              className="w-full bg-gradient-to-r from-[#FF416C] to-[#FF4B2B] hover:shadow-[0_0_15px_rgba(255,65,108,0.4)] hover:scale-[1.03]"
               onClick={onSchedule}
+              isLoading={isScheduling}
               disabled={isScheduling || !scheduledDate}
             >
               <Clock className="w-4 h-4 mr-2" />

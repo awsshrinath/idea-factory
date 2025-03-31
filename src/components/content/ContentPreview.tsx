@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Eye, Pencil, RefreshCw } from "lucide-react";
 import { ContentFormData } from "@/pages/Content";
@@ -13,6 +12,7 @@ import { PreviewActions } from "./preview/PreviewActions";
 import { CharacterCounter } from "./preview/CharacterCounter";
 import { RegenerateOptions } from "./preview/RegenerateOptions";
 import debounce from 'lodash/debounce';
+import { CheckCircle } from "lucide-react";
 
 interface ContentPreviewProps {
   formData: ContentFormData;
@@ -120,6 +120,12 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
       toast({
         title: "Success",
         description: "Content saved as draft",
+        variant: "default",
+        action: (
+          <div className="flex items-center">
+            <CheckCircle className="w-4 h-4 mr-1 text-accent" />
+          </div>
+        ),
       });
 
       navigate("/");
@@ -196,6 +202,12 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
       toast({
         title: "Success",
         description: `Content published to: ${formData.platforms.join(', ')}`,
+        variant: "default",
+        action: (
+          <div className="flex items-center">
+            <CheckCircle className="w-4 h-4 mr-1 text-accent" />
+          </div>
+        ),
       });
 
       navigate("/");
@@ -244,6 +256,12 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
       toast({
         title: "Success",
         description: "Post scheduled successfully",
+        variant: "default",
+        action: (
+          <div className="flex items-center">
+            <CheckCircle className="w-4 h-4 mr-1 text-accent" />
+          </div>
+        ),
       });
     } catch (error: any) {
       console.error('Error scheduling post:', error);
@@ -290,8 +308,14 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
         onContentChange(data.content);
 
         toast({
-          title: "Content regenerated!",
-          description: "Your content has been updated in the preview.",
+          title: "Success",
+          description: "Content regenerated successfully!",
+          variant: "default",
+          action: (
+            <div className="flex items-center">
+              <CheckCircle className="w-4 h-4 mr-1 text-accent" />
+            </div>
+          ),
         });
       } else {
         throw new Error(data?.error || 'Failed to regenerate content');
