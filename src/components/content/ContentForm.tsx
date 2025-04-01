@@ -3,7 +3,7 @@ import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ContentFormData, Platform, Tone, AIModel, Language } from "@/pages/Content";
-import { Sparkles, Wand2, AlertCircle, CheckCircle, RefreshCw } from "lucide-react";
+import { Sparkles, Wand2, AlertCircle, CheckCircle, RefreshCw, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -125,6 +125,14 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
                 <p>Describe your content idea in detail</p>
               </TooltipContent>
             </Tooltip>
+            <Tooltip>
+              <TooltipTrigger>
+                <Info className="w-4 h-4 text-primary/60" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Be specific. E.g., 'Write a LinkedIn post about AI in healthcare.'</p>
+              </TooltipContent>
+            </Tooltip>
           </label>
           <Textarea
             placeholder={PLACEHOLDER_TEXT}
@@ -192,6 +200,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             isLoading={isRegenerating}
             className={cn(
               "transition-all duration-300 text-foreground bg-transparent border border-white/30 rounded-lg hover:bg-white/5 hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] hover:scale-[1.03]",
+              "animate-fade-in"
             )}
             onClick={handleRegenerate}
             disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
