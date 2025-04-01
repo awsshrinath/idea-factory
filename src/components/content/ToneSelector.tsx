@@ -58,10 +58,8 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
         </Tooltip>
       </label>
       <div className={cn(
-        "gap-3 mt-[12px]",
-        isMobile 
-          ? "flex flex-col space-y-2" 
-          : "grid grid-cols-4 overflow-x-auto"
+        "flex flex-wrap justify-center gap-3 mt-[12px]",
+        isMobile && "overflow-x-auto pb-2 snap-x snap-mandatory flex-nowrap justify-start"
       )}>
         {tones.map(({ value, icon, label }) => (
           <Button
@@ -70,8 +68,10 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
             variant={selectedTone === value ? "default" : "outline"}
             onClick={() => onToneSelect(value)}
             className={cn(
-              "flex items-center justify-center gap-2 px-6 py-3 h-auto rounded-full text-base font-semibold transition-all duration-300",
+              "flex items-center justify-center gap-2 h-auto rounded-full text-base font-semibold transition-all duration-300",
               "hover:scale-105 hover:shadow-[0_2px_10px_rgba(0,0,0,0.3)]",
+              "flex-shrink-0 min-w-auto width-auto",
+              isMobile ? "px-4 py-2 snap-center" : "px-6 py-3",
               selectedTone === value
                 ? `bg-gradient-to-r ${gradients[value]} text-primary-foreground shadow-[0_0_8px_rgba(255,255,255,0.2)]`
                 : "bg-transparent border border-white/20 text-foreground"
