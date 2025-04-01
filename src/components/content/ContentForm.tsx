@@ -1,8 +1,9 @@
+
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { ContentFormData, Platform, Tone, AIModel, Language } from "@/pages/Content";
-import { Sparkles, Wand2, AlertCircle, CheckCircle } from "lucide-react";
+import { Sparkles, Wand2, AlertCircle, CheckCircle, RefreshCw } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useToast } from "@/hooks/use-toast";
@@ -22,6 +23,7 @@ const PLACEHOLDER_TEXT = "Write a professional LinkedIn post about AI in healthc
 
 export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [isGenerating, setIsGenerating] = useState(false);
+  const [isRegenerating, setIsRegenerating] = useState(false);
   const [charCount, setCharCount] = useState(0);
   const [showError, setShowError] = useState(false);
   const { toast } = useToast();
@@ -39,13 +41,9 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
     });
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (charCount > MAX_CHARS) {
-      setShowError(true);
-      return;
-    }
-    setIsGenerating(true);
+  const generateContent = async (isRegenerateAction = false) => {
+    const actionType = isRegenerateAction ? setIsRegenerating : setIsGenerating;
+    actionType(true);
     setShowError(false);
     console.log("Generating content with data:", formData);
 
@@ -69,8 +67,8 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
         });
 
         toast({
-          title: "Success",
-          description: "Content generated successfully!",
+          title: isRegenerateAction ? "Regenerated" : "Success",
+          description: isRegenerateAction ? "Content regenerated successfully!" : "Content generated successfully!",
           variant: "default",
           action: (
             <div className="flex items-center">
@@ -85,12 +83,32 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
       console.error('Error generating content:', error);
       toast({
         variant: "destructive",
-        title: "Error generating content",
+        title: isRegenerateAction ? "Error regenerating content" : "Error generating content",
         description: error.message || "An unexpected error occurred",
       });
     } finally {
-      setIsGenerating(false);
+      actionType(false);
     }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (charCount > MAX_CHARS) {
+      setShowError(true);
+      return;
+    }
+    
+    await generateContent(false);
+  };
+
+  const handleRegenerate = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    if (charCount > MAX_CHARS) {
+      setShowError(true);
+      return;
+    }
+    
+    await generateContent(true);
   };
 
   return (
@@ -153,18 +171,35 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           onToneSelect={(tone) => onChange({ ...formData, tone: tone })}
         />
 
-        <Button
-          type="submit"
-          size="lg"
-          isLoading={isGenerating}
-          className={cn(
-            "w-full transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
-          )}
-          disabled={!formData.description || formData.platforms.length === 0 || isGenerating || charCount > MAX_CHARS}
-        >
-          <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-          {isGenerating ? "Generating..." : "Generate Content"}
-        </Button>
+        <div className="flex gap-3 w-full">
+          <Button
+            type="submit"
+            size="lg"
+            isLoading={isGenerating}
+            className={cn(
+              "flex-1 transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
+            )}
+            disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
+          >
+            <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
+            {isGenerating ? "Generating..." : "Generate Content"}
+          </Button>
+          
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            isLoading={isRegenerating}
+            className={cn(
+              "transition-all duration-300 text-foreground bg-transparent border border-white/30 rounded-lg hover:bg-white/5 hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] hover:scale-[1.03]",
+            )}
+            onClick={handleRegenerate}
+            disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
+          >
+            <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
+            {isRegenerating ? "Regenerating..." : "Regenerate"}
+          </Button>
+        </div>
 
         {formData.platforms.length === 0 && (
           <Alert className="bg-muted border-accent/20">
