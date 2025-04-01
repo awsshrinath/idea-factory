@@ -1,9 +1,10 @@
 
-import { Tone } from "@/pages/Content";
+import { Tone } from "@/types/content";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { Sparkles, BookOpen, Users, Coffee } from "lucide-react";
+import { Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ToneSelectorProps {
   selectedTone: Tone;
@@ -13,14 +14,22 @@ interface ToneSelectorProps {
 const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   {
     value: "professional",
-    icon: <BookOpen className="w-4 h-4" />,
+    icon: <span className="text-xl">💼</span>,
     label: "Professional",
   },
-  { value: "friendly", icon: <Users className="w-4 h-4" />, label: "Friendly" },
-  { value: "casual", icon: <Coffee className="w-4 h-4" />, label: "Casual" },
+  { 
+    value: "friendly", 
+    icon: <span className="text-xl">🤝</span>, 
+    label: "Friendly" 
+  },
+  { 
+    value: "casual", 
+    icon: <span className="text-xl">😎</span>, 
+    label: "Casual" 
+  },
   {
     value: "creative",
-    icon: <Sparkles className="w-4 h-4" />,
+    icon: <span className="text-xl">✨</span>,
     label: "Creative",
   },
 ];
@@ -33,6 +42,8 @@ const gradients = {
 };
 
 export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="space-y-2">
       <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
@@ -46,7 +57,12 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
           </TooltipContent>
         </Tooltip>
       </label>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-[12px]">
+      <div className={cn(
+        "gap-3 mt-[12px]",
+        isMobile 
+          ? "flex flex-col space-y-2" 
+          : "grid grid-cols-4 overflow-x-auto"
+      )}>
         {tones.map(({ value, icon, label }) => (
           <Button
             key={value}
@@ -54,9 +70,11 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
             variant={selectedTone === value ? "default" : "outline"}
             onClick={() => onToneSelect(value)}
             className={cn(
-              "flex-col h-auto py-4 gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg hover:shadow-xl",
-              selectedTone === value &&
-                `bg-gradient-to-r ${gradients[value]} text-primary-foreground`
+              "flex items-center justify-center gap-2 px-6 py-3 h-auto rounded-full text-base font-semibold transition-all duration-300",
+              "hover:scale-105 hover:shadow-[0_2px_10px_rgba(0,0,0,0.3)]",
+              selectedTone === value
+                ? `bg-gradient-to-r ${gradients[value]} text-primary-foreground shadow-[0_0_8px_rgba(255,255,255,0.2)]`
+                : "bg-transparent border border-white/20 text-foreground"
             )}
           >
             {icon}
