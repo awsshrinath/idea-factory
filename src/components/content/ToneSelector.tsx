@@ -34,12 +34,20 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   },
 ];
 
-// Updated gradients with more harmonious, slightly muted colors
+// Updated gradients with more harmonious colors including new casual blue gradient
 const gradients = {
   professional: "bg-gradient-to-r from-[#FF416C] to-[#FF4B2B]", // Keep as is
-  friendly: "bg-gradient-to-r from-[#90F5C3] to-[#48D9E4]", // Changed from neon green to soft teal
-  casual: "bg-gradient-to-r from-[#1F1F1F] to-[#3D3D3D]", // Subtle warm gray gradient
+  friendly: "bg-gradient-to-r from-[#90F5C3] to-[#48D9E4]", // Soft teal
+  casual: "bg-gradient-to-r from-[#4facfe] to-[#00f2fe]", // Light blue gradient
   creative: "bg-gradient-to-r from-[#C084FC] to-[#FF6DCE]", // Soft purple-pink gradient
+};
+
+// Shadows for selected states
+const selectedShadows = {
+  professional: "shadow-[0_0_12px_rgba(255,75,43,0.5)]",
+  friendly: "shadow-[0_0_12px_rgba(72,217,228,0.5)]",
+  casual: "shadow-[0_0_8px_rgba(0,242,254,0.5)]", // Subtle inner glow for casual
+  creative: "shadow-[0_0_12px_rgba(192,132,252,0.5)]",
 };
 
 export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) {
@@ -60,7 +68,7 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
       </label>
       <div className={cn(
         "flex flex-wrap justify-center gap-3 mt-[12px]",
-        isMobile && "overflow-x-auto pb-2 snap-x snap-mandatory flex-nowrap justify-start"
+        isMobile && "gap-2 pb-2"
       )}>
         {tones.map(({ value, icon, label }) => (
           <Button
@@ -69,16 +77,19 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
             variant="outline"
             onClick={() => onToneSelect(value)}
             className={cn(
-              "flex items-center justify-center gap-2 h-auto rounded-full text-base font-semibold transition-all duration-300",
-              "hover:scale-105 hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]", // Enhanced hover effects
-              "flex-shrink-0 min-w-auto width-auto",
-              isMobile ? "px-4 py-2 snap-center" : "px-6 py-3",
+              "flex items-center justify-center gap-2 h-auto rounded-full text-base font-semibold",
+              "transition-all duration-200 ease-in-out",
+              "hover:scale-105 hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]",
+              "flex-shrink-0 min-w-auto width-auto border-2",
+              isMobile ? "px-4 py-2" : "px-6 py-3",
               selectedTone === value
                 ? cn(
                     gradients[value],
-                    "text-primary-foreground shadow-[0_0_12px_rgba(255,255,255,0.25)]" // Enhanced glow
+                    "text-white scale-105",
+                    selectedShadows[value],
+                    "border-white/60"
                   )
-                : "bg-transparent border border-white/20 text-foreground"
+                : "bg-transparent border-white/20 text-foreground"
             )}
           >
             {icon}
