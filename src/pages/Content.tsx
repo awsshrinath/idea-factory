@@ -77,7 +77,7 @@ export function Content() {
             </p>
           </div>
 
-          {/* Main Content Layout - Mobile Responsive */}
+          {/* Main Content Layout - Now responds to mobile vs desktop */}
           <div className="space-y-6">
             {/* Content Form */}
             <div className="transform hover:scale-[1.01] transition-transform duration-300">
@@ -87,7 +87,7 @@ export function Content() {
               />
             </div>
             
-            {/* Live Preview Section - Now Full Width */}
+            {/* Live Preview Section - Full width on mobile, but in original layout on desktop */}
             <div className="w-full">
               <h2 className={cn(
                 "font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2",
@@ -102,7 +102,7 @@ export function Content() {
               </div>
             </div>
             
-            {/* Sidebar Content Moved Below - Mobile Stacked, Desktop Two Column */}
+            {/* Sidebar Content - Stacked on mobile, but in original layout on desktop */}
             <div className={cn(
               "grid gap-6",
               isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
