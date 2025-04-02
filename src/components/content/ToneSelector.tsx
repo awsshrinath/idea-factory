@@ -34,11 +34,12 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   },
 ];
 
+// Updated gradients with more harmonious, slightly muted colors
 const gradients = {
-  professional: "from-[#FF416C] to-[#FF4B2B]",
-  friendly: "from-[#42E695] to-[#3BB2B8]",
-  casual: "from-[#FFD54F] to-[#FFB74D]",
-  creative: "from-[#6A5ACD] to-[#8A2BE2]",
+  professional: "from-[#FF416C] to-[#FF4B2B]", // Keep as is
+  friendly: "from-[#90F5C3] to-[#48D9E4]", // Changed from neon green to soft teal
+  casual: "from-[#1F1F1F] to-[#3D3D3D]", // Subtle warm gray gradient
+  creative: "from-[#C084FC] to-[#FF6DCE]", // Soft purple-pink gradient
 };
 
 export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) {
@@ -69,11 +70,11 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
             onClick={() => onToneSelect(value)}
             className={cn(
               "flex items-center justify-center gap-2 h-auto rounded-full text-base font-semibold transition-all duration-300",
-              "hover:scale-105 hover:shadow-[0_2px_10px_rgba(0,0,0,0.3)]",
+              "hover:scale-105 hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]", // Enhanced hover effects
               "flex-shrink-0 min-w-auto width-auto",
               isMobile ? "px-4 py-2 snap-center" : "px-6 py-3",
               selectedTone === value
-                ? `bg-gradient-to-r ${gradients[value]} text-primary-foreground shadow-[0_0_8px_rgba(255,255,255,0.2)]`
+                ? `bg-gradient-to-r ${gradients[value]} text-primary-foreground shadow-[0_0_12px_rgba(255,255,255,0.25)]` // Enhanced glow
                 : "bg-transparent border border-white/20 text-foreground"
             )}
           >
