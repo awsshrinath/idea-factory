@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Sparkles, Linkedin, Twitter, Facebook } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface PlatformSelectorProps {
   selectedPlatforms: Platform[];
@@ -17,9 +18,11 @@ const platforms: { value: Platform; icon: React.ReactNode; label: string }[] = [
 ];
 
 export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: PlatformSelectorProps) {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="space-y-2">
-      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
+      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[12px]">
         Select Platforms
         <Tooltip>
           <TooltipTrigger>
@@ -30,7 +33,10 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
           </TooltipContent>
         </Tooltip>
       </label>
-      <div className="flex flex-wrap gap-2 mt-[12px]">
+      <div className={cn(
+        "flex flex-wrap gap-2 mt-[12px]",
+        isMobile && "grid grid-cols-3"
+      )}>
         {platforms.map(({ value, icon, label }) => (
           <Button
             key={value}
@@ -39,6 +45,7 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
             onClick={() => onPlatformToggle(value)}
             className={cn(
               "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg hover:shadow-xl",
+              isMobile && "w-full text-sm py-1 px-2 h-11",
               selectedPlatforms.includes(value) &&
                 "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
             )}

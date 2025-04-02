@@ -12,6 +12,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export type Platform = "linkedin" | "twitter" | "facebook";
 export type Tone = "professional" | "friendly" | "casual" | "creative";
@@ -34,16 +36,23 @@ export function Content() {
     aiModel: "chatgpt",
     language: "English",
   });
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8 animate-fade-in">
-        <div className="max-w-7xl mx-auto space-y-8">
+      <main className={cn(
+        "flex-1 p-4 md:p-8 animate-fade-in",
+        isMobile ? "ml-0" : "ml-64"
+      )}>
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Header Section */}
-          <div className="mb-8 animate-slide-in-right">
+          <div className="mb-6 animate-slide-in-right">
             <div className="flex items-center gap-2">
-              <h1 className="text-4xl font-bold font-heading bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+              <h1 className={cn(
+                "font-bold font-heading bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
+                isMobile ? "text-2xl" : "text-4xl"
+              )}>
                 Create Your Next Masterpiece
               </h1>
               <TooltipProvider>
@@ -60,13 +69,16 @@ export function Content() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <p className="text-lg text-muted-foreground mt-2">
+            <p className={cn(
+              "text-muted-foreground mt-2",
+              isMobile ? "text-base" : "text-lg"
+            )}>
               Use AI to generate professional, engaging, and platform-ready content
             </p>
           </div>
 
-          {/* Main Content Layout - Restructured */}
-          <div className="space-y-8">
+          {/* Main Content Layout - Mobile Responsive */}
+          <div className="space-y-6">
             {/* Content Form */}
             <div className="transform hover:scale-[1.01] transition-transform duration-300">
               <ContentForm
@@ -77,7 +89,10 @@ export function Content() {
             
             {/* Live Preview Section - Now Full Width */}
             <div className="w-full">
-              <h2 className="text-2xl font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2">
+              <h2 className={cn(
+                "font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2",
+                isMobile ? "text-xl" : "text-2xl"
+              )}>
                 Live Preview
               </h2>
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
@@ -87,8 +102,11 @@ export function Content() {
               </div>
             </div>
             
-            {/* Sidebar Content Moved Below - Two Column Layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+            {/* Sidebar Content Moved Below - Mobile Stacked, Desktop Two Column */}
+            <div className={cn(
+              "grid gap-6",
+              isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
+            )}>
               <div className="transform hover:scale-[1.01] transition-transform duration-300">
                 <TrendingTopics
                   onSelect={(topic) =>

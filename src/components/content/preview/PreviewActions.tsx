@@ -5,6 +5,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 interface PreviewActionsProps {
   onSaveDraft: () => Promise<void>;
@@ -33,8 +35,13 @@ export function PreviewActions({
   setScheduledDate,
   hasContent
 }: PreviewActionsProps) {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="flex flex-wrap gap-3 mt-6">
+    <div className={cn(
+      "mt-6",
+      isMobile ? "flex flex-col gap-3" : "flex flex-wrap gap-3"
+    )}>
       <TooltipProvider>
         <Tooltip>
           <TooltipTrigger asChild>
@@ -42,7 +49,10 @@ export function PreviewActions({
               variant={isEditing ? "default" : "outline"}
               size="icon"
               onClick={onToggleEdit}
-              className="relative hover:shadow-[0_0_8px_rgba(255,255,255,0.2)]"
+              className={cn(
+                "relative hover:shadow-[0_0_8px_rgba(255,255,255,0.2)]",
+                isMobile && "h-12 w-12 self-end mb-3"
+              )}
             >
               <Edit2 className="w-4 h-4" />
             </Button>
@@ -55,7 +65,10 @@ export function PreviewActions({
 
       <Button
         variant="outline"
-        className="flex-1 transition-all duration-300 hover:shadow-[0_0_12px_rgba(66,230,149,0.4)]"
+        className={cn(
+          "transition-all duration-300 hover:shadow-[0_0_12px_rgba(66,230,149,0.4)]",
+          isMobile ? "w-full h-12" : "flex-1"
+        )}
         onClick={onSaveDraft}
         isLoading={isSaving}
         disabled={isSaving || !hasContent}
@@ -66,7 +79,10 @@ export function PreviewActions({
       
       <Button
         variant="outline"
-        className="flex-1 transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,198,255,0.4)]"
+        className={cn(
+          "transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,198,255,0.4)]",
+          isMobile ? "w-full h-12" : "flex-1"
+        )}
         onClick={onPublish}
         isLoading={isPublishing}
         disabled={isPublishing || !hasContent}
@@ -79,7 +95,10 @@ export function PreviewActions({
         <DialogTrigger asChild>
           <Button
             variant="outline"
-            className="flex-1 transition-all duration-300 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)]"
+            className={cn(
+              "transition-all duration-300 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)]",
+              isMobile ? "w-full h-12" : "flex-1"
+            )}
             disabled={!hasContent}
           >
             <Calendar className="w-4 h-4 mr-2" />

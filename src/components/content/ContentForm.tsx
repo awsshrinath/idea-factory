@@ -12,6 +12,7 @@ import { ToneSelector } from "./ToneSelector";
 import { ModelLanguageSelector } from "./ModelLanguageSelector";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface ContentFormProps {
   formData: ContentFormData;
@@ -27,6 +28,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   const [charCount, setCharCount] = useState(0);
   const [showError, setShowError] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     setCharCount(formData.description.length);
@@ -112,10 +114,10 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-8">
-      <div className="space-y-4 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-6 md:p-8 rounded-xl shadow-[0_12px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-6 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-5 md:p-8 rounded-xl shadow-[0_12px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[16px]">
+          <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[12px]">
             Content Description
             <Tooltip>
               <TooltipTrigger>
@@ -142,7 +144,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               setCharCount(e.target.value.length);
             }}
             className={cn(
-              "h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50 mt-[12px]",
+              "h-28 md:h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50 mt-[12px]",
               showError && "border-red-500 focus:border-red-500"
             )}
           />
@@ -179,13 +181,17 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           onToneSelect={(tone) => onChange({ ...formData, tone: tone })}
         />
 
-        <div className="flex gap-3 w-full">
+        <div className={cn(
+          "flex gap-3 w-full",
+          isMobile && "flex-col gap-3"
+        )}>
           <Button
             type="submit"
-            size="lg"
+            size={isMobile ? "default" : "lg"}
             isLoading={isGenerating}
             className={cn(
               "flex-1 transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
+              isMobile && "h-12 w-full"
             )}
             disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
           >
@@ -195,12 +201,13 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           
           <Button
             type="button"
-            size="lg"
+            size={isMobile ? "default" : "lg"}
             variant="outline"
             isLoading={isRegenerating}
             className={cn(
               "transition-all duration-300 text-foreground bg-transparent border border-white/30 rounded-lg hover:bg-white/5 hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] hover:scale-[1.03]",
-              "animate-fade-in"
+              "animate-fade-in",
+              isMobile && "h-12 w-full"
             )}
             onClick={handleRegenerate}
             disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
