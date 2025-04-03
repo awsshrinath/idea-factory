@@ -32,6 +32,12 @@ export function Sidebar() {
   const toggleSidebar = () => {
     if (isMobile) {
       setMobileOpen(!mobileOpen);
+      // Toggle body scroll when sidebar is open on mobile
+      if (!mobileOpen) {
+        document.body.classList.add('sidebar-open');
+      } else {
+        document.body.classList.remove('sidebar-open');
+      }
     } else {
       setCollapsed(!collapsed);
     }
@@ -45,9 +51,9 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="fixed top-6 left-4 z-50 bg-background/80 backdrop-blur-sm rounded-full shadow-md"
+          className="fixed top-4 left-4 z-50 bg-background/80 backdrop-blur-sm rounded-full shadow-md h-10 w-10 flex items-center justify-center"
         >
-          {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
+          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
       )}
 
@@ -88,7 +94,10 @@ export function Sidebar() {
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className="flex items-center space-x-2 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors"
+                  className={cn(
+                    "flex items-center space-x-2 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors",
+                    isMobile && "py-4" // Increase touch area on mobile
+                  )}
                   onClick={() => isMobile && setMobileOpen(false)}
                 >
                   <item.icon className="h-5 w-5 text-muted-foreground" />
@@ -102,11 +111,14 @@ export function Sidebar() {
         </nav>
       </div>
 
-      {/* Mobile overlay backdrop */}
+      {/* Mobile overlay backdrop with improved z-index */}
       {isMobile && mobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/70 z-30 backdrop-blur-sm transition-opacity duration-300"
-          onClick={() => setMobileOpen(false)}
+          className="fixed inset-0 bg-black/80 z-30 backdrop-blur-sm transition-opacity duration-300"
+          onClick={() => {
+            setMobileOpen(false);
+            document.body.classList.remove('sidebar-open');
+          }}
         />
       )}
     </>

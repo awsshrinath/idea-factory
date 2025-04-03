@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChangelogSection } from "@/components/settings/ChangelogSection";
@@ -8,10 +9,13 @@ import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function Settings() {
   const [isTesting, setIsTesting] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   const testOpenAIConnection = async () => {
     setIsTesting(true);
@@ -41,81 +45,113 @@ export function Settings() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8 animate-fadeIn">
-        <h1 className="text-4xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-          Documentation
-        </h1>
-        
-        <Tabs defaultValue="changelog" className="w-full">
-          <TabsList className="mb-4 bg-card border border-white/10">
-            <TabsTrigger 
-              value="changelog"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Changelog
-            </TabsTrigger>
-            <TabsTrigger 
-              value="roadmap"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Roadmap
-            </TabsTrigger>
-            <TabsTrigger 
-              value="workflows"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Page Workflows
-            </TabsTrigger>
-            <TabsTrigger 
-              value="tech"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Tech Stack
-            </TabsTrigger>
-            <TabsTrigger 
-              value="integrations"
-              className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground"
-            >
-              Integrations
-            </TabsTrigger>
-          </TabsList>
+      <main className={cn(
+        "flex-1 p-4 md:p-6 lg:p-8 animate-fadeIn w-full max-w-full pb-20",
+        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+      )}>
+        <div className="max-w-5xl mx-auto">
+          <h1 className={cn(
+            "text-4xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent",
+            isMobile && "text-2xl text-center"
+          )}>
+            Settings & Documentation
+          </h1>
+          
+          <Tabs defaultValue="changelog" className="w-full">
+            <TabsList className={cn(
+              "mb-4 bg-card border border-white/10",
+              isMobile && "flex flex-wrap overflow-x-auto max-w-full"
+            )}>
+              <TabsTrigger 
+                value="changelog"
+                className={cn(
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                  isMobile && "flex-1 min-w-[32%] py-3"
+                )}
+              >
+                Changelog
+              </TabsTrigger>
+              <TabsTrigger 
+                value="roadmap"
+                className={cn(
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                  isMobile && "flex-1 min-w-[32%] py-3"
+                )}
+              >
+                Roadmap
+              </TabsTrigger>
+              <TabsTrigger 
+                value="workflows"
+                className={cn(
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                  isMobile && "flex-1 min-w-[32%] py-3"
+                )}
+              >
+                Workflows
+              </TabsTrigger>
+              <TabsTrigger 
+                value="tech"
+                className={cn(
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                  isMobile && "flex-1 min-w-[32%] py-3"
+                )}
+              >
+                Tech
+              </TabsTrigger>
+              <TabsTrigger 
+                value="integrations"
+                className={cn(
+                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
+                  isMobile && "flex-1 min-w-[32%] py-3"
+                )}
+              >
+                API
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="changelog">
-            <ChangelogSection />
-          </TabsContent>
+            <TabsContent value="changelog">
+              <ChangelogSection />
+            </TabsContent>
 
-          <TabsContent value="roadmap">
-            <RoadmapSection />
-          </TabsContent>
+            <TabsContent value="roadmap">
+              <RoadmapSection />
+            </TabsContent>
 
-          <TabsContent value="workflows">
-            <WorkflowsSection />
-          </TabsContent>
+            <TabsContent value="workflows">
+              <WorkflowsSection />
+            </TabsContent>
 
-          <TabsContent value="tech">
-            <TechStackSection />
-          </TabsContent>
+            <TabsContent value="tech">
+              <TechStackSection />
+            </TabsContent>
 
-          <TabsContent value="integrations">
-            <div className="space-y-6">
-              <div className="bg-card p-6 rounded-lg border border-white/10">
-                <h2 className="text-xl font-semibold mb-4">OpenAI Integration</h2>
-                <p className="text-muted-foreground mb-4">
-                  Test your OpenAI API connection to ensure content generation will work properly.
-                </p>
-                <Button
-                  onClick={testOpenAIConnection}
-                  disabled={isTesting}
-                  className="w-full sm:w-auto"
-                >
-                  {isTesting ? "Testing Connection..." : "Test OpenAI Connection"}
-                </Button>
+            <TabsContent value="integrations">
+              <div className="space-y-6">
+                <div className={cn(
+                  "bg-card p-6 rounded-lg border border-white/10",
+                  isMobile && "p-4"
+                )}>
+                  <h2 className="text-xl font-semibold mb-4">OpenAI Integration</h2>
+                  <p className="text-muted-foreground mb-4">
+                    Test your OpenAI API connection to ensure content generation will work properly.
+                  </p>
+                  <Button
+                    onClick={testOpenAIConnection}
+                    disabled={isTesting}
+                    className={cn(
+                      "w-full sm:w-auto",
+                      isMobile && "mobile-touch-friendly h-12"
+                    )}
+                  >
+                    {isTesting ? "Testing Connection..." : "Test OpenAI Connection"}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </TabsContent>
-        </Tabs>
+            </TabsContent>
+          </Tabs>
+        </div>
       </main>
     </div>
   );
