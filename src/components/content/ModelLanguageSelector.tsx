@@ -43,10 +43,7 @@ export function ModelLanguageSelector({
   const isMobile = useIsMobile();
   
   return (
-    <div className={cn(
-      "space-y-2",
-      !isMobile && "mb-4"
-    )}>
+    <div className="space-y-4 mb-4">
       <div className={cn(
         "grid gap-4",
         isMobile ? "grid-cols-1" : "grid-cols-2"
@@ -69,12 +66,12 @@ export function ModelLanguageSelector({
               <SelectTrigger 
                 className={cn(
                   "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
-                  "focus:ring-primary/20 focus:border-primary"
+                  "focus:ring-primary/20 focus:border-primary w-full"
                 )}
               >
                 <SelectValue placeholder="Select AI Model" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 bg-background/95 backdrop-blur-sm">
                 {aiModels.map((model) => (
                   <SelectItem 
                     key={model.value} 
@@ -115,12 +112,12 @@ export function ModelLanguageSelector({
               <SelectTrigger 
                 className={cn(
                   "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
-                  "focus:ring-primary/20 focus:border-primary"
+                  "focus:ring-primary/20 focus:border-primary w-full"
                 )}
               >
                 <SelectValue placeholder="Select Language" />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="z-50 bg-background/95 backdrop-blur-sm">
                 {languages.map((lang) => (
                   <SelectItem key={lang.value} value={lang.value} className="cursor-pointer">
                     {lang.label}

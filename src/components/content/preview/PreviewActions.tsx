@@ -51,7 +51,7 @@ export function PreviewActions({
               onClick={onToggleEdit}
               className={cn(
                 "relative hover:shadow-[0_0_8px_rgba(255,255,255,0.2)]",
-                isMobile && "h-12 w-12 self-end mb-3"
+                isMobile ? "h-12 w-12 self-end mb-2" : "h-12 w-12"
               )}
             >
               <Edit2 className="w-4 h-4" />
@@ -67,7 +67,7 @@ export function PreviewActions({
         variant="outline"
         className={cn(
           "transition-all duration-300 hover:shadow-[0_0_12px_rgba(66,230,149,0.4)]",
-          isMobile ? "w-full h-12" : "flex-1"
+          isMobile ? "w-full h-12" : "flex-1 h-12"
         )}
         onClick={onSaveDraft}
         isLoading={isSaving}
@@ -81,7 +81,7 @@ export function PreviewActions({
         variant="outline"
         className={cn(
           "transition-all duration-300 hover:shadow-[0_0_12px_rgba(0,198,255,0.4)]",
-          isMobile ? "w-full h-12" : "flex-1"
+          isMobile ? "w-full h-12" : "flex-1 h-12"
         )}
         onClick={onPublish}
         isLoading={isPublishing}
@@ -97,7 +97,7 @@ export function PreviewActions({
             variant="outline"
             className={cn(
               "transition-all duration-300 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)]",
-              isMobile ? "w-full h-12" : "flex-1"
+              isMobile ? "w-full h-12" : "flex-1 h-12"
             )}
             disabled={!hasContent}
           >
@@ -105,7 +105,7 @@ export function PreviewActions({
             Schedule Post
           </Button>
         </DialogTrigger>
-        <DialogContent>
+        <DialogContent className="z-50 bg-background/95 backdrop-blur-sm">
           <DialogHeader>
             <DialogTitle>Schedule Post</DialogTitle>
           </DialogHeader>

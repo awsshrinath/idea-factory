@@ -54,8 +54,8 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
   const isMobile = useIsMobile();
   
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[12px]">
+    <div className="space-y-3 mb-6">
+      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
         Select Tone
         <Tooltip>
           <TooltipTrigger>
@@ -67,8 +67,9 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
         </Tooltip>
       </label>
       <div className={cn(
-        "flex flex-wrap gap-3 mt-[12px]",
-        isMobile && "grid grid-cols-2 gap-2"
+        isMobile 
+          ? "flex overflow-x-auto pb-2 space-x-3 no-scrollbar" 
+          : "flex flex-wrap gap-3"
       )}>
         {tones.map(({ value, icon, label }) => (
           <Button
@@ -77,11 +78,11 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
             variant="outline"
             onClick={() => onToneSelect(value)}
             className={cn(
-              "flex items-center justify-center gap-2 h-auto rounded-full text-base font-semibold",
+              "flex-none items-center justify-center gap-2 h-auto rounded-full text-base font-semibold",
               "transition-all duration-200 ease-in-out",
               "hover:scale-105 hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]",
-              "flex-shrink-0 min-w-0 w-full border-2",
-              isMobile ? "px-3 py-2 text-sm" : "px-6 py-3",
+              "min-w-0 border-2",
+              isMobile ? "px-4 py-2 text-sm" : "px-6 py-3",
               selectedTone === value
                 ? cn(
                     gradients[value],

@@ -21,8 +21,8 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
   const isMobile = useIsMobile();
   
   return (
-    <div className="space-y-2">
-      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500] mb-[12px]">
+    <div className="space-y-3 mb-6">
+      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
         Select Platforms
         <Tooltip>
           <TooltipTrigger>
@@ -34,8 +34,8 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
         </Tooltip>
       </label>
       <div className={cn(
-        "flex flex-wrap gap-2 mt-[12px]",
-        isMobile && "grid grid-cols-3"
+        "flex gap-3",
+        isMobile ? "flex-wrap" : "flex-wrap"
       )}>
         {platforms.map(({ value, icon, label }) => (
           <Button
@@ -44,8 +44,7 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
             variant={selectedPlatforms.includes(value) ? "default" : "outline"}
             onClick={() => onPlatformToggle(value)}
             className={cn(
-              "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-lg hover:shadow-xl",
-              isMobile && "w-full text-sm py-1 px-2 h-11",
+              "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-sm hover:shadow-md",
               selectedPlatforms.includes(value) &&
                 "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
             )}

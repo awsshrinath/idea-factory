@@ -31,12 +31,12 @@ export function RegenerateOptions({
   return (
     <div className="space-y-4 p-4 md:p-6 bg-gradient-to-br from-[#121212] to-[#1a1a1a] rounded-xl shadow-[0_8px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
       <div className={cn(
-        "gap-4 items-end",
-        isMobile ? "flex flex-col" : "flex flex-wrap justify-between"
+        "flex items-end",
+        isMobile ? "flex-col gap-3" : "flex-row justify-between gap-4"
       )}>
         <div className={cn(
           "space-y-2",
-          isMobile ? "w-full" : "min-w-[150px]"
+          isMobile ? "w-full" : "w-1/2"
         )}>
           <Label htmlFor="regeneration-model" className="text-sm text-muted-foreground">
             AI Model for Regeneration
@@ -46,10 +46,10 @@ export function RegenerateOptions({
             onValueChange={(value) => onModelChange(value as AIModel)}
             disabled={isRegenerating}
           >
-            <SelectTrigger id="regeneration-model" className="bg-background/50 border-accent/20 focus:border-primary">
+            <SelectTrigger id="regeneration-model" className="bg-background/50 border-accent/20 focus:border-primary w-full">
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="z-50 bg-background/95 backdrop-blur-sm">
               <SelectItem value="chatgpt">ChatGPT (Fast)</SelectItem>
               <SelectItem value="deepseek">DeepSeek (Advanced)</SelectItem>
             </SelectContent>
@@ -62,7 +62,7 @@ export function RegenerateOptions({
           disabled={isRegenerating}
           className={cn(
             "group bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-[0_0_15px_rgba(79,70,229,0.6)] hover:scale-[1.03]",
-            isMobile && "w-full h-12"
+            isMobile ? "w-full h-12" : "h-12"
           )}
         >
           <RefreshCw className={`w-4 h-4 mr-2 ${!isRegenerating ? 'group-hover:rotate-180 transition-transform duration-500' : ''}`} />

@@ -42,13 +42,13 @@ export function Content() {
     <div className="min-h-screen flex bg-background">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-8 animate-fade-in",
+        "flex-1 p-4 md:p-6 lg:p-8 animate-fade-in",
         isMobile ? "ml-0" : "ml-64"
       )}>
         <div className="max-w-7xl mx-auto space-y-6">
-          {/* Header Section */}
-          <div className="mb-6 animate-slide-in-right">
-            <div className="flex items-center gap-2">
+          {/* Header Section - Centered on desktop */}
+          <div className="mb-6 animate-slide-in-right text-center lg:text-left">
+            <div className="flex items-center gap-2 justify-center lg:justify-start">
               <h1 className={cn(
                 "font-bold font-heading bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
                 isMobile ? "text-2xl" : "text-4xl"
@@ -77,7 +77,7 @@ export function Content() {
             </p>
           </div>
 
-          {/* Main Content Layout - Now responds to mobile vs desktop */}
+          {/* Main Content Layout */}
           <div className="space-y-6">
             {/* Content Form */}
             <div className="transform hover:scale-[1.01] transition-transform duration-300">
@@ -87,7 +87,7 @@ export function Content() {
               />
             </div>
             
-            {/* Live Preview Section - Full width on mobile, but in original layout on desktop */}
+            {/* Live Preview Section */}
             <div className="w-full">
               <h2 className={cn(
                 "font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2",
@@ -102,7 +102,7 @@ export function Content() {
               </div>
             </div>
             
-            {/* Sidebar Content - Stacked on mobile, but in original layout on desktop */}
+            {/* Sidebar Content - Responsive layout */}
             <div className={cn(
               "grid gap-6",
               isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
