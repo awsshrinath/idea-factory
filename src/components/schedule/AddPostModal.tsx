@@ -1,3 +1,4 @@
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,42 +12,42 @@ export function AddPostModal() {
       <DialogTrigger asChild>
         <Button>Add Post</Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] text-white">
         <DialogHeader>
-          <DialogTitle>Schedule New Post</DialogTitle>
+          <DialogTitle className="text-white">Schedule New Post</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
           <div className="grid gap-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title" className="text-[#E0E0E0]">Title</Label>
             <Input id="title" placeholder="Enter post title" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="content">Content</Label>
-            <Textarea id="content" placeholder="Write your post content..." />
+            <Label htmlFor="content" className="text-[#E0E0E0]">Content</Label>
+            <Textarea id="content" placeholder="Write your post content..." className="text-white placeholder:text-[#B0B0B0]" />
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="platform">Platform</Label>
+            <Label htmlFor="platform" className="text-[#E0E0E0]">Platform</Label>
             <Select>
-              <SelectTrigger>
+              <SelectTrigger className="text-white">
                 <SelectValue placeholder="Select platform" />
               </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="linkedin">LinkedIn</SelectItem>
-                <SelectItem value="twitter">Twitter</SelectItem>
-                <SelectItem value="instagram">Instagram</SelectItem>
+              <SelectContent className="bg-background/95 backdrop-blur-sm">
+                <SelectItem value="linkedin" className="text-white">LinkedIn</SelectItem>
+                <SelectItem value="twitter" className="text-white">Twitter</SelectItem>
+                <SelectItem value="instagram" className="text-white">Instagram</SelectItem>
               </SelectContent>
             </Select>
           </div>
           <div className="grid gap-2">
-            <Label htmlFor="date">Schedule Date</Label>
+            <Label htmlFor="date" className="text-[#E0E0E0]">Schedule Date</Label>
             <Input id="date" type="datetime-local" />
           </div>
         </div>
         <div className="flex justify-end gap-2">
           <DialogTrigger asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" className="text-white">Cancel</Button>
           </DialogTrigger>
-          <Button>Schedule Post</Button>
+          <Button className="text-white">Schedule Post</Button>
         </div>
       </DialogContent>
     </Dialog>

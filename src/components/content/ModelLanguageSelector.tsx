@@ -49,7 +49,7 @@ export function ModelLanguageSelector({
         isMobile ? "grid-cols-1" : "grid-cols-2"
       )}>
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
+          <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
             <Bot className="w-4 h-4 text-primary/70" />
             AI Model
             <Tooltip>
@@ -65,23 +65,23 @@ export function ModelLanguageSelector({
             <Select value={selectedModel} onValueChange={onModelSelect}>
               <SelectTrigger 
                 className={cn(
-                  "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
+                  "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300 text-white",
                   "focus:ring-primary/20 focus:border-primary w-full"
                 )}
               >
                 <SelectValue placeholder="Select AI Model" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-background/95 backdrop-blur-sm">
+              <SelectContent className="z-50 bg-background/95 backdrop-blur-sm text-white">
                 {aiModels.map((model) => (
                   <SelectItem 
                     key={model.value} 
                     value={model.value} 
-                    className="cursor-pointer flex items-center justify-between group"
+                    className="cursor-pointer flex items-center justify-between group text-white"
                   >
                     <span>{model.label}</span>
                     <Tooltip>
                       <TooltipTrigger>
-                        <HelpCircle className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+                        <HelpCircle className="w-4 h-4 text-[#B0B0B0] opacity-0 group-hover:opacity-100 transition-opacity" />
                       </TooltipTrigger>
                       <TooltipContent side="right">
                         <p className="max-w-[200px]">{model.description}</p>
@@ -95,7 +95,7 @@ export function ModelLanguageSelector({
         </div>
 
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
+          <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
             <Globe className="w-4 h-4 text-primary/70" />
             Language
             <Tooltip>
@@ -111,15 +111,15 @@ export function ModelLanguageSelector({
             <Select value={selectedLanguage} onValueChange={onLanguageSelect}>
               <SelectTrigger 
                 className={cn(
-                  "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300",
+                  "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300 text-white",
                   "focus:ring-primary/20 focus:border-primary w-full"
                 )}
               >
                 <SelectValue placeholder="Select Language" />
               </SelectTrigger>
-              <SelectContent className="z-50 bg-background/95 backdrop-blur-sm">
+              <SelectContent className="z-50 bg-background/95 backdrop-blur-sm text-white">
                 {languages.map((lang) => (
-                  <SelectItem key={lang.value} value={lang.value} className="cursor-pointer">
+                  <SelectItem key={lang.value} value={lang.value} className="cursor-pointer text-white">
                     {lang.label}
                   </SelectItem>
                 ))}

@@ -22,7 +22,7 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
   
   return (
     <div className="space-y-3 mb-6">
-      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
+      <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
         Select Platforms
         <Tooltip>
           <TooltipTrigger>
@@ -45,8 +45,9 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
             onClick={() => onPlatformToggle(value)}
             className={cn(
               "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-sm hover:shadow-md",
-              selectedPlatforms.includes(value) &&
-                "bg-gradient-to-r from-primary to-primary/80 text-primary-foreground"
+              selectedPlatforms.includes(value)
+                ? "bg-gradient-to-r from-primary to-primary/80 text-white"
+                : "text-white"
             )}
           >
             {icon}

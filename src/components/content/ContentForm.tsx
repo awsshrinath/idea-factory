@@ -117,7 +117,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-6 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-4 md:p-6 rounded-xl shadow-[0_12px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
         <div className="space-y-2">
-          <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
+          <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
             Content Description
             <Tooltip>
               <TooltipTrigger>
@@ -144,13 +144,13 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
               setCharCount(e.target.value.length);
             }}
             className={cn(
-              "h-28 md:h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-muted-foreground/50",
+              "h-28 md:h-32 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-[#B0B0B0]",
               showError && "border-red-500 focus:border-red-500"
             )}
           />
           <div className="flex justify-between items-center text-sm">
             <span className={cn(
-              "text-muted-foreground",
+              "text-[#B0B0B0]",
               charCount > MAX_CHARS && "text-red-500"
             )}>
               {charCount}/{MAX_CHARS} characters
@@ -190,7 +190,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             size={isMobile ? "default" : "lg"}
             isLoading={isGenerating}
             className={cn(
-              "transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
+              "transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-white rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
               isMobile ? "h-12 w-full" : "flex-1 h-12"
             )}
             disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
@@ -205,7 +205,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
             variant="outline"
             isLoading={isRegenerating}
             className={cn(
-              "transition-all duration-300 text-foreground bg-transparent border border-white/30 rounded-lg hover:bg-white/5 hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] hover:scale-[1.03]",
+              "transition-all duration-300 text-white bg-transparent border border-white/30 rounded-lg hover:bg-white/5 hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] hover:scale-[1.03]",
               "animate-fade-in",
               isMobile ? "h-12 w-full" : "flex-1 h-12"
             )}
@@ -219,7 +219,7 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
 
         {formData.platforms.length === 0 && (
           <Alert className="bg-muted border-accent/20">
-            <AlertDescription className="text-muted-foreground">
+            <AlertDescription className="text-[#B0B0B0]">
               Select at least one platform to generate content
             </AlertDescription>
           </Alert>

@@ -55,7 +55,7 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
   
   return (
     <div className="space-y-3 mb-6">
-      <label className="text-sm font-medium text-[#ccc] italic flex items-center gap-2 text-[14px] font-[500]">
+      <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
         Select Tone
         <Tooltip>
           <TooltipTrigger>
@@ -90,7 +90,7 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
                     selectedShadows[value],
                     "border-white/60"
                   )
-                : "bg-transparent border-white/20 text-foreground"
+                : "bg-transparent border-white/20 text-white"
             )}
           >
             {icon}

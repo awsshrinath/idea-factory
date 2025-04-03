@@ -38,7 +38,7 @@ export function RegenerateOptions({
           "space-y-2",
           isMobile ? "w-full" : "w-1/2"
         )}>
-          <Label htmlFor="regeneration-model" className="text-sm text-muted-foreground">
+          <Label htmlFor="regeneration-model" className="text-sm text-[#E0E0E0]">
             AI Model for Regeneration
           </Label>
           <Select
@@ -46,12 +46,12 @@ export function RegenerateOptions({
             onValueChange={(value) => onModelChange(value as AIModel)}
             disabled={isRegenerating}
           >
-            <SelectTrigger id="regeneration-model" className="bg-background/50 border-accent/20 focus:border-primary w-full">
+            <SelectTrigger id="regeneration-model" className="bg-background/50 border-accent/20 focus:border-primary w-full text-white">
               <SelectValue placeholder="Select model" />
             </SelectTrigger>
-            <SelectContent className="z-50 bg-background/95 backdrop-blur-sm">
-              <SelectItem value="chatgpt">ChatGPT (Fast)</SelectItem>
-              <SelectItem value="deepseek">DeepSeek (Advanced)</SelectItem>
+            <SelectContent className="z-50 bg-background/95 backdrop-blur-sm text-white">
+              <SelectItem value="chatgpt" className="text-white">ChatGPT (Fast)</SelectItem>
+              <SelectItem value="deepseek" className="text-white">DeepSeek (Advanced)</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -61,7 +61,7 @@ export function RegenerateOptions({
           isLoading={isRegenerating}
           disabled={isRegenerating}
           className={cn(
-            "group bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-[0_0_15px_rgba(79,70,229,0.6)] hover:scale-[1.03]",
+            "group bg-gradient-to-br from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 transition-all duration-300 shadow-md hover:shadow-[0_0_15px_rgba(79,70,229,0.6)] hover:scale-[1.03] text-white",
             isMobile ? "w-full h-12" : "h-12"
           )}
         >
@@ -69,7 +69,7 @@ export function RegenerateOptions({
           {isRegenerating ? "Regenerating..." : "Regenerate Content"}
         </Button>
       </div>
-      <p className="text-xs text-muted-foreground italic">
+      <p className="text-xs text-[#B0B0B0] italic">
         Regenerate your content using the same prompt but with potentially different results.
         Try different models for creative variations.
       </p>
