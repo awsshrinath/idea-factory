@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { Bell, Plus } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -10,17 +11,31 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 const Index = () => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8 animate-fadeIn">
+      <main className={cn(
+        "flex-1 p-4 md:p-6 lg:p-8 animate-fadeIn w-full max-w-full",
+        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+      )}>
         <div className="max-w-7xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary 
-                           bg-clip-text text-transparent">
+          <div className={cn(
+            "flex justify-between items-center mb-8",
+            isMobile && "px-2 flex-col items-center gap-4"
+          )}>
+            <div className={cn(
+              isMobile && "text-center"
+            )}>
+              <h1 className={cn(
+                "font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
+                isMobile ? "text-2xl" : "text-4xl"
+              )}>
                 Welcome back, Creator!
               </h1>
               <p className="text-muted-foreground mt-2">

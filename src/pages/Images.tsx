@@ -8,12 +8,15 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { AuthStatus } from "@/components/AuthStatus";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function Images() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const isMobile = useIsMobile();
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -63,13 +66,23 @@ export function Images() {
   }
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8">
+      <main className={cn(
+        "flex-1 p-4 md:p-6 lg:p-8",
+        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+        "w-full max-w-full"
+      )}>
         <div className="max-w-5xl mx-auto">
-          <div className="flex justify-between items-center mb-8">
+          <div className={cn(
+            "flex justify-between items-center mb-8",
+            isMobile && "flex-col items-start gap-4"
+          )}>
             <div className="animate-fadeIn">
-              <h1 className="text-4xl font-bold mb-2 text-foreground font-heading">
+              <h1 className={cn(
+                "font-bold mb-2 text-foreground font-heading",
+                isMobile ? "text-2xl" : "text-4xl"
+              )}>
                 AI Image Generation
               </h1>
               <p className="text-muted-foreground">
@@ -80,7 +93,10 @@ export function Images() {
             <AuthStatus />
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
+          <div className={cn(
+            "grid gap-8 mb-12",
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+          )}>
             <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
               <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading flex items-center gap-2">
                 <Wand2 className="h-6 w-6 text-primary" />
