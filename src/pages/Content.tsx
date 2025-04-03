@@ -39,13 +39,14 @@ export function Content() {
   const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 lg:p-8 animate-fade-in",
-        isMobile ? "ml-0" : "ml-64"
+        "flex-1 p-4 md:p-6 lg:p-8 animate-fade-in w-full max-w-full",
+        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+        "overflow-x-hidden"
       )}>
-        <div className="max-w-7xl mx-auto space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6 w-full">
           {/* Header Section - Centered on desktop */}
           <div className="mb-6 animate-slide-in-right text-center lg:text-left">
             <div className="flex items-center gap-2 justify-center lg:justify-start">
@@ -78,9 +79,9 @@ export function Content() {
           </div>
 
           {/* Main Content Layout */}
-          <div className="space-y-6">
+          <div className="space-y-6 w-full max-w-full">
             {/* Content Form */}
-            <div className="transform hover:scale-[1.01] transition-transform duration-300">
+            <div className="transform hover:scale-[1.01] transition-transform duration-300 w-full max-w-full">
               <ContentForm
                 formData={formData}
                 onChange={setFormData}
@@ -88,14 +89,14 @@ export function Content() {
             </div>
             
             {/* Live Preview Section */}
-            <div className="w-full">
+            <div className="w-full max-w-full">
               <h2 className={cn(
                 "font-bold mb-4 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2",
                 isMobile ? "text-xl" : "text-2xl"
               )}>
                 Live Preview
               </h2>
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
+              <div className="transform hover:scale-[1.01] transition-transform duration-300 w-full max-w-full">
                 <ContentPreview formData={formData} onContentChange={(newContent) => {
                   setFormData(prev => ({...prev, description: newContent}));
                 }} />
@@ -104,10 +105,10 @@ export function Content() {
             
             {/* Sidebar Content - Responsive layout */}
             <div className={cn(
-              "grid gap-6",
+              "grid gap-6 w-full max-w-full",
               isMobile ? "grid-cols-1" : "grid-cols-1 md:grid-cols-2"
             )}>
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
+              <div className="transform hover:scale-[1.01] transition-transform duration-300 w-full">
                 <TrendingTopics
                   onSelect={(topic) =>
                     setFormData((prev) => ({
@@ -117,7 +118,7 @@ export function Content() {
                   }
                 />
               </div>
-              <div className="transform hover:scale-[1.01] transition-transform duration-300">
+              <div className="transform hover:scale-[1.01] transition-transform duration-300 w-full">
                 <RecentContent />
               </div>
             </div>

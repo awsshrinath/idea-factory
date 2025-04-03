@@ -35,7 +35,7 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
       </label>
       <div className={cn(
         "flex gap-3",
-        isMobile ? "flex-wrap" : "flex-wrap"
+        isMobile ? "flex-col max-w-full" : "flex-wrap"
       )}>
         {platforms.map(({ value, icon, label }) => (
           <Button
@@ -45,6 +45,7 @@ export function PlatformSelector({ selectedPlatforms, onPlatformToggle }: Platfo
             onClick={() => onPlatformToggle(value)}
             className={cn(
               "gap-2 transition-all duration-300 hover:scale-105 rounded-lg shadow-sm hover:shadow-md",
+              isMobile && "w-full justify-center py-3",
               selectedPlatforms.includes(value)
                 ? "bg-gradient-to-r from-primary to-primary/80 text-white"
                 : "text-white"

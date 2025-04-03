@@ -10,6 +10,7 @@
   
   body {
     color: #E0E0E0;
+    @apply overflow-x-hidden; /* Add overflow-x: hidden to prevent horizontal scroll */
   }
 }
 
@@ -33,5 +34,20 @@
   
   .content-sublabel {
     @apply text-xs text-[#B0B0B0];
+  }
+  
+  /* Mobile-specific styles */
+  @media (max-width: 600px) {
+    .mobile-stack {
+      @apply flex-col gap-3 w-full;
+    }
+    
+    .mobile-touch-friendly {
+      @apply p-4 text-base leading-relaxed;
+    }
+    
+    .mobile-card {
+      @apply w-full max-w-full;
+    }
   }
 }

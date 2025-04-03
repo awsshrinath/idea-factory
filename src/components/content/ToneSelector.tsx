@@ -67,8 +67,9 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
         </Tooltip>
       </label>
       <div className={cn(
+        "@media (max-width: 600px) { flex-direction: column; gap: 12px; width: 100%; }",
         isMobile 
-          ? "flex overflow-x-auto pb-2 space-x-3 no-scrollbar" 
+          ? "flex overflow-x-auto py-2 space-x-3 no-scrollbar" 
           : "flex flex-wrap gap-3"
       )}>
         {tones.map(({ value, icon, label }) => (
@@ -82,7 +83,8 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
               "transition-all duration-200 ease-in-out",
               "hover:scale-105 hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]",
               "min-w-0 border-2",
-              isMobile ? "px-4 py-2 text-sm" : "px-6 py-3",
+              "@media (max-width: 600px) { width: 100%; justify-content: center; }",
+              isMobile ? "px-4 py-3 text-sm" : "px-6 py-3",
               selectedTone === value
                 ? cn(
                     gradients[value],

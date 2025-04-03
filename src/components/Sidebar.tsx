@@ -45,7 +45,7 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 bg-background/80 backdrop-blur-sm rounded-full shadow-md"
+          className="fixed top-6 left-4 z-50 bg-background/80 backdrop-blur-sm rounded-full shadow-md"
         >
           {mobileOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
         </Button>
@@ -65,7 +65,7 @@ export function Sidebar() {
           "bg-background/90 backdrop-blur-md",
         )}
       >
-        <div className="flex items-center justify-between p-4">
+        <div className="flex items-center justify-between p-6">
           {!(collapsed && !isMobile) && (
             <h1 className="text-xl font-heading font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent truncate">
               Content AI
@@ -83,12 +83,12 @@ export function Sidebar() {
           )}
         </div>
         <nav className="flex-1 p-4 overflow-y-auto">
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {menuItems.map((item) => (
               <li key={item.path}>
                 <Link
                   to={item.path}
-                  className="flex items-center space-x-2 px-2 py-2 rounded-lg hover:bg-white/5 transition-colors"
+                  className="flex items-center space-x-2 px-3 py-3 rounded-lg hover:bg-white/5 transition-colors"
                   onClick={() => isMobile && setMobileOpen(false)}
                 >
                   <item.icon className="h-5 w-5 text-muted-foreground" />
@@ -105,7 +105,7 @@ export function Sidebar() {
       {/* Mobile overlay backdrop */}
       {isMobile && mobileOpen && (
         <div 
-          className="fixed inset-0 bg-black/50 z-30 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/70 z-30 backdrop-blur-sm transition-opacity duration-300"
           onClick={() => setMobileOpen(false)}
         />
       )}

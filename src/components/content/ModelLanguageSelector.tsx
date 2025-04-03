@@ -66,7 +66,8 @@ export function ModelLanguageSelector({
               <SelectTrigger 
                 className={cn(
                   "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300 text-white",
-                  "focus:ring-primary/20 focus:border-primary w-full"
+                  "focus:ring-primary/20 focus:border-primary w-full",
+                  isMobile && "mobile-touch-friendly py-3"
                 )}
               >
                 <SelectValue placeholder="Select AI Model" />
@@ -112,7 +113,8 @@ export function ModelLanguageSelector({
               <SelectTrigger 
                 className={cn(
                   "bg-background/50 border-accent/20 hover:border-primary/50 transition-all duration-300 text-white",
-                  "focus:ring-primary/20 focus:border-primary w-full"
+                  "focus:ring-primary/20 focus:border-primary w-full",
+                  isMobile && "mobile-touch-friendly py-3"
                 )}
               >
                 <SelectValue placeholder="Select Language" />
