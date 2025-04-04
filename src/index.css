@@ -25,6 +25,11 @@
     -ms-overflow-style: none;  /* IE and Edge */
     scrollbar-width: none;  /* Firefox */
   }
+  
+  /* Filter utilities */
+  .hover\:brightness-95:hover {
+    filter: brightness(0.95);
+  }
 }
 
 @layer components {

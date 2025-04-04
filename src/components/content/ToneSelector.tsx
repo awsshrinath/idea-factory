@@ -36,16 +36,16 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
 
 // Updated gradients with more harmonious colors and professional tones
 const gradients = {
-  professional: "bg-gradient-to-r from-[#2b5876] to-[#4e4376]", // New professional blue-gray to purple
-  friendly: "bg-gradient-to-r from-[#90F5C3] to-[#48D9E4]", // Keep friendly teal
+  professional: "bg-gradient-to-r from-[#2b5876] to-[#4e4376]", // Professional blue-gray to purple
+  friendly: "bg-gradient-to-r from-[#FDC830] to-[#F37335]", // New warm friendly gradient
   casual: "bg-gradient-to-r from-[#4facfe] to-[#00f2fe]", // Keep casual blue
   creative: "bg-gradient-to-r from-[#C084FC] to-[#FF6DCE]", // Keep creative purple-pink
 };
 
 // Updated shadows with more consistent and subtle glow effects
 const selectedShadows = {
-  professional: "shadow-[0_0_12px_rgba(46,87,118,0.5)]", // Matching new professional gradient
-  friendly: "shadow-[0_0_12px_rgba(72,217,228,0.5)]", // Keep friendly shadow
+  professional: "shadow-[0_0_12px_rgba(46,87,118,0.5)]", // Matching professional gradient
+  friendly: "shadow-[0_2px_8px_rgba(253,200,48,0.3)]", // New softer friendly shadow
   casual: "shadow-[0_0_8px_rgba(0,242,254,0.5)]", // Keep casual shadow
   creative: "shadow-[0_0_12px_rgba(192,132,252,0.5)]", // Keep creative shadow
 };
@@ -83,7 +83,8 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
               "rounded-full text-base font-semibold",
               "transition-all duration-200 ease-in-out",
               "border-2",
-              "hover:scale-[1.03] hover:shadow-[0_4px_12px_rgba(255,255,255,0.1)]",
+              "hover:scale-[1.03] hover:shadow-[0_4px_12px_rgba(255,255,255,0.1)] hover:brightness-95",
+              "active:scale-[0.98]", // Added scale effect on click
               isMobile ? "px-4 py-3 text-sm min-w-[48%]" : "px-6 py-3",
               selectedTone === value
                 ? cn(
