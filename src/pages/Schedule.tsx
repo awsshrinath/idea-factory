@@ -13,15 +13,15 @@ export function Schedule() {
   return (
     <div className={cn(
       "min-h-screen flex overflow-x-hidden",
-      isMobile && "bg-[#111827]" // Dark background for mobile
+      "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]" // Added dark theme gradient background
     )}>
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 lg:p-8",
-        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8", // Updated padding to match other pages
+        isMobile ? "ml-0 pt-16" : "ml-64", // Keep mobile padding for menu button
         "w-full max-w-full"
       )}>
-        <div className="max-w-7xl mx-auto">
+        <div className="max-w-7xl mx-auto page-container">
           <ScheduleHeader />
           
           {/* Main Content Grid */}
