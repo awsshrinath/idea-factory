@@ -23,6 +23,10 @@ import { Paintbrush, ImageIcon, Wand2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please enter a prompt"),
@@ -32,16 +36,18 @@ const formSchema = z.object({
 
 const styles = [
   { value: "realistic", label: "Realistic", gradient: "bg-gradient-primary" },
-  { value: "artistic", label: "Artistic", gradient: "bg-gradient-creative" },
-  { value: "cartoon", label: "Cartoon", gradient: "bg-gradient-casual" },
-  { value: "3d", label: "3D Render", gradient: "bg-gradient-friendly" },
+  { value: "cyberpunk", label: "Cyberpunk", gradient: "bg-gradient-creative" },
+  { value: "watercolor", label: "Watercolor", gradient: "bg-gradient-casual" },
+  { value: "anime", label: "Anime", gradient: "bg-gradient-friendly" },
+  { value: "3d", label: "3D Render", gradient: "bg-gradient-secondary" },
+  { value: "sketch", label: "Sketch", gradient: "bg-gradient-muted" },
 ];
 
 const aspectRatios = [
   { value: "1:1", label: "Square (1:1)" },
   { value: "16:9", label: "Landscape (16:9)" },
   { value: "9:16", label: "Portrait (9:16)" },
-  { value: "4:3", label: "Classic (4:3)" },
+  { value: "4:5", label: "Instagram (4:5)" },
 ];
 
 export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (imageUrl: string) => void }) {
@@ -73,7 +79,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
     defaultValues: {
       prompt: "",
       style: "",
-      aspectRatio: "",
+      aspectRatio: "1:1", // Default to square
     },
   });
 
@@ -130,9 +136,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
 
       // Call the callback with the image URL
       onImageGenerated(data.imageUrl);
-
-      // Reset form
-      form.reset();
     } catch (error: any) {
       console.error('Error generating image:', error);
       toast({
@@ -166,73 +169,74 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: (i
           )}
         />
 
-        <div className="grid grid-cols-2 gap-4">
-          <FormField
-            control={form.control}
-            name="style"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-foreground">Style</FormLabel>
-                <Select
-                  onValueChange={field.onChange}
-                  defaultValue={field.value}
-                >
-                  <FormControl>
-                    <SelectTrigger className="bg-background border-white/10 focus:border-primary transition-colors">
-                      <SelectValue placeholder="Select style" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {styles.map((style) => (
-                      <SelectItem 
-                        key={style.value} 
-                        value={style.value}
-                        className={`${style.gradient} text-foreground hover:shadow-glow transition-all duration-300`}
-                      >
-                        <div className="flex items-center gap-2">
-                          <Paintbrush className="h-4 w-4" />
-                          {style.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+        <FormField
+          control={form.control}
+          name="style"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel className="text-foreground">Choose Image Style</FormLabel>
+              <Select
+                onValueChange={field.onChange}
+                defaultValue={field.value}
+              >
+                <FormControl>
+                  <SelectTrigger className="bg-background border-white/10 focus:border-primary transition-colors">
+                    <SelectValue placeholder="Select style" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {styles.map((style) => (
+                    <SelectItem 
+                      key={style.value} 
+                      value={style.value}
+                      className={`${style.gradient} text-foreground hover:shadow-glow transition-all duration-300`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Paintbrush className="h-4 w-4" />
+                        {style.label}
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
-          <FormField
-            control={form.control}
-            name="aspectRatio"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-foreground">Aspect Ratio</FormLabel>
-                <Select
+        <FormField
+          control={form.control}
+          name="aspectRatio"
+          render={({ field }) => (
+            <FormItem className="space-y-3">
+              <FormLabel className="text-foreground">Aspect Ratio</FormLabel>
+              <FormControl>
+                <ToggleGroup 
+                  type="single" 
+                  value={field.value} 
                   onValueChange={field.onChange}
-                  defaultValue={field.value}
+                  className="flex flex-wrap gap-2"
                 >
-                  <FormControl>
-                    <SelectTrigger className="bg-background border-white/10 focus:border-primary transition-colors">
-                      <SelectValue placeholder="Select aspect ratio" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {aspectRatios.map((ratio) => (
-                      <SelectItem key={ratio.value} value={ratio.value}>
-                        <div className="flex items-center gap-2">
-                          <ImageIcon className="h-4 w-4" />
-                          {ratio.label}
-                        </div>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-        </div>
+                  {aspectRatios.map((ratio) => (
+                    <ToggleGroupItem 
+                      key={ratio.value} 
+                      value={ratio.value}
+                      className={cn(
+                        "flex items-center gap-1.5 rounded-full px-3 py-1.5 border text-sm",
+                        "border-white/10 hover:bg-accent/10 data-[state=on]:bg-primary/20 data-[state=on]:border-primary/50",
+                        "transition-all duration-200"
+                      )}
+                    >
+                      <ImageIcon className="h-3.5 w-3.5" />
+                      {ratio.label}
+                    </ToggleGroupItem>
+                  ))}
+                </ToggleGroup>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
 
         <Button
           type="submit"

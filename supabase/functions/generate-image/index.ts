@@ -65,14 +65,20 @@ serve(async (req) => {
       case 'realistic':
         enhancedPrompt += ', photorealistic, highly detailed, 8k resolution';
         break;
-      case 'artistic':
-        enhancedPrompt += ', artistic style, creative interpretation, digital art';
+      case 'cyberpunk':
+        enhancedPrompt += ', cyberpunk style, neon lights, futuristic, urban dystopia';
         break;
-      case 'cartoon':
-        enhancedPrompt += ', cartoon style, vibrant colors, animated look';
+      case 'watercolor':
+        enhancedPrompt += ', watercolor painting, soft colors, artistic, flowing, handpainted';
+        break;
+      case 'anime':
+        enhancedPrompt += ', anime style, vibrant colors, 2D, manga inspired';
         break;
       case '3d':
-        enhancedPrompt += ', 3D rendered, cinema 4d style, octane render';
+        enhancedPrompt += ', 3D rendered, cinema 4d style, octane render, realistic lighting';
+        break;
+      case 'sketch':
+        enhancedPrompt += ', pencil sketch, hand drawn, detailed linework, black and white';
         break;
     }
 
@@ -85,8 +91,8 @@ serve(async (req) => {
       case '9:16':
         size = '1024x1792';
         break;
-      case '4:3':
-        size = '1024x768';
+      case '4:5':
+        size = '1024x1280';
         break;
     }
 
