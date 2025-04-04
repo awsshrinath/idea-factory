@@ -34,20 +34,20 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   },
 ];
 
-// Updated gradients with more harmonious colors including new casual blue gradient
+// Updated gradients with more harmonious colors and professional tones
 const gradients = {
-  professional: "bg-gradient-to-r from-[#FF416C] to-[#FF4B2B]", // Keep as is
-  friendly: "bg-gradient-to-r from-[#90F5C3] to-[#48D9E4]", // Soft teal
-  casual: "bg-gradient-to-r from-[#4facfe] to-[#00f2fe]", // Light blue gradient
-  creative: "bg-gradient-to-r from-[#C084FC] to-[#FF6DCE]", // Soft purple-pink gradient
+  professional: "bg-gradient-to-r from-[#2b5876] to-[#4e4376]", // New professional blue-gray to purple
+  friendly: "bg-gradient-to-r from-[#90F5C3] to-[#48D9E4]", // Keep friendly teal
+  casual: "bg-gradient-to-r from-[#4facfe] to-[#00f2fe]", // Keep casual blue
+  creative: "bg-gradient-to-r from-[#C084FC] to-[#FF6DCE]", // Keep creative purple-pink
 };
 
-// Shadows for selected states
+// Updated shadows with more consistent and subtle glow effects
 const selectedShadows = {
-  professional: "shadow-[0_0_12px_rgba(255,75,43,0.5)]",
-  friendly: "shadow-[0_0_12px_rgba(72,217,228,0.5)]",
-  casual: "shadow-[0_0_8px_rgba(0,242,254,0.5)]", // Subtle inner glow for casual
-  creative: "shadow-[0_0_12px_rgba(192,132,252,0.5)]",
+  professional: "shadow-[0_0_12px_rgba(46,87,118,0.5)]", // Matching new professional gradient
+  friendly: "shadow-[0_0_12px_rgba(72,217,228,0.5)]", // Keep friendly shadow
+  casual: "shadow-[0_0_8px_rgba(0,242,254,0.5)]", // Keep casual shadow
+  creative: "shadow-[0_0_12px_rgba(192,132,252,0.5)]", // Keep creative shadow
 };
 
 export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) {
@@ -67,9 +67,9 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
         </Tooltip>
       </label>
       <div className={cn(
-        "tone-button-container", // Add class for mobile targeting
+        "tone-button-group", // Class for mobile targeting
         "flex flex-wrap gap-3",
-        isMobile ? "justify-center" : "flex-wrap"
+        isMobile ? "justify-center" : ""
       )}>
         {tones.map(({ value, icon, label }) => (
           <Button
@@ -78,19 +78,21 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
             variant="outline"
             onClick={() => onToneSelect(value)}
             className={cn(
-              "flex-none items-center justify-center gap-2 h-auto rounded-full text-base font-semibold",
+              "tone-button", // Class for mobile targeting
+              "flex-none items-center justify-center gap-2 h-auto",
+              "rounded-full text-base font-semibold",
               "transition-all duration-200 ease-in-out",
-              "hover:scale-105 hover:shadow-[0_4px_12px_rgba(0,0,0,0.25)]",
-              "min-w-0 border-2",
+              "border-2",
+              "hover:scale-[1.03] hover:shadow-[0_4px_12px_rgba(255,255,255,0.1)]",
               isMobile ? "px-4 py-3 text-sm min-w-[48%]" : "px-6 py-3",
               selectedTone === value
                 ? cn(
                     gradients[value],
-                    "text-white scale-105",
+                    "text-white",
                     selectedShadows[value],
-                    "border-white/60"
+                    "border-white/20"
                   )
-                : "bg-transparent border-white/20 text-white"
+                : "bg-transparent border-white/10 text-white hover:bg-transparent"
             )}
           >
             {icon}
