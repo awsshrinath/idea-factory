@@ -67,23 +67,23 @@ export function Images() {
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 lg:p-8",
-        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+        "flex-1 p-0",
+        isMobile ? "ml-0 pt-16" : "ml-64",
         "w-full max-w-full"
       )}>
-        <div className="max-w-7xl mx-auto">
+        <div className="w-full px-2 sm:px-4">
           <div className={cn(
-            "flex justify-between items-center mb-8",
+            "flex justify-between items-center p-4",
             isMobile && "flex-col items-start gap-4"
           )}>
             <div className="animate-fadeIn">
               <h1 className={cn(
-                "font-bold mb-2 text-foreground font-heading",
-                isMobile ? "text-2xl" : "text-4xl"
+                "font-bold mb-1 text-foreground font-heading",
+                isMobile ? "text-2xl" : "text-3xl"
               )}>
                 AI Image Generation
               </h1>
-              <p className="text-muted-foreground">
+              <p className="text-muted-foreground text-sm">
                 Create unique images using AI. Describe what you want to see, choose a
                 style, and let AI do the magic.
               </p>
@@ -92,21 +92,21 @@ export function Images() {
           </div>
 
           <div className={cn(
-            "grid gap-6",
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"
+            "grid gap-4 p-2 sm:p-4",
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-12"
           )}>
-            {/* Left Column - Main Controls - Takes 2/3 of the space */}
-            <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 lg:col-span-2">
-              <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading flex items-center gap-2">
-                <Wand2 className="h-6 w-6 text-primary" />
+            {/* Left Column - Main Controls - Takes ~65% of the space */}
+            <Card className="p-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 lg:col-span-8 overflow-hidden">
+              <h2 className="text-xl font-semibold mb-4 text-foreground font-heading flex items-center gap-2">
+                <Wand2 className="h-5 w-5 text-primary" />
                 Create New Image
               </h2>
               <ImageGenerationForm onImageGenerated={handleImageGenerated} />
             </Card>
 
-            {/* Right Column - Image History - Takes 1/3 of the space */}
-            <div className="space-y-6">
-              <h2 className="text-2xl font-semibold text-foreground font-heading">Your Images</h2>
+            {/* Right Column - Image History - Takes ~35% of the space */}
+            <div className="space-y-3 lg:col-span-4">
+              <h2 className="text-xl font-semibold text-foreground font-heading px-2">Your Images</h2>
               <ImageHistory key={refreshTrigger} />
             </div>
           </div>

@@ -148,7 +148,7 @@ export function ImageHistory() {
 
   if (!isAuthenticated) {
     return (
-      <Card className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 shadow-card">
+      <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
         Please log in to view your generated images.
       </Card>
     );
@@ -156,7 +156,7 @@ export function ImageHistory() {
 
   if (isLoading) {
     return (
-      <Card className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 shadow-card">
+      <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
         Loading images...
       </Card>
     );
@@ -164,7 +164,7 @@ export function ImageHistory() {
 
   if (images.length === 0) {
     return (
-      <Card className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 shadow-card">
+      <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
         No images generated yet. Try generating your first image!
       </Card>
     );
@@ -173,18 +173,15 @@ export function ImageHistory() {
   return (
     <ScrollArea className={cn(
       "rounded-lg border border-white/10 bg-gradient-card shadow-card",
-      "max-h-[calc(100vh-250px)]"
+      "max-h-[calc(100vh-170px)]"
     )}>
-      <div className={cn(
-        "grid gap-4 p-4",
-        isMobile ? "grid-cols-1" : "grid-cols-1"
-      )}>
+      <div className="p-2 space-y-3">
         {images.map((image) => {
           const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
           return (
-            <Card key={image.id} className="p-4 bg-muted/10 border border-white/10 hover:shadow-card-hover transition-all duration-300">
-              <div className="flex flex-col md:flex-row gap-4">
-                <div className="md:w-1/3 aspect-square">
+            <Card key={image.id} className="p-3 bg-muted/10 border border-white/10 hover:shadow-card-hover transition-all duration-300">
+              <div className="flex flex-col gap-3">
+                <div className="aspect-square w-full">
                   <img
                     src={imageUrl}
                     alt={image.prompt}
@@ -195,27 +192,27 @@ export function ImageHistory() {
                     }}
                   />
                 </div>
-                <div className="md:w-2/3 flex flex-col">
-                  <p className="text-sm text-foreground mb-2 line-clamp-3">
+                <div className="flex flex-col">
+                  <p className="text-sm text-foreground mb-2 line-clamp-2 min-h-[2.5rem]">
                     {image.prompt}
                   </p>
-                  <div className="flex flex-wrap gap-2 mb-3">
+                  <div className="flex flex-wrap gap-2 mb-2">
                     <span className="text-xs bg-primary/20 text-white px-2 py-1 rounded-full">
-                      Style: {image.style || "Default"}
+                      {image.style || "Default"}
                     </span>
                     <span className="text-xs bg-secondary/20 text-white px-2 py-1 rounded-full">
-                      Ratio: {image.aspect_ratio || "1:1"}
+                      {image.aspect_ratio || "1:1"}
                     </span>
                   </div>
-                  <div className="mt-auto flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-1">
                     <Button 
                       variant="outline" 
                       size="sm"
                       className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
                       onClick={() => handleRegenerate(image)}
                     >
-                      <RefreshCcw className="h-4 w-4 mr-2" />
-                      Re-Generate
+                      <RefreshCcw className="h-3 w-3 mr-1" />
+                      Regenerate
                     </Button>
                     <Button 
                       variant="outline" 
@@ -223,7 +220,7 @@ export function ImageHistory() {
                       className="flex-1 hover:bg-gradient-primary transition-all duration-300"
                       onClick={() => handleDownload(image)}
                     >
-                      <Download className="h-4 w-4 mr-2" />
+                      <Download className="h-3 w-3 mr-1" />
                       Download
                     </Button>
                     <Button 
@@ -232,7 +229,7 @@ export function ImageHistory() {
                       className="hover:bg-destructive/20 transition-all duration-300"
                       onClick={() => handleDelete(image.id)}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3 w-3" />
                     </Button>
                   </div>
                 </div>
