@@ -71,7 +71,7 @@ export function Images() {
         isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
         "w-full max-w-full"
       )}>
-        <div className="max-w-6xl mx-auto">
+        <div className="max-w-7xl mx-auto">
           <div className={cn(
             "flex justify-between items-center mb-8",
             isMobile && "flex-col items-start gap-4"
@@ -93,10 +93,10 @@ export function Images() {
 
           <div className={cn(
             "grid gap-6",
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"
           )}>
-            {/* Left Column - Main Controls */}
-            <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
+            {/* Left Column - Main Controls - Takes 2/3 of the space */}
+            <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 lg:col-span-2">
               <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading flex items-center gap-2">
                 <Wand2 className="h-6 w-6 text-primary" />
                 Create New Image
@@ -104,7 +104,7 @@ export function Images() {
               <ImageGenerationForm onImageGenerated={handleImageGenerated} />
             </Card>
 
-            {/* Right Column - Image History */}
+            {/* Right Column - Image History - Takes 1/3 of the space */}
             <div className="space-y-6">
               <h2 className="text-2xl font-semibold text-foreground font-heading">Your Images</h2>
               <ImageHistory key={refreshTrigger} />
