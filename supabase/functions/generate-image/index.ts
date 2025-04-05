@@ -18,8 +18,8 @@ serve(async (req) => {
 
   try {
     console.log("Request received for image generation");
-    const { prompt, style, aspectRatio } = await req.json();
-    console.log("Request data:", { prompt, style, aspectRatio });
+    const { prompt, style, aspectRatio, detailLevel, seed, lighting } = await req.json();
+    console.log("Request data:", { prompt, style, aspectRatio, detailLevel, seed, lighting });
 
     // Get user information from the request
     const authHeader = req.headers.get('Authorization');
@@ -59,26 +59,54 @@ serve(async (req) => {
     
     console.log("User authenticated:", user.id);
 
-    // Enhance the prompt based on the selected style
+    // Enhance the prompt based on the selected style and other parameters
     let enhancedPrompt = prompt;
+    
+    // Add style enhancement
     switch (style) {
-      case 'realistic':
+      case "realistic":
         enhancedPrompt += ', photorealistic, highly detailed, 8k resolution';
         break;
-      case 'cyberpunk':
+      case "cyberpunk":
         enhancedPrompt += ', cyberpunk style, neon lights, futuristic, urban dystopia';
         break;
-      case 'watercolor':
+      case "watercolor":
         enhancedPrompt += ', watercolor painting, soft colors, artistic, flowing, handpainted';
         break;
-      case 'anime':
+      case "anime":
         enhancedPrompt += ', anime style, vibrant colors, 2D, manga inspired';
         break;
-      case '3d':
+      case "3d":
         enhancedPrompt += ', 3D rendered, cinema 4d style, octane render, realistic lighting';
         break;
-      case 'sketch':
+      case "sketch":
         enhancedPrompt += ', pencil sketch, hand drawn, detailed linework, black and white';
+        break;
+    }
+    
+    // Add detail level enhancement
+    switch (detailLevel) {
+      case "low":
+        enhancedPrompt += ', simple, minimalist';
+        break;
+      case "medium":
+        // medium is default, no additional prompt needed
+        break;
+      case "high":
+        enhancedPrompt += ', extremely detailed, intricate, high definition, sharp focus';
+        break;
+    }
+    
+    // Add lighting enhancement
+    switch (lighting) {
+      case "natural":
+        enhancedPrompt += ', natural lighting, soft shadows';
+        break;
+      case "studio":
+        enhancedPrompt += ', studio lighting, professional photography, even illumination';
+        break;
+      case "cinematic":
+        enhancedPrompt += ', cinematic lighting, dramatic shadows, professional color grading';
         break;
     }
 
@@ -104,19 +132,28 @@ serve(async (req) => {
     }
     
     console.log('Making request to OpenAI API');
+    
+    // Prepare request body
+    const openAIRequestBody: any = {
+      model: "dall-e-3",
+      prompt: enhancedPrompt,
+      n: 1,
+      size: size,
+      quality: "standard",
+    };
+    
+    // Add seed if provided
+    if (seed) {
+      openAIRequestBody.seed = parseInt(seed, 10);
+    }
+    
     const response = await fetch('https://api.openai.com/v1/images/generations', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${openAIApiKey}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({
-        model: "dall-e-3",
-        prompt: enhancedPrompt,
-        n: 1,
-        size: size,
-        quality: "standard",
-      }),
+      body: JSON.stringify(openAIRequestBody),
     });
 
     console.log('OpenAI response status:', response.status);
@@ -209,7 +246,7 @@ serve(async (req) => {
     }
 
     console.log('Saving to generated_images table...');
-    // Save to generated_images table
+    // Save to generated_images table with all the new parameters
     const { error: dbError } = await supabaseClient
       .from('generated_images')
       .insert({
@@ -218,6 +255,9 @@ serve(async (req) => {
         style: style,
         aspect_ratio: aspectRatio,
         image_path: fileName,
+        detail_level: detailLevel,
+        lighting: lighting,
+        seed: seed || null
       });
 
     if (dbError) {

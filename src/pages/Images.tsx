@@ -95,17 +95,23 @@ export function Images() {
 
           <div className={cn(
             "grid gap-8 mb-12",
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-5"
           )}>
-            <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
+            <Card className={cn(
+              "p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300",
+              isMobile ? "col-span-1" : "col-span-3"
+            )}>
               <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading flex items-center gap-2">
                 <Wand2 className="h-6 w-6 text-primary" />
-                Generate New Image
+                Create New Image
               </h2>
               <ImageGenerationForm onImageGenerated={handleImageGenerated} />
             </Card>
 
-            <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
+            <Card className={cn(
+              "p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300",
+              isMobile ? "col-span-1" : "col-span-2"
+            )}>
               <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">Preview</h2>
               <div className="aspect-square bg-muted rounded-lg flex items-center justify-center border border-white/10 overflow-hidden">
                 {previewImage ? (
@@ -124,7 +130,7 @@ export function Images() {
           </div>
 
           <div className="animate-fadeIn">
-            <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">Generated Images</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">My Gallery</h2>
             <ImageHistory key={refreshTrigger} />
           </div>
         </div>
