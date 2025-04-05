@@ -13,7 +13,6 @@ import { cn } from "@/lib/utils";
 
 export function Images() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
-  const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const isMobile = useIsMobile();
@@ -47,8 +46,7 @@ export function Images() {
     };
   }, [navigate]);
 
-  const handleImageGenerated = (imageUrl: string) => {
-    setPreviewImage(imageUrl);
+  const handleImageGenerated = () => {
     // Increment the refresh trigger to cause ImageHistory to reload
     setRefreshTrigger(prev => prev + 1);
   };
@@ -73,7 +71,7 @@ export function Images() {
         isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
         "w-full max-w-full"
       )}>
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-6xl mx-auto">
           <div className={cn(
             "flex justify-between items-center mb-8",
             isMobile && "flex-col items-start gap-4"
@@ -94,13 +92,11 @@ export function Images() {
           </div>
 
           <div className={cn(
-            "grid gap-8 mb-12",
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-5"
+            "grid gap-6",
+            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-2"
           )}>
-            <Card className={cn(
-              "p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300",
-              isMobile ? "col-span-1" : "col-span-3"
-            )}>
+            {/* Left Column - Main Controls */}
+            <Card className="p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
               <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading flex items-center gap-2">
                 <Wand2 className="h-6 w-6 text-primary" />
                 Create New Image
@@ -108,30 +104,11 @@ export function Images() {
               <ImageGenerationForm onImageGenerated={handleImageGenerated} />
             </Card>
 
-            <Card className={cn(
-              "p-6 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300",
-              isMobile ? "col-span-1" : "col-span-2"
-            )}>
-              <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">Preview</h2>
-              <div className="aspect-square bg-muted rounded-lg flex items-center justify-center border border-white/10 overflow-hidden">
-                {previewImage ? (
-                  <img 
-                    src={previewImage} 
-                    alt="Generated preview" 
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <p className="text-muted-foreground">
-                    Generated image will appear here
-                  </p>
-                )}
-              </div>
-            </Card>
-          </div>
-
-          <div className="animate-fadeIn">
-            <h2 className="text-2xl font-semibold mb-6 text-foreground font-heading">My Gallery</h2>
-            <ImageHistory key={refreshTrigger} />
+            {/* Right Column - Image History */}
+            <div className="space-y-6">
+              <h2 className="text-2xl font-semibold text-foreground font-heading">Your Images</h2>
+              <ImageHistory key={refreshTrigger} />
+            </div>
           </div>
         </div>
       </main>

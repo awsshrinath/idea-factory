@@ -1,16 +1,21 @@
 
 import { Card } from "@/components/ui/card";
-import { Download, Trash2 } from "lucide-react";
+import { Download, Trash2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/components/ui/use-toast";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface GeneratedImage {
   id: string;
   prompt: string;
   image_path: string;
   created_at: string;
+  style: string;
+  aspect_ratio: string;
 }
 
 export function ImageHistory() {
@@ -18,6 +23,7 @@ export function ImageHistory() {
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const { toast } = useToast();
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -132,71 +138,109 @@ export function ImageHistory() {
     }
   };
 
+  const handleRegenerate = async (image: GeneratedImage) => {
+    // This functionality is handled in the parent component
+    toast({
+      title: "Regenerate Image",
+      description: "Please use the settings in the form to regenerate this image.",
+    });
+  };
+
   if (!isAuthenticated) {
     return (
-      <div className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 rounded-lg shadow-card">
+      <Card className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 shadow-card">
         Please log in to view your generated images.
-      </div>
+      </Card>
     );
   }
 
   if (isLoading) {
     return (
-      <div className="text-center text-muted-foreground py-8">
+      <Card className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 shadow-card">
         Loading images...
-      </div>
+      </Card>
     );
   }
 
   if (images.length === 0) {
     return (
-      <div className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 rounded-lg shadow-card">
+      <Card className="text-center text-muted-foreground py-8 bg-gradient-card border border-white/10 shadow-card">
         No images generated yet. Try generating your first image!
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {images.map((image) => {
-        const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
-        return (
-          <Card key={image.id} className="p-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
-            <img
-              src={imageUrl}
-              alt={image.prompt}
-              className="w-full h-48 object-cover rounded-md mb-4 border border-white/10"
-              onError={(e) => {
-                console.error('Error loading image:', e);
-                (e.target as HTMLImageElement).src = '/placeholder.svg';
-              }}
-            />
-            <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
-              {image.prompt}
-            </p>
-            <div className="flex justify-between gap-2">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
-                onClick={() => handleDownload(image)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex-1 hover:bg-gradient-primary transition-all duration-300"
-                onClick={() => handleDelete(image.id)}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
-            </div>
-          </Card>
-        );
-      })}
-    </div>
+    <ScrollArea className={cn(
+      "rounded-lg border border-white/10 bg-gradient-card shadow-card",
+      "max-h-[calc(100vh-250px)]"
+    )}>
+      <div className={cn(
+        "grid gap-4 p-4",
+        isMobile ? "grid-cols-1" : "grid-cols-1"
+      )}>
+        {images.map((image) => {
+          const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
+          return (
+            <Card key={image.id} className="p-4 bg-muted/10 border border-white/10 hover:shadow-card-hover transition-all duration-300">
+              <div className="flex flex-col md:flex-row gap-4">
+                <div className="md:w-1/3 aspect-square">
+                  <img
+                    src={imageUrl}
+                    alt={image.prompt}
+                    className="w-full h-full object-cover rounded-md border border-white/10"
+                    onError={(e) => {
+                      console.error('Error loading image:', e);
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
+                <div className="md:w-2/3 flex flex-col">
+                  <p className="text-sm text-foreground mb-2 line-clamp-3">
+                    {image.prompt}
+                  </p>
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    <span className="text-xs bg-primary/20 text-white px-2 py-1 rounded-full">
+                      Style: {image.style || "Default"}
+                    </span>
+                    <span className="text-xs bg-secondary/20 text-white px-2 py-1 rounded-full">
+                      Ratio: {image.aspect_ratio || "1:1"}
+                    </span>
+                  </div>
+                  <div className="mt-auto flex flex-wrap gap-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
+                      onClick={() => handleRegenerate(image)}
+                    >
+                      <RefreshCcw className="h-4 w-4 mr-2" />
+                      Re-Generate
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-1 hover:bg-gradient-primary transition-all duration-300"
+                      onClick={() => handleDownload(image)}
+                    >
+                      <Download className="h-4 w-4 mr-2" />
+                      Download
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="hover:bg-destructive/20 transition-all duration-300"
+                      onClick={() => handleDelete(image.id)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            </Card>
+          );
+        })}
+      </div>
+    </ScrollArea>
   );
 }
