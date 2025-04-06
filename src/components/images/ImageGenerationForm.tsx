@@ -17,16 +17,14 @@ import {
   ImageIcon, 
   Wand2, 
   RefreshCcw, 
-  Download, 
-  CircleArrowDown, 
-  CircleArrowUp,
   Info,
   Camera,
   Monitor,
   Smartphone,
   Sun,
   Lamp,
-  Film
+  Film,
+  AspectRatio as AspectRatioIcon
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -43,7 +41,8 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { Progress } from "@/components/ui/progress";
+import { StyleQuickSwitch } from "./StyleQuickSwitch";
 
 const formSchema = z.object({
   prompt: z.string().min(1, "Please enter a prompt"),
@@ -54,12 +53,23 @@ const formSchema = z.object({
   lighting: z.enum(["natural", "studio", "cinematic"]).default("natural"),
 });
 
-const styles = [
+interface StyleOption {
+  value: string;
+  label: string;
+  gradient: string;
+  description: string;
+  thumbnail: string;
+  icon: React.ReactNode;
+  tooltip: string;
+}
+
+const styles: StyleOption[] = [
   { 
     value: "realistic", 
     label: "Realistic", 
     gradient: "bg-gradient-primary",
     description: "Photo-realistic images with natural details",
+    thumbnail: "https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=500&q=80",
     icon: <Camera className="h-5 w-5" />,
     tooltip: "Photo-realistic style with high fidelity to real-world images"
   },
@@ -68,6 +78,7 @@ const styles = [
     label: "Cyberpunk", 
     gradient: "bg-gradient-creative",
     description: "Futuristic neon-lit urban aesthetics",
+    thumbnail: "https://images.unsplash.com/photo-1558486012-817176f84c6d?w=500&q=80",
     icon: <Monitor className="h-5 w-5" />,
     tooltip: "Futuristic neon-lit urban aesthetic with high tech and low life" 
   },
@@ -76,6 +87,7 @@ const styles = [
     label: "Watercolor", 
     gradient: "bg-gradient-casual",
     description: "Soft flowing artistic painting style",
+    thumbnail: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=500&q=80",
     icon: <Paintbrush className="h-5 w-5" />,
     tooltip: "Gentle watercolor painting style with soft edges and color blends" 
   },
@@ -84,6 +96,7 @@ const styles = [
     label: "Anime", 
     gradient: "bg-gradient-friendly",
     description: "Japanese animation inspired artwork",
+    thumbnail: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80",
     icon: <Wand2 className="h-5 w-5" />,
     tooltip: "Japanese animation inspired artwork with distinctive stylization" 
   },
@@ -92,6 +105,7 @@ const styles = [
     label: "3D Render", 
     gradient: "bg-gradient-secondary",
     description: "Computer generated 3D graphics",
+    thumbnail: "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=500&q=80",
     icon: <ImageIcon className="h-5 w-5" />,
     tooltip: "Computer generated 3D rendered graphics with realistic lighting" 
   },
@@ -100,6 +114,7 @@ const styles = [
     label: "Sketch", 
     gradient: "bg-gradient-muted",
     description: "Hand-drawn pencil sketch style",
+    thumbnail: "https://images.unsplash.com/photo-1618331833071-ce81bd50d300?w=500&q=80",
     icon: <Paintbrush className="h-5 w-5" />,
     tooltip: "Hand-drawn pencil sketch style with detailed linework" 
   },
@@ -131,42 +146,8 @@ const aspectRatios = [
     value: "4:5", 
     label: "Instagram", 
     description: "4:5", 
-    icon: <ImageIcon className="h-4 w-4 rotate-90" />,
+    icon: <AspectRatioIcon className="h-4 w-4" />,
     tooltip: "Instagram optimal aspect ratio (4:5)" 
-  },
-];
-
-// Example templates
-const exampleTemplates = [
-  {
-    thumbnail: "https://images.unsplash.com/photo-1502872364588-894d7d6ddfab?w=800&q=80",
-    prompt: "Surreal floating islands with waterfalls in a sunset sky",
-    style: "realistic"
-  },
-  {
-    thumbnail: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=800&q=80",
-    prompt: "Cyberpunk street scene with neon signs and rainy atmosphere",
-    style: "cyberpunk"
-  },
-  {
-    thumbnail: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=800&q=80",
-    prompt: "Peaceful mountain lake with pine trees in watercolor style",
-    style: "watercolor"
-  },
-  {
-    thumbnail: "https://images.unsplash.com/photo-1493106641515-6b5631de4bb9?w=800&q=80",
-    prompt: "Futuristic robot in a Japanese garden with cherry blossoms",
-    style: "anime"
-  },
-  {
-    thumbnail: "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=800&q=80",
-    prompt: "Abstract 3D geometric shapes with glossy surfaces and dramatic lighting",
-    style: "3d"
-  },
-  {
-    thumbnail: "https://images.unsplash.com/photo-1618331833071-ce81bd50d300?w=800&q=80",
-    prompt: "Detailed pencil sketch of an old Victorian house with intricate architecture",
-    style: "sketch"
   },
 ];
 
@@ -174,61 +155,10 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
   const [isGenerating, setIsGenerating] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [recentImages, setRecentImages] = useState<any[]>([]);
+  const [generationProgress, setGenerationProgress] = useState(0);
+  const [moodKeywords, setMoodKeywords] = useState<string[]>([]);
   const { toast } = useToast();
   const isMobile = useIsMobile();
-
-  // Check authentication status
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-      
-      if (data.session) {
-        fetchRecentImages();
-      }
-    };
-
-    checkAuth();
-
-    // Set up auth state change listener
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-      if (session) {
-        fetchRecentImages();
-      }
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
-
-  // Fetch recent images
-  const fetchRecentImages = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('generated_images')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (error) throw error;
-      
-      // Get public URLs for images
-      const imagesWithUrls = data?.map(image => {
-        const url = supabase.storage
-          .from('ai_generated_images')
-          .getPublicUrl(image.image_path).data.publicUrl;
-        
-        return { ...image, url };
-      });
-      
-      setRecentImages(imagesWithUrls || []);
-    } catch (error) {
-      console.error('Error fetching recent images:', error);
-    }
-  };
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -242,6 +172,61 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
     },
   });
 
+  // Check authentication status
+  useEffect(() => {
+    const checkAuth = async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+    };
+
+    checkAuth();
+
+    // Set up auth state change listener
+    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => {
+      authListener?.subscription?.unsubscribe();
+    };
+  }, []);
+  
+  // Listen for template selection events
+  useEffect(() => {
+    const handleTemplateSelected = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail) {
+        const { prompt, style } = customEvent.detail;
+        form.setValue("prompt", prompt);
+        form.setValue("style", style);
+      }
+    };
+    
+    const handleRegenerateImage = (event: Event) => {
+      const customEvent = event as CustomEvent;
+      if (customEvent.detail) {
+        const { prompt, style, aspectRatio } = customEvent.detail;
+        form.setValue("prompt", prompt);
+        form.setValue("style", style);
+        form.setValue("aspectRatio", aspectRatio);
+        
+        // Scroll to form
+        const formElement = document.getElementById("image-generation-form");
+        if (formElement) {
+          formElement.scrollIntoView({ behavior: "smooth" });
+        }
+      }
+    };
+
+    window.addEventListener('template-selected', handleTemplateSelected);
+    window.addEventListener('regenerate-image', handleRegenerateImage);
+    
+    return () => {
+      window.removeEventListener('template-selected', handleTemplateSelected);
+      window.removeEventListener('regenerate-image', handleRegenerateImage);
+    };
+  }, [form]);
+
   // Reset form function
   const handleReset = () => {
     form.reset({
@@ -252,34 +237,45 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
       seed: "",
       lighting: "natural",
     });
+    setMoodKeywords([]);
     toast({
       title: "Form Reset",
       description: "All settings have been reset to defaults.",
     });
   };
 
-  // Apply example template
-  const applyExampleTemplate = (example: typeof exampleTemplates[0]) => {
-    form.setValue("prompt", example.prompt);
-    form.setValue("style", example.style);
-    
-    toast({
-      title: "Example Applied",
-      description: "Prompt and style have been updated.",
-    });
-  };
+  // Simulation of AI image generation progress
+  useEffect(() => {
+    if (isGenerating) {
+      const interval = setInterval(() => {
+        setGenerationProgress((prev) => {
+          const increment = Math.random() * 15;
+          const newValue = prev + increment;
+          return newValue >= 100 ? 100 : newValue;
+        });
+      }, 500);
 
-  // Handle regenerating an image with the same prompt
-  const handleRegenerate = async (image: any) => {
-    form.setValue("prompt", image.prompt);
-    form.setValue("style", image.style);
-    form.setValue("aspectRatio", image.aspect_ratio);
+      return () => clearInterval(interval);
+    } else {
+      setGenerationProgress(0);
+    }
+  }, [isGenerating]);
+
+  // Process mood keywords to enhance prompt
+  const enhancePromptWithMood = (originalPrompt: string) => {
+    if (moodKeywords.length === 0) return originalPrompt;
     
-    await form.handleSubmit(onSubmit)();
+    // Random selection of keywords to include
+    const selectedKeywords = moodKeywords.filter(() => Math.random() > 0.3).slice(0, 2);
+    
+    if (selectedKeywords.length === 0) return originalPrompt;
+    
+    return `${originalPrompt}, ${selectedKeywords.join(', ')} mood`;
   };
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsGenerating(true);
+    setGenerationProgress(0);
     try {
       if (!isAuthenticated) {
         toast({
@@ -306,11 +302,15 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
         description: "This may take a minute...",
       });
 
-      console.log("Sending request to edge function with values:", values);
+      // Enhance prompt with mood keywords if available
+      const enhancedPrompt = enhancePromptWithMood(values.prompt);
+      const enhancedValues = { ...values, prompt: enhancedPrompt };
+
+      console.log("Sending request to edge function with values:", enhancedValues);
       
       // Use supabase's function invocation
       const { data, error } = await supabase.functions.invoke("generate-image", {
-        body: values,
+        body: enhancedValues,
       });
       
       if (error) {
@@ -331,9 +331,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
 
       // Call the callback
       onImageGenerated();
-      
-      // Refresh recent images
-      fetchRecentImages();
     } catch (error: any) {
       console.error('Error generating image:', error);
       toast({
@@ -346,10 +343,21 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
     }
   }
 
+  const handleApplyMood = (keywords: string[]) => {
+    setMoodKeywords(keywords);
+    
+    if (keywords.length > 0) {
+      toast({
+        title: "Mood Applied",
+        description: `Mood keywords will enhance your prompt: ${keywords.join(', ')}`,
+      });
+    }
+  };
+
   return (
     <TooltipProvider>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+        <form id="image-generation-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
           <FormField
             control={form.control}
             name="prompt"
@@ -378,42 +386,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             )}
           />
 
-          {/* Example Templates - Horizontal Scrollable Bar */}
-          <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-muted-foreground">Example templates - click to use</h3>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Click any template to use its prompt and style</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-            <ScrollArea className="w-full whitespace-nowrap">
-              <div className="flex gap-3 pb-2 overflow-x-auto">
-                {exampleTemplates.map((example, index) => (
-                  <Card 
-                    key={index} 
-                    className="overflow-hidden border border-white/10 hover:border-white/20 cursor-pointer transition-all duration-300 bg-muted/20 flex-shrink-0 w-[150px]"
-                    onClick={() => applyExampleTemplate(example)}
-                  >
-                    <div className="aspect-square overflow-hidden">
-                      <img 
-                        src={example.thumbnail} 
-                        alt={example.prompt} 
-                        className="object-cover w-full h-full transition-transform hover:scale-105" 
-                      />
-                    </div>
-                    <div className="p-2 bg-black/30">
-                      <p className="text-xs font-medium truncate">{example.prompt}</p>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </ScrollArea>
-          </div>
+          <StyleQuickSwitch onMoodSelect={handleApplyMood} />
 
           <FormField
             control={form.control}
@@ -442,16 +415,28 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
                             field.value === style.value 
                               ? "border-primary shadow-[0_0_12px_rgba(255,65,108,0.5)]" 
                               : "border-white/10",
+                            "hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:border-white/20"
                           )}
                           onClick={() => field.onChange(style.value)}
                         >
+                          {/* Style Thumbnail */}
                           <div className={cn(
-                            "h-20 flex items-center justify-center",
-                            style.gradient
+                            "h-24 overflow-hidden",
                           )}>
-                            <div className="flex flex-col items-center gap-1">
-                              {style.icon}
-                              <span className="text-sm font-medium">{style.label}</span>
+                            <img 
+                              src={style.thumbnail} 
+                              alt={style.label} 
+                              className="w-full h-full object-cover" 
+                            />
+                            <div className={cn(
+                              "absolute inset-0 opacity-40",
+                              style.gradient
+                            )} />
+                            <div className="absolute inset-0 flex flex-col items-center justify-center">
+                              <div className="bg-black/40 p-1 rounded-full">
+                                {style.icon}
+                              </div>
+                              <span className="text-sm font-medium mt-1 text-white shadow-sm">{style.label}</span>
                             </div>
                           </div>
                           <div className="p-2 bg-muted/30">
@@ -541,8 +526,22 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
               </h3>
               <CollapsibleTrigger asChild>
                 <Button variant="ghost" size="sm">
-                  {isAdvancedOpen ? <CircleArrowUp className="h-4 w-4" /> : <CircleArrowDown className="h-4 w-4" />}
                   <span className="sr-only">Toggle advanced options</span>
+                  <div className={cn(
+                    "h-5 w-5 rounded-full border border-white/20 flex items-center justify-center",
+                    "transition-transform duration-300",
+                    isAdvancedOpen ? "rotate-180" : ""
+                  )}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path 
+                        d="M3.5 5.5L7 9L10.5 5.5" 
+                        stroke="currentColor" 
+                        strokeWidth="1.5" 
+                        strokeLinecap="round" 
+                        strokeLinejoin="round"
+                      />
+                    </svg>
+                  </div>
                 </Button>
               </CollapsibleTrigger>
             </div>
@@ -670,15 +669,33 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             </CollapsibleContent>
           </Collapsible>
 
+          {/* Generation Progress */}
+          {isGenerating && (
+            <div className="space-y-2">
+              <div className="flex justify-between text-xs text-muted-foreground">
+                <span>Generating Magic...</span>
+                <span>{Math.round(generationProgress)}%</span>
+              </div>
+              <Progress value={generationProgress} className="h-2" />
+            </div>
+          )}
+
           {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-between">
             <Button
               type="submit"
-              className="w-full bg-gradient-secondary hover:bg-gradient-primary shadow-glow hover:shadow-card-hover transition-all duration-300 group"
+              className={cn(
+                "w-full bg-gradient-secondary shadow-glow transition-all duration-300 group",
+                "hover:shadow-[0_0_25px_rgba(0,198,255,0.4)] hover:bg-gradient-primary",
+                isGenerating && "animate-pulse"
+              )}
               disabled={isGenerating || !isAuthenticated}
               isLoading={isGenerating}
             >
-              <Wand2 className="h-4 w-4 mr-2 group-hover:rotate-12 transition-transform" />
+              <Wand2 className={cn(
+                "h-4 w-4 mr-2",
+                "transition-transform group-hover:rotate-12"
+              )} />
               {isGenerating ? "Generating..." : isAuthenticated ? "Generate Image" : "Login Required"}
             </Button>
             
@@ -687,36 +704,12 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
               variant="ghost"
               onClick={handleReset}
               className="sm:w-auto"
+              disabled={isGenerating}
             >
               <RefreshCcw className="h-4 w-4 mr-2" />
               Reset
             </Button>
           </div>
-
-          {/* Quick Style Switcher (Optional) */}
-          {!isMobile && (
-            <div className="pt-4 border-t border-white/10">
-              <h3 className="text-sm font-medium mb-2">Quick Style Switch</h3>
-              <div className="flex flex-wrap gap-2">
-                {styles.map((style) => (
-                  <button
-                    key={style.value}
-                    type="button"
-                    onClick={() => form.setValue("style", style.value)}
-                    className={cn(
-                      "rounded-full p-1.5 transition-all",
-                      form.watch("style") === style.value 
-                        ? `${style.gradient} shadow-[0_0_8px_rgba(255,65,108,0.3)]` 
-                        : "bg-muted/20"
-                    )}
-                    title={style.label}
-                  >
-                    {style.icon}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
         </form>
       </Form>
     </TooltipProvider>
