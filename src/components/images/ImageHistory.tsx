@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Download, Trash2, RefreshCcw, Heart, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -16,15 +17,18 @@ import {
   CarouselPrevious
 } from "@/components/ui/carousel";
 
+// Update the interface to match our database schema
 interface GeneratedImage {
   id: string;
+  user_id: string;
   prompt: string;
-  image_path: string;
-  created_at: string;
   style: string;
   aspect_ratio: string;
-  title?: string;
-  is_favorite?: boolean;
+  image_path: string;
+  created_at: string;
+  updated_at?: string;
+  title?: string | null;
+  is_favorite?: boolean | null;
 }
 
 export function ImageHistory() {
@@ -165,6 +169,7 @@ export function ImageHistory() {
 
   const saveTitle = async (id: string) => {
     try {
+      // Update with the corrected type that includes title field
       const { error } = await supabase
         .from('generated_images')
         .update({ title: editTitle })
@@ -199,6 +204,7 @@ export function ImageHistory() {
     try {
       const newFavoriteStatus = !image.is_favorite;
       
+      // Update with the corrected type that includes is_favorite field
       const { error } = await supabase
         .from('generated_images')
         .update({ is_favorite: newFavoriteStatus })
