@@ -4,7 +4,7 @@ import { ImageGenerationForm } from "@/components/images/ImageGenerationForm";
 import { ImageGallery } from "@/components/images/ImageGallery";
 import { StyleTemplates } from "@/components/images/StyleTemplates";
 import { Card } from "@/components/ui/card";
-import { Wand2, Sparkles, BookImage } from "lucide-react";
+import { Wand2, Sparkles, BookImage, Grid, LayoutGrid, Rows, Heart, Clock, Filter, Image as ImageIcon } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -13,12 +13,22 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator";
+import { 
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export function Images() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"create" | "gallery">("create");
+  const [galleryView, setGalleryView] = useState<"grid" | "carousel">("grid");
+  const [galleryFilter, setGalleryFilter] = useState<"all" | "favorites" | "recent">("all");
   const isMobile = useIsMobile();
   const navigate = useNavigate();
 
@@ -116,7 +126,65 @@ export function Images() {
                 </TabsContent>
                 
                 <TabsContent value="gallery" className="animate-fadeIn">
-                  <ImageGallery key={refreshTrigger} />
+                  <div className="flex items-center justify-between mb-4 px-1">
+                    <div className="flex items-center gap-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            className="text-xs h-8"
+                          >
+                            <Filter className="h-3.5 w-3.5 mr-2" />
+                            {galleryFilter === "all" ? "All Images" : 
+                             galleryFilter === "favorites" ? "Favorites" : "Recent"}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="start">
+                          <DropdownMenuItem onClick={() => setGalleryFilter("all")}>
+                            <ImageIcon className="h-3.5 w-3.5 mr-2" />
+                            All Images
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setGalleryFilter("favorites")}>
+                            <Heart className="h-3.5 w-3.5 mr-2" />
+                            Favorites
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setGalleryFilter("recent")}>
+                            <Clock className="h-3.5 w-3.5 mr-2" />
+                            Recent
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
+                    
+                    <div className="flex items-center gap-1 border border-white/10 rounded-md bg-muted/10">
+                      <Button
+                        variant={galleryView === "grid" ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-8 rounded-none rounded-l-md"
+                        onClick={() => setGalleryView("grid")}
+                      >
+                        <LayoutGrid className="h-3.5 w-3.5" />
+                        <span className="sr-only">Grid View</span>
+                      </Button>
+                      <Separator orientation="vertical" className="h-5 bg-white/10" />
+                      <Button 
+                        variant={galleryView === "carousel" ? "secondary" : "ghost"}
+                        size="sm"
+                        className="h-8 rounded-none rounded-r-md"
+                        onClick={() => setGalleryView("carousel")}
+                      >
+                        <Rows className="h-3.5 w-3.5" />
+                        <span className="sr-only">Carousel View</span>
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <ImageGallery 
+                    key={`${galleryView}-${galleryFilter}-${refreshTrigger}`} 
+                    viewMode={galleryView}
+                    filter={galleryFilter}
+                  />
                 </TabsContent>
               </Tabs>
             </>
@@ -156,7 +224,7 @@ export function Images() {
                     Your Latest Creation
                   </h2>
                   <ScrollArea className="h-[600px]">
-                    <ImageGallery key={refreshTrigger} previewMode={true} />
+                    <ImageGallery key={`preview-${refreshTrigger}`} previewMode={true} />
                   </ScrollArea>
                 </div>
               </div>
@@ -168,8 +236,63 @@ export function Images() {
                     <BookImage className="h-5 w-5 text-primary" />
                     Your Image Gallery
                   </h2>
+                  
+                  <div className="flex items-center gap-3">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          className="text-sm"
+                        >
+                          <Filter className="h-4 w-4 mr-2" />
+                          {galleryFilter === "all" ? "All Images" : 
+                           galleryFilter === "favorites" ? "Favorites" : "Recent"}
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem onClick={() => setGalleryFilter("all")}>
+                          <ImageIcon className="h-4 w-4 mr-2" />
+                          All Images
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setGalleryFilter("favorites")}>
+                          <Heart className="h-4 w-4 mr-2" />
+                          Favorites
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => setGalleryFilter("recent")}>
+                          <Clock className="h-4 w-4 mr-2" />
+                          Recent
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                    
+                    <div className="flex items-center gap-1 border border-white/10 rounded-md bg-muted/10">
+                      <Button
+                        variant={galleryView === "grid" ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => setGalleryView("grid")}
+                      >
+                        <Grid className="h-4 w-4" />
+                        <span className="sr-only">Grid View</span>
+                      </Button>
+                      <Separator orientation="vertical" className="h-6 bg-white/10" />
+                      <Button 
+                        variant={galleryView === "carousel" ? "secondary" : "ghost"}
+                        size="sm"
+                        onClick={() => setGalleryView("carousel")}
+                      >
+                        <Rows className="h-4 w-4" />
+                        <span className="sr-only">Carousel View</span>
+                      </Button>
+                    </div>
+                  </div>
                 </div>
-                <ImageGallery key={`full-${refreshTrigger}`} fullGallery={true} />
+                <ImageGallery 
+                  key={`full-${galleryView}-${galleryFilter}-${refreshTrigger}`} 
+                  fullGallery={true}
+                  viewMode={galleryView}
+                  filter={galleryFilter}
+                />
               </div>
             </>
           )}

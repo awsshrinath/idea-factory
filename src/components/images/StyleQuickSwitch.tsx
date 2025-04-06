@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -19,8 +18,11 @@ import {
   Lightbulb, 
   Mountain, 
   Hand as HandIcon, 
+  X,
+  Info,
   LucideIcon 
 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface MoodOption {
   id: string;
@@ -107,53 +109,108 @@ interface StyleQuickSwitchProps {
   onMoodSelect: (keywords: string[]) => void;
 }
 
+const MAX_SELECTIONS = 3;
+
 export function StyleQuickSwitch({ onMoodSelect }: StyleQuickSwitchProps) {
-  const [selectedMood, setSelectedMood] = useState<string | null>(null);
+  const [selectedMoods, setSelectedMoods] = useState<string[]>([]);
 
   const handleMoodSelect = (mood: MoodOption) => {
-    // Toggle mood selection
-    const newSelected = selectedMood === mood.id ? null : mood.id;
-    setSelectedMood(newSelected);
+    let newSelected = [...selectedMoods];
     
-    // Call parent handler with selected mood's keywords or empty array if deselected
-    onMoodSelect(newSelected ? mood.keywords : []);
+    if (newSelected.includes(mood.id)) {
+      newSelected = newSelected.filter(id => id !== mood.id);
+    } 
+    else if (newSelected.length < MAX_SELECTIONS) {
+      newSelected = [...newSelected, mood.id];
+    } 
+    setSelectedMoods(newSelected);
+    
+    const allKeywords = newSelected.flatMap(id => 
+      moodOptions.find(option => option.id === id)?.keywords || []
+    );
+    
+    onMoodSelect(allKeywords);
+  };
+
+  const handleClearAll = () => {
+    setSelectedMoods([]);
+    onMoodSelect([]);
   };
 
   return (
     <TooltipProvider>
-      <div className="space-y-2">
+      <div className="space-y-3 glass p-4 rounded-lg border border-white/10">
         <div className="flex items-center justify-between">
-          <h3 className="text-sm font-medium text-muted-foreground">Quick Mood Switch</h3>
-          <p className="text-xs text-muted-foreground">Apply a mood to your prompt</p>
+          <div className="flex items-center gap-2">
+            <h3 className="text-sm font-medium text-foreground">Quick Mood Switch</h3>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Apply up to {MAX_SELECTIONS} moods to enhance your prompt</p>
+              </TooltipContent>
+            </Tooltip>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {selectedMoods.length > 0 && (
+              <Badge variant="outline" className="bg-muted/30 text-xs">
+                {selectedMoods.length}/{MAX_SELECTIONS}
+              </Badge>
+            )}
+            {selectedMoods.length > 0 && (
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                className="h-6 px-2 text-xs"
+                onClick={handleClearAll}
+              >
+                <X className="h-3.5 w-3.5 mr-1" />
+                Clear All
+              </Button>
+            )}
+          </div>
         </div>
         
         <div className="flex flex-wrap gap-2">
-          {moodOptions.map((mood) => (
-            <Tooltip key={mood.id}>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className={cn(
-                    "h-9 transition-all duration-300 group",
-                    selectedMood === mood.id
-                      ? "bg-primary/20 border-primary text-primary shadow-[0_0_8px_rgba(255,65,108,0.3)]"
-                      : "hover:bg-accent/10"
-                  )}
-                  onClick={() => handleMoodSelect(mood)}
-                >
-                  <mood.icon className={cn(
-                    "h-4 w-4 mr-1 transition-transform duration-300 group-hover:rotate-12",
-                    selectedMood === mood.id ? "text-primary" : "text-muted-foreground"
-                  )} />
-                  <span>{mood.label}</span>
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>{mood.description}</p>
-              </TooltipContent>
-            </Tooltip>
-          ))}
+          {moodOptions.map((mood) => {
+            const isSelected = selectedMoods.includes(mood.id);
+            const isMaxed = selectedMoods.length >= MAX_SELECTIONS && !isSelected;
+            
+            return (
+              <Tooltip key={mood.id}>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={cn(
+                      "h-9 transition-all duration-300 group",
+                      isSelected 
+                        ? "bg-primary/20 border-primary text-primary shadow-[0_0_12px_rgba(255,65,108,0.4)]" 
+                        : isMaxed
+                          ? "opacity-50 cursor-not-allowed hover:bg-transparent"
+                          : "hover:bg-accent/10 hover:scale-[1.03]"
+                    )}
+                    onClick={() => !isMaxed && handleMoodSelect(mood)}
+                    disabled={isMaxed}
+                  >
+                    <mood.icon className={cn(
+                      "h-4 w-4 mr-1 transition-transform duration-300",
+                      isSelected 
+                        ? "text-primary animate-pulse" 
+                        : "text-muted-foreground",
+                      !isMaxed && "group-hover:rotate-12"
+                    )} />
+                    <span>{mood.label}</span>
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>{mood.description}</p>
+                </TooltipContent>
+              </Tooltip>
+            );
+          })}
         </div>
       </div>
     </TooltipProvider>

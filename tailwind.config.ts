@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -67,7 +68,7 @@ export default {
       boxShadow: {
         card: "0 4px 8px rgba(0, 0, 0, 0.2)",
         "card-hover": "0 6px 12px rgba(0, 0, 0, 0.3)",
-        glow: "0 0 15px rgba(0, 198, 255, 0.6)",
+        glow: "0 0 15px rgba(0, 0, 0, 0.6)",
       },
       keyframes: {
         "accordion-down": {
@@ -90,6 +91,18 @@ export default {
           "0%": { transform: "scale(1)" },
           "100%": { transform: "scale(1.05)" },
         },
+        shimmer: {
+          "0%": { transform: "translateX(-100%)" },
+          "100%": { transform: "translateX(100%)" }
+        },
+        pulse: {
+          "0%, 100%": { opacity: "1" },
+          "50%": { opacity: "0.5" }
+        },
+        float: {
+          "0%, 100%": { transform: "translateY(0)" },
+          "50%": { transform: "translateY(-10px)" }
+        }
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -97,6 +110,9 @@ export default {
         fadeIn: "fadeIn 0.5s ease-out",
         slideIn: "slideIn 0.3s ease-out",
         scaleUp: "scaleUp 0.2s ease-out",
+        shimmer: "shimmer 2.5s infinite",
+        pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
+        float: "float 3s ease-in-out infinite"
       },
       backgroundImage: {
         "gradient-primary": "linear-gradient(90deg, #FF416C, #FF4B2B)",

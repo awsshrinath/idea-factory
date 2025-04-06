@@ -20,16 +20,15 @@ import {
   Camera,
   Monitor,
   Smartphone,
-  Sun,
-  Lamp,
   Film,
   SquareIcon,
+  Sun,
+  Lamp,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { cn } from "@/lib/utils";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Card } from "@/components/ui/card";
@@ -257,10 +256,9 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
   const enhancePromptWithMood = (originalPrompt: string) => {
     if (moodKeywords.length === 0) return originalPrompt;
     
-    const selectedKeywords = moodKeywords.filter(() => Math.random() > 0.3).slice(0, 2);
+    if (moodKeywords.length <= 2) return `${originalPrompt}, ${moodKeywords.join(', ')} mood`;
     
-    if (selectedKeywords.length === 0) return originalPrompt;
-    
+    const selectedKeywords = moodKeywords.sort(() => Math.random() - 0.5).slice(0, 2);
     return `${originalPrompt}, ${selectedKeywords.join(', ')} mood`;
   };
 
@@ -380,7 +378,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             control={form.control}
             name="style"
             render={({ field }) => (
-              <FormItem>
+              <FormItem className="mt-8">
                 <FormLabel className="text-foreground font-medium flex items-center gap-1">
                   Image Style
                   <Tooltip>
@@ -392,46 +390,49 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
                     </TooltipContent>
                   </Tooltip>
                 </FormLabel>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                   {styles.map((style) => (
                     <Tooltip key={style.value}>
                       <TooltipTrigger asChild>
                         <div 
                           className={cn(
                             "relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300",
-                            "border-2",
+                            "glass border-2",
                             field.value === style.value 
-                              ? "border-primary shadow-[0_0_12px_rgba(255,65,108,0.5)]" 
-                              : "border-white/10",
-                            "hover:shadow-[0_0_15px_rgba(255,255,255,0.15)] hover:border-white/20"
+                              ? "border-primary shadow-[0_0_15px_rgba(255,65,108,0.5)] scale-[1.03]" 
+                              : "border-white/10 hover:border-white/30",
+                            "hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-[1.03]"
                           )}
                           onClick={() => field.onChange(style.value)}
                         >
-                          <div className={cn(
-                            "h-24 overflow-hidden",
-                          )}>
+                          <div className="h-32 overflow-hidden">
                             <img 
                               src={style.thumbnail} 
                               alt={style.label} 
-                              className="w-full h-full object-cover" 
+                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
                             />
                             <div className={cn(
-                              "absolute inset-0 opacity-40",
+                              "absolute inset-0 opacity-30",
                               style.gradient
                             )} />
-                            <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <div className="bg-black/40 p-1 rounded-full">
+                            {field.value === style.value && (
+                              <div className="absolute inset-0 bg-primary/10 backdrop-blur-[1px]"></div>
+                            )}
+                          </div>
+                          <div className="p-3 bg-background/40 backdrop-blur-sm">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="p-1.5 rounded-full bg-background/70 backdrop-blur-sm">
                                 {style.icon}
                               </div>
-                              <span className="text-sm font-medium mt-1 text-white shadow-sm">{style.label}</span>
+                              <span className="font-medium">{style.label}</span>
                             </div>
-                          </div>
-                          <div className="p-2 bg-muted/30">
                             <p className="text-xs text-muted-foreground">{style.description}</p>
                           </div>
                           {field.value === style.value && (
-                            <div className="absolute top-2 right-2 bg-primary text-white rounded-full p-1 w-4 h-4 flex items-center justify-center">
-                              <span className="text-[8px] font-bold">✓</span>
+                            <div className="absolute top-3 right-3 bg-primary rounded-full p-1.5 shadow-[0_0_10px_rgba(255,65,108,0.7)]">
+                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
+                              </svg>
                             </div>
                           )}
                         </div>
@@ -451,7 +452,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             control={form.control}
             name="aspectRatio"
             render={({ field }) => (
-              <FormItem className="space-y-3">
+              <FormItem className="space-y-3 mt-6">
                 <FormLabel className="text-foreground font-medium flex items-center gap-1">
                   Aspect Ratio
                   <Tooltip>
@@ -463,7 +464,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
                     </TooltipContent>
                   </Tooltip>
                 </FormLabel>
-                <div className="flex flex-wrap gap-3">
+                <div className="flex flex-wrap gap-2">
                   {aspectRatios.map((ratio) => (
                     <Tooltip key={ratio.value}>
                       <TooltipTrigger asChild>
@@ -474,8 +475,8 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
                             "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium",
                             "transition-all duration-200 border-2",
                             field.value === ratio.value
-                              ? "bg-primary/20 border-primary text-white shadow-[0_0_8px_rgba(255,65,108,0.5)]"
-                              : "bg-transparent border-white/10 text-white hover:bg-accent/10"
+                              ? "bg-primary/20 border-primary text-white shadow-[0_0_8px_rgba(255,65,108,0.5)] scale-[1.03]"
+                              : "bg-transparent border-white/10 text-white hover:bg-accent/10 hover:scale-[1.03]"
                           )}
                         >
                           {ratio.icon}
@@ -496,7 +497,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
           <Collapsible
             open={isAdvancedOpen}
             onOpenChange={setIsAdvancedOpen}
-            className="border border-white/10 rounded-lg p-4 bg-muted/20"
+            className="border border-white/10 rounded-lg p-4 bg-muted/20 backdrop-blur-sm mt-6"
           >
             <div className="flex items-center justify-between">
               <h3 className="text-sm font-medium flex items-center gap-1">
@@ -656,7 +657,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
           </Collapsible>
 
           {isGenerating && (
-            <div className="space-y-2">
+            <div className="space-y-2 mt-4">
               <div className="flex justify-between text-xs text-muted-foreground">
                 <span>Generating Magic...</span>
                 <span>{Math.round(generationProgress)}%</span>
@@ -665,17 +666,21 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             </div>
           )}
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-between">
+          <div className="flex flex-col sm:flex-row gap-3 justify-between mt-6">
             <Button
               type="submit"
               className={cn(
-                "w-full bg-gradient-secondary shadow-glow transition-all duration-300 group",
-                "hover:shadow-[0_0_25px_rgba(0,198,255,0.4)] hover:bg-gradient-primary",
-                isGenerating && "animate-pulse"
+                "w-full bg-gradient-secondary shadow-glow transition-all duration-500 group relative overflow-hidden",
+                "hover:shadow-[0_0_25px_rgba(0,198,255,0.6)] hover:bg-gradient-primary",
+                isGenerating ? "animate-pulse" : ""
               )}
               disabled={isGenerating || !isAuthenticated}
               isLoading={isGenerating}
             >
+              {isGenerating && (
+                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]"></span>
+              )}
+              
               <Wand2 className={cn(
                 "h-4 w-4 mr-2",
                 "transition-transform group-hover:rotate-12"
