@@ -36,7 +36,9 @@ serve(async (req) => {
               style TEXT,
               aspect_ratio TEXT,
               image_path TEXT NOT NULL,
-              created_at TIMESTAMPTZ DEFAULT now() NOT NULL
+              created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+              title TEXT,
+              is_favorite BOOLEAN DEFAULT false
             );
 
             -- Add RLS policies
@@ -58,6 +60,12 @@ serve(async (req) => {
             CREATE POLICY "Users can delete their own images" 
               ON public.generated_images 
               FOR DELETE 
+              USING (auth.uid() = user_id);
+              
+            -- Allow users to update their own images
+            CREATE POLICY "Users can update their own images" 
+              ON public.generated_images 
+              FOR UPDATE 
               USING (auth.uid() = user_id);
           END IF;
         END;

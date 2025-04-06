@@ -257,7 +257,9 @@ serve(async (req) => {
         image_path: fileName,
         detail_level: detailLevel,
         lighting: lighting,
-        seed: seed || null
+        seed: seed || null,
+        title: null, // Add the new fields with default values
+        is_favorite: false
       });
 
     if (dbError) {

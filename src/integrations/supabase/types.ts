@@ -146,8 +146,10 @@ export type Database = {
           created_at: string | null
           id: string
           image_path: string
+          is_favorite: boolean | null
           prompt: string
           style: string
+          title: string | null
           updated_at: string | null
           user_id: string
         }
@@ -156,8 +158,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_path: string
+          is_favorite?: boolean | null
           prompt: string
           style: string
+          title?: string | null
           updated_at?: string | null
           user_id: string
         }
@@ -166,8 +170,10 @@ export type Database = {
           created_at?: string | null
           id?: string
           image_path?: string
+          is_favorite?: boolean | null
           prompt?: string
           style?: string
+          title?: string | null
           updated_at?: string | null
           user_id?: string
         }

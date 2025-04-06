@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Download, Trash2, RefreshCcw, Heart, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -251,7 +250,6 @@ export function ImageHistory() {
     );
   }
 
-  // For small number of images, use grid view
   if (images.length <= 3 || viewMode === "grid") {
     return (
       <ScrollArea className={cn(
@@ -380,7 +378,6 @@ export function ImageHistory() {
     );
   }
 
-  // For larger number of images, offer carousel view
   return (
     <div className="rounded-lg border border-white/10 bg-gradient-card shadow-card p-4">
       <div className="mb-4 flex justify-between items-center">
