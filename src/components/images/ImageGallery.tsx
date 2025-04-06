@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Download, Trash2, RefreshCcw, Heart, Edit2, Check, X, Search, Clock, Sparkles, Filter } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -33,7 +32,6 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 
-// Interface to match our database schema
 interface GeneratedImage {
   id: string;
   user_id: string;
@@ -53,15 +51,16 @@ type ViewMode = "grid" | "carousel";
 interface ImageGalleryProps {
   previewMode?: boolean;
   fullGallery?: boolean;
+  viewMode?: "grid" | "carousel";
+  filter?: "all" | "favorites" | "recent";
 }
 
-export function ImageGallery({ previewMode = false, fullGallery = false }: ImageGalleryProps) {
+export function ImageGallery({ previewMode = false, fullGallery = false, viewMode = "grid", filter = "all" }: ImageGalleryProps) {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
-  const [viewMode, setViewMode] = useState<ViewMode>(previewMode ? "carousel" : "grid");
   const [sortOption, setSortOption] = useState<SortOption>("recent");
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
@@ -94,9 +93,8 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
     return () => {
       authListener?.subscription?.unsubscribe();
     };
-  }, []);
+  }, [filter]);
 
-  // Update sort when option changes
   useEffect(() => {
     sortImages(sortOption);
   }, [sortOption]);
@@ -104,16 +102,24 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
   const fetchImages = async () => {
     setIsLoading(true);
     try {
-      const { data, error } = await supabase
+      let query = supabase
         .from('generated_images')
-        .select('*')
-        .order('created_at', { ascending: false });
+        .select('*');
+      
+      if (filter === "favorites") {
+        query = query.eq('is_favorite', true);
+      } else if (filter === "recent") {
+        query = query.order('created_at', { ascending: false }).limit(10);
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+      
+      const { data, error } = await query;
 
       if (error) throw error;
 
       console.log("Fetched images:", data);
       
-      // If in preview mode, only show the first image
       const filteredData = previewMode ? (data && data.length > 0 ? [data[0]] : []) : data || [];
       
       setImages(filteredData);
@@ -143,10 +149,8 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
       case "favorites":
         sortedImages.sort((a, b) => {
           if (a.is_favorite === b.is_favorite) {
-            // If both have the same favorite status, sort by date
             return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
           }
-          // Put favorites first
           return a.is_favorite ? -1 : 1;
         });
         break;
@@ -221,8 +225,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
   };
 
   const handleRegenerate = async (image: GeneratedImage) => {
-    // This functionality is handled in the parent component
-    // Dispatch a custom event that ImageGenerationForm will listen for
     window.dispatchEvent(new CustomEvent('regenerate-image', { 
       detail: { 
         prompt: image.prompt,
@@ -244,7 +246,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
 
   const saveTitle = async (id: string) => {
     try {
-      // Update with the corrected type that includes title field
       const { error } = await supabase
         .from('generated_images')
         .update({ title: editTitle })
@@ -284,7 +285,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
     try {
       const newFavoriteStatus = !image.is_favorite;
       
-      // Update with the corrected type that includes is_favorite field
       const { error } = await supabase
         .from('generated_images')
         .update({ is_favorite: newFavoriteStatus })
@@ -302,7 +302,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
         setSelectedImage({...selectedImage, is_favorite: newFavoriteStatus});
       }
       
-      // Re-sort if we're sorting by favorites
       if (sortOption === "favorites") {
         sortImages(sortOption, updatedImages);
       }
@@ -322,13 +321,44 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
       });
     }
   };
-  
+
   const showImageDetails = (image: GeneratedImage) => {
     setSelectedImage(image);
     setIsDetailModalOpen(true);
   };
 
-  // Loading states
+  const renderPlaceholderCards = () => {
+    const count = previewMode ? 1 : 8;
+    
+    return Array(count).fill(0).map((_, i) => (
+      <Card 
+        key={`placeholder-${i}`} 
+        className="p-3 bg-muted/10 border border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300 group overflow-hidden"
+      >
+        <div className="aspect-square w-full overflow-hidden rounded-md relative bg-gradient-to-br from-muted/20 via-muted/30 to-muted/20 animate-shimmer bg-[length:200%_100%] flex items-center justify-center">
+          <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]">
+            <div className="p-4 text-center">
+              <Sparkles className="h-8 w-8 mb-2 mx-auto text-muted-foreground/50" />
+              <p className="text-sm text-muted-foreground font-medium">Generate images to unlock</p>
+            </div>
+          </div>
+        </div>
+        
+        <div className="mt-2 space-y-2">
+          <div className="h-5 rounded bg-muted/20 animate-shimmer bg-[length:200%_100%]"></div>
+          <div className="flex gap-1">
+            <Badge variant="shimmer" className="w-16">Style</Badge>
+            <Badge variant="shimmer" className="w-12">Ratio</Badge>
+          </div>
+          <div className="flex gap-1 h-8">
+            <div className="h-full flex-1 rounded bg-muted/20 animate-shimmer bg-[length:200%_100%]"></div>
+            <div className="h-full w-9 rounded bg-muted/20 animate-shimmer bg-[length:200%_100%]"></div>
+          </div>
+        </div>
+      </Card>
+    ));
+  };
+
   if (!isAuthenticated) {
     return (
       <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
@@ -340,9 +370,14 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
   if (isLoading) {
     return previewMode ? (
       <div className="grid grid-cols-1 gap-4">
-        <Card className="p-3 bg-muted/10 border border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]">
-          <div className="aspect-square w-full">
-            <Skeleton className="h-full w-full" />
+        <Card className="p-3 bg-muted/10 border border-white/10">
+          <div className="aspect-square w-full bg-gradient-to-br from-muted/20 via-muted/30 to-muted/20 animate-shimmer bg-[length:200%_100%] rounded-md">
+            <div className="h-full w-full flex items-center justify-center">
+              <div className="p-4 text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-2 mx-auto"></div>
+                <p className="text-sm text-muted-foreground font-medium">Loading your creation...</p>
+              </div>
+            </div>
           </div>
           <div className="mt-2">
             <Skeleton className="h-6 w-3/4" />
@@ -356,7 +391,9 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
     ) : (
       <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
         <div className="flex flex-col items-center gap-2">
-          <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+          <div className="rounded-full bg-muted/20 p-2">
+            <Sparkles className="h-6 w-6" />
+          </div>
           <span>Loading your creative gallery...</span>
         </div>
       </Card>
@@ -365,21 +402,62 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
 
   if (images.length === 0) {
     return (
-      <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-2">
-          <div className="rounded-full bg-muted/20 p-2">
-            <Sparkles className="h-6 w-6" />
+      <div>
+        {previewMode ? (
+          <Card className="p-3 bg-muted/10 border border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] transition-all duration-300">
+            <div className="aspect-square w-full overflow-hidden rounded-md relative bg-gradient-to-br from-muted/20 via-muted/30 to-muted/20 animate-shimmer bg-[length:200%_100%] flex items-center justify-center">
+              <div className="absolute inset-0 flex items-center justify-center backdrop-blur-[2px]">
+                <div className="p-4 text-center">
+                  <Sparkles className="h-8 w-8 mb-2 mx-auto text-primary/40" />
+                  <p className="text-sm text-foreground font-medium">Your next masterpiece</p>
+                  <p className="text-xs text-muted-foreground mt-1">Fill in the form and click Generate</p>
+                </div>
+              </div>
+            </div>
+            <div className="mt-2 space-y-2">
+              <p className="text-sm text-foreground font-medium">Ready to create something amazing</p>
+              <div className="flex gap-1">
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(0,198,255,0.4)] hover:scale-[1.02] opacity-50"
+                  disabled
+                >
+                  <RefreshCcw className="h-3 w-3 mr-1" />
+                  Regenerate
+                </Button>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  className="flex-1 hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(255,65,108,0.4)] hover:scale-[1.02] opacity-50"
+                  disabled
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  Download
+                </Button>
+              </div>
+            </div>
+          </Card>
+        ) : fullGallery ? (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+            {renderPlaceholderCards()}
           </div>
-          <span>No images generated yet. Try creating your first masterpiece!</span>
-        </div>
-      </Card>
+        ) : (
+          <Card className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <div className="rounded-full bg-muted/20 p-2">
+                <Sparkles className="h-6 w-6" />
+              </div>
+              <span>No images generated yet. Try creating your first masterpiece!</span>
+            </div>
+          </Card>
+        )}
+      </div>
     );
   }
 
-  // Render image gallery based on various modes
   const renderGalleryContent = () => {
     if (previewMode) {
-      // Preview Mode - Only showing the most recent image
       const image = images[0];
       const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
       
@@ -437,7 +515,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
     }
     
     if (fullGallery) {
-      // Full Gallery with Controls
       return (
         <div className="space-y-4">
           <div className="flex flex-wrap gap-3 justify-between items-center">
@@ -515,7 +592,7 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                     key={image.id} 
                     className={cn(
                       "p-3 bg-muted/10 border border-white/10 transition-all duration-300 group overflow-hidden",
-                      "hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:border-white/20",
+                      "hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:border-white/20 hover:scale-[1.02]",
                       image.is_favorite && "border-primary/30"
                     )}
                   >
@@ -629,16 +706,18 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                       </div>
                     )}
                     <div className="flex gap-1 mt-1">
-                      <Badge variant="outline" className="text-[10px] py-0 h-4 bg-primary/10">
+                      <Badge variant="style" className="text-[10px] py-0 h-4">
                         {image.style}
                       </Badge>
-                      <Badge variant="outline" className="text-[10px] py-0 h-4 bg-secondary/10">
+                      <Badge variant="dimension" className="text-[10px] py-0 h-4">
                         {image.aspect_ratio}
                       </Badge>
                     </div>
                   </Card>
                 );
               })}
+              
+              {images.length < 5 && fullGallery && renderPlaceholderCards().slice(0, 5 - images.length)}
             </div>
           ) : (
             <Carousel 
@@ -705,7 +784,10 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                               <Button 
                                 size="icon" 
                                 variant="ghost" 
-                                onClick={() => startEditing(image)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  startEditing(image);
+                                }}
                                 className="h-7 w-7 hover:bg-accent/10"
                               >
                                 <Edit2 className="h-3.5 w-3.5" />
@@ -713,10 +795,10 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                             </div>
                           )}
                           <div className="flex flex-wrap gap-1">
-                            <Badge variant="outline" className="bg-primary/10">
+                            <Badge variant="style" className="bg-primary/10">
                               {image.style}
                             </Badge>
-                            <Badge variant="outline" className="bg-secondary/10">
+                            <Badge variant="dimension" className="bg-secondary/10">
                               {image.aspect_ratio}
                             </Badge>
                           </div>
@@ -724,7 +806,7 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                             <Button 
                               variant="outline" 
                               size="sm"
-                              className="flex-1 hover:bg-gradient-secondary transition-all duration-300"
+                              className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
                               onClick={() => handleRegenerate(image)}
                             >
                               <RefreshCcw className="h-3 w-3 mr-1" />
@@ -780,7 +862,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
       );
     }
     
-    // Default gallery view (neither preview nor full)
     return (
       <ScrollArea className={cn(
         "rounded-lg border border-white/10 bg-gradient-card shadow-card",
@@ -863,7 +944,7 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(0,198,255,0.4)] hover:scale-[1.02]"
+                        className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleRegenerate(image);
@@ -875,7 +956,7 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
                       <Button 
                         variant="outline" 
                         size="sm"
-                        className="flex-1 hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(255,65,108,0.4)] hover:scale-[1.02]"
+                        className="flex-1 hover:bg-gradient-primary transition-all duration-300"
                         onClick={(e) => {
                           e.stopPropagation();
                           handleDownload(image);
@@ -931,7 +1012,6 @@ export function ImageGallery({ previewMode = false, fullGallery = false }: Image
     <>
       {renderGalleryContent()}
       
-      {/* Image Detail Modal */}
       <Dialog open={isDetailModalOpen} onOpenChange={setIsDetailModalOpen}>
         <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] max-h-[90vh] overflow-y-auto">
           <DialogTitle className="flex justify-between items-center">

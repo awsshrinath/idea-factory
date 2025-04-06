@@ -4,7 +4,7 @@ import { ImageGenerationForm } from "@/components/images/ImageGenerationForm";
 import { ImageGallery } from "@/components/images/ImageGallery";
 import { StyleTemplates } from "@/components/images/StyleTemplates";
 import { Card } from "@/components/ui/card";
-import { Wand2, Sparkles, BookImage, Grid, LayoutGrid, Rows, Heart, Clock, Filter, Image as ImageIcon } from "lucide-react";
+import { Wand2, Sparkles, BookImage, Grid, LayoutGrid, Rows, Heart, Clock, Filter, Image as ImageIcon, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -21,6 +21,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { Badge } from "@/components/ui/badge";
+import { useToast } from "@/components/ui/use-toast";
 
 export function Images() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
@@ -29,8 +31,10 @@ export function Images() {
   const [activeTab, setActiveTab] = useState<"create" | "gallery">("create");
   const [galleryView, setGalleryView] = useState<"grid" | "carousel">("grid");
   const [galleryFilter, setGalleryFilter] = useState<"all" | "favorites" | "recent">("all");
+  const [notifyMeEnabled, setNotifyMeEnabled] = useState<boolean>(false);
   const isMobile = useIsMobile();
   const navigate = useNavigate();
+  const { toast } = useToast();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -67,6 +71,17 @@ export function Images() {
     if (isMobile) {
       setActiveTab("gallery");
     }
+  };
+  
+  const toggleNotifyMe = () => {
+    setNotifyMeEnabled(prev => !prev);
+    toast({
+      title: notifyMeEnabled ? "Notifications disabled" : "Notifications enabled",
+      description: notifyMeEnabled 
+        ? "You won't be notified about new features." 
+        : "You'll be the first to know when Personal Style Training launches!",
+      variant: "default"
+    });
   };
 
   if (isLoading) {
@@ -297,20 +312,48 @@ export function Images() {
             </>
           )}
           
-          {/* Future Feature Placeholder */}
-          <div className="mt-8 px-4 pb-8 opacity-80">
-            <Card className="p-4 bg-gradient-to-br from-background to-muted/30 border border-white/5 backdrop-blur-sm">
-              <h3 className="text-lg font-semibold text-foreground/80 mb-2">Coming Soon: Personal Style Training</h3>
+          {/* Future Feature Placeholder with added notification CTA */}
+          <div className="mt-8 px-4 pb-8 opacity-90">
+            <Card className="p-4 bg-gradient-to-br from-background to-muted/30 border border-white/5 backdrop-blur-sm overflow-hidden">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-lg font-semibold text-foreground/90">Coming Soon: Personal Style Training</h3>
+                <Button 
+                  variant={notifyMeEnabled ? "secondary" : "outline"}
+                  size="sm"
+                  className="transition-all duration-300 hover:scale-[1.02]"
+                  onClick={toggleNotifyMe}
+                >
+                  <Bell className={`h-4 w-4 mr-2 ${notifyMeEnabled ? "text-secondary-foreground" : ""}`} />
+                  {notifyMeEnabled ? "Notifications On" : "Notify Me"}
+                </Button>
+              </div>
               <div className="grid grid-cols-3 gap-3">
-                {["Fashion", "Architecture", "Cinematic VFX"].map((style) => (
-                  <div key={style} className="relative overflow-hidden rounded-lg aspect-square bg-muted/20 flex items-center justify-center border border-white/10 backdrop-blur-sm">
+                {[
+                  {name: "Fashion", desc: "Train AI on your fashion preferences"}, 
+                  {name: "Architecture", desc: "Create buildings in your unique style"}, 
+                  {name: "Cinematic VFX", desc: "Generate movie-quality visuals"}
+                ].map((style) => (
+                  <div 
+                    key={style.name} 
+                    className="relative overflow-hidden rounded-lg aspect-square bg-muted/20 flex items-center justify-center border border-white/10 backdrop-blur-sm hover:shadow-[0_0_15px_rgba(66,230,149,0.15)] transition-all duration-300 group"
+                  >
                     <div className="absolute inset-0 backdrop-blur-md flex items-center justify-center">
-                      <div className="bg-background/60 px-3 py-1 rounded-full text-xs font-medium">Coming Soon</div>
+                      <div className="bg-background/60 px-3 py-1 rounded-full text-xs font-medium mb-8">Coming Soon</div>
                     </div>
-                    <p className="text-sm font-medium">{style}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center">
+                      <p className="text-sm font-medium">{style.name}</p>
+                      <p className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">{style.desc}</p>
+                    </div>
                   </div>
                 ))}
               </div>
+              
+              {notifyMeEnabled && (
+                <div className="mt-3 bg-accent/10 rounded-md p-2 text-xs text-accent-foreground flex items-center justify-center">
+                  <Sparkles className="h-3 w-3 mr-2" />
+                  You'll be the first to know when Personal Style Training launches!
+                </div>
+              )}
             </Card>
           </div>
         </div>
