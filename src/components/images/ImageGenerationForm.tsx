@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
@@ -24,7 +23,7 @@ import {
   Sun,
   Lamp,
   Film,
-  AspectRatio as AspectRatioIcon
+  SquareIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/components/ui/use-toast";
@@ -96,7 +95,7 @@ const styles: StyleOption[] = [
     label: "Anime", 
     gradient: "bg-gradient-friendly",
     description: "Japanese animation inspired artwork",
-    thumbnail: "https://images.unsplash.com/photo-1578301978693-85fa9c0320b9?w=500&q=80",
+    thumbnail: "https://images.unsplash.com/photo-1578331833071-ce81bd50d300?w=500&q=80",
     icon: <Wand2 className="h-5 w-5" />,
     tooltip: "Japanese animation inspired artwork with distinctive stylization" 
   },
@@ -125,7 +124,7 @@ const aspectRatios = [
     value: "1:1", 
     label: "Square", 
     description: "1:1", 
-    icon: <ImageIcon className="h-4 w-4" />,
+    icon: <SquareIcon className="h-4 w-4" />,
     tooltip: "Perfect square aspect ratio (1:1)" 
   },
   { 
@@ -146,7 +145,7 @@ const aspectRatios = [
     value: "4:5", 
     label: "Instagram", 
     description: "4:5", 
-    icon: <AspectRatioIcon className="h-4 w-4" />,
+    icon: <ImageIcon className="h-4 w-4" />,
     tooltip: "Instagram optimal aspect ratio (4:5)" 
   },
 ];
@@ -172,7 +171,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
     },
   });
 
-  // Check authentication status
   useEffect(() => {
     const checkAuth = async () => {
       const { data } = await supabase.auth.getSession();
@@ -181,7 +179,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
 
     checkAuth();
 
-    // Set up auth state change listener
     const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
       setIsAuthenticated(!!session);
     });
@@ -190,8 +187,7 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
       authListener?.subscription?.unsubscribe();
     };
   }, []);
-  
-  // Listen for template selection events
+
   useEffect(() => {
     const handleTemplateSelected = (event: Event) => {
       const customEvent = event as CustomEvent;
@@ -210,7 +206,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
         form.setValue("style", style);
         form.setValue("aspectRatio", aspectRatio);
         
-        // Scroll to form
         const formElement = document.getElementById("image-generation-form");
         if (formElement) {
           formElement.scrollIntoView({ behavior: "smooth" });
@@ -227,7 +222,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
     };
   }, [form]);
 
-  // Reset form function
   const handleReset = () => {
     form.reset({
       prompt: "",
@@ -244,7 +238,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
     });
   };
 
-  // Simulation of AI image generation progress
   useEffect(() => {
     if (isGenerating) {
       const interval = setInterval(() => {
@@ -261,11 +254,9 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
     }
   }, [isGenerating]);
 
-  // Process mood keywords to enhance prompt
   const enhancePromptWithMood = (originalPrompt: string) => {
     if (moodKeywords.length === 0) return originalPrompt;
     
-    // Random selection of keywords to include
     const selectedKeywords = moodKeywords.filter(() => Math.random() > 0.3).slice(0, 2);
     
     if (selectedKeywords.length === 0) return originalPrompt;
@@ -302,13 +293,11 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
         description: "This may take a minute...",
       });
 
-      // Enhance prompt with mood keywords if available
       const enhancedPrompt = enhancePromptWithMood(values.prompt);
       const enhancedValues = { ...values, prompt: enhancedPrompt };
 
       console.log("Sending request to edge function with values:", enhancedValues);
       
-      // Use supabase's function invocation
       const { data, error } = await supabase.functions.invoke("generate-image", {
         body: enhancedValues,
       });
@@ -329,7 +318,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
         description: "Image generated successfully!",
       });
 
-      // Call the callback
       onImageGenerated();
     } catch (error: any) {
       console.error('Error generating image:', error);
@@ -419,7 +407,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
                           )}
                           onClick={() => field.onChange(style.value)}
                         >
-                          {/* Style Thumbnail */}
                           <div className={cn(
                             "h-24 overflow-hidden",
                           )}>
@@ -506,7 +493,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             )}
           />
 
-          {/* Advanced Options Collapsible */}
           <Collapsible
             open={isAdvancedOpen}
             onOpenChange={setIsAdvancedOpen}
@@ -669,7 +655,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             </CollapsibleContent>
           </Collapsible>
 
-          {/* Generation Progress */}
           {isGenerating && (
             <div className="space-y-2">
               <div className="flex justify-between text-xs text-muted-foreground">
@@ -680,7 +665,6 @@ export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: ()
             </div>
           )}
 
-          {/* Action buttons */}
           <div className="flex flex-col sm:flex-row gap-3 justify-between">
             <Button
               type="submit"

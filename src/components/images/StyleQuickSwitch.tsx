@@ -12,13 +12,13 @@ import {
   Gamepad2, 
   Sparkles, 
   Brain, 
-  Buildings, 
+  Building, 
   Palette, 
   Camera, 
   Brush, 
   Lightbulb, 
   Mountain, 
-  HandIcon, 
+  Hand as HandIcon, 
   LucideIcon 
 } from "lucide-react";
 
@@ -62,7 +62,7 @@ const moodOptions: MoodOption[] = [
   { 
     id: "urban", 
     label: "Urban", 
-    icon: Buildings,
+    icon: Building,
     keywords: ["city", "street", "metropolitan", "graffiti"],
     description: "City aesthetics with urban elements and energy"
   },
