@@ -55,7 +55,7 @@ interface ImageGalleryProps {
   filter?: "all" | "favorites" | "recent";
 }
 
-export function ImageGallery({ previewMode = false, fullGallery = false, viewMode = "grid", filter = "all" }: ImageGalleryProps) {
+export function ImageGallery({ previewMode = false, fullGallery = false, viewMode: initialViewMode = "grid", filter = "all" }: ImageGalleryProps) {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -64,6 +64,7 @@ export function ImageGallery({ previewMode = false, fullGallery = false, viewMod
   const [sortOption, setSortOption] = useState<SortOption>("recent");
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const { toast } = useToast();
   const isMobile = useIsMobile();
 
@@ -1084,7 +1085,7 @@ export function ImageGallery({ previewMode = false, fullGallery = false, viewMod
                       </Button>
                     </div>
                   ) : (
-                    <div className="flex items-center justify-between">
+                    <div className="flex items-center justify-between mb-2">
                       <p className="text-lg font-medium">
                         {selectedImage.title || "Untitled Image"}
                       </p>
