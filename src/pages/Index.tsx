@@ -19,10 +19,10 @@ const Index = () => {
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-3 md:p-5 lg:p-6 animate-fadeIn w-full max-w-full",
+        "flex-1 p-3 md:p-4 lg:p-5 animate-fadeIn w-full max-w-full",
         isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
       )}>
-        <div className="max-w-7xl mx-auto space-y-5">
+        <div className="max-w-7xl mx-auto space-y-4">
           <QuickLinkBar />
           <PersonalizedGreeting />
           <HeroBanner />
