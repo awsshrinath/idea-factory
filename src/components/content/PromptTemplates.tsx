@@ -123,7 +123,6 @@ export function PromptTemplates({ onSelectTemplate }: PromptTemplatesProps) {
       <ScrollArea 
         id="templates-scroll-container"
         className="pb-2 w-full"
-        orientation="horizontal"
       >
         <div className="flex gap-3 min-w-max p-1">
           {templates.map((template) => (
