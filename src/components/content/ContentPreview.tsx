@@ -1,7 +1,7 @@
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Eye, Pencil, RefreshCw } from "lucide-react";
-import { ContentFormData } from "@/pages/Content";
+import { Eye, Pencil, RefreshCw, Copy, Share2, Download } from "lucide-react";
+import { ContentFormData } from "@/types/content";
 import { useRef, useState, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -12,7 +12,6 @@ import { PlatformPreview } from "./preview/PlatformPreview";
 import { PreviewActions } from "./preview/PreviewActions";
 import { CharacterCounter } from "./preview/CharacterCounter";
 import { RegenerateOptions } from "./preview/RegenerateOptions";
-import debounce from 'lodash/debounce';
 import { CheckCircle } from "lucide-react";
 
 interface ContentPreviewProps {
@@ -31,6 +30,7 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
   const [editedContent, setEditedContent] = useState(formData.description);
   const [isRegenerating, setIsRegenerating] = useState(false);
   const [selectedModelForRegeneration, setSelectedModelForRegeneration] = useState<"chatgpt" | "deepseek">(formData.aiModel);
+  const [showPreview, setShowPreview] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -38,7 +38,42 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
     if (!isEditing) {
       setEditedContent(formData.description);
     }
+    
+    // Show animation when content changes
+    if (formData.description) {
+      setShowPreview(false);
+      setTimeout(() => setShowPreview(true), 100);
+    }
   }, [formData.description, isEditing]);
+
+  const copyToClipboard = useCallback(() => {
+    if (navigator.clipboard && editedContent) {
+      navigator.clipboard.writeText(editedContent);
+      toast({
+        title: "Copied!",
+        description: "Content copied to clipboard",
+        variant: "default",
+      });
+    }
+  }, [editedContent, toast]);
+
+  const downloadAsText = useCallback(() => {
+    if (!editedContent) return;
+    
+    const element = document.createElement("a");
+    const file = new Blob([editedContent], {type: 'text/plain'});
+    element.href = URL.createObjectURL(file);
+    element.download = `content-${new Date().toISOString().split('T')[0]}.txt`;
+    document.body.appendChild(element);
+    element.click();
+    document.body.removeChild(element);
+    
+    toast({
+      title: "Downloaded!",
+      description: "Content downloaded as text file",
+      variant: "default",
+    });
+  }, [editedContent, toast]);
 
   const validateFormData = () => {
     if (!formData.description.trim()) {
@@ -336,34 +371,63 @@ export function ContentPreview({ formData, onContentChange }: ContentPreviewProp
   return (
     <Card 
       ref={previewRef}
-      className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px] max-h-[600px] min-h-[320px] overflow-y-auto relative"
+      className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm transition-all duration-300 transform hover:shadow-2xl rounded-[12px] max-h-[600px] min-h-[320px] overflow-y-auto relative"
     >
-      <CardHeader className="p-6 sticky top-0 bg-gradient-to-br from-[#121212] to-[#1a1a1a] z-10">
-        <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent justify-between mb-[16px]">
-          <div className="flex items-center gap-2">
-            <Eye className="w-6 h-6" />
-            Live Preview
-          </div>
+      <CardHeader className="p-4 sticky top-0 bg-gradient-to-br from-[#121212] to-[#1a1a1a] z-10 border-b border-white/5">
+        <div className="flex items-center justify-between">
+          <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+            <Eye className="w-5 h-5" />
+            Preview
+          </CardTitle>
           
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={handleToggleEdit}
-            className={cn(
-              "h-8 w-8 rounded-full hover:bg-primary/20 transition-colors",
-              isEditing && "bg-primary/20 text-primary"
-            )}
-          >
-            <Pencil className="h-4 w-4" />
-          </Button>
-        </CardTitle>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost" 
+              size="icon"
+              onClick={copyToClipboard}
+              className="h-8 w-8 rounded-full hover:bg-primary/20"
+              disabled={!editedContent}
+              title="Copy to clipboard"
+            >
+              <Copy className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="ghost" 
+              size="icon"
+              onClick={downloadAsText}
+              className="h-8 w-8 rounded-full hover:bg-primary/20"
+              disabled={!editedContent}
+              title="Download as text"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={handleToggleEdit}
+              className={cn(
+                "h-8 w-8 rounded-full hover:bg-primary/20 transition-colors",
+                isEditing && "bg-primary/20 text-primary"
+              )}
+              title={isEditing ? "Save changes" : "Edit content"}
+            >
+              <Pencil className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="p-[24px]">
+      
+      <CardContent className={cn(
+        "p-4 transition-all duration-300",
+        showPreview ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"
+      )}>
         <div className="space-y-4">
           {formData.platforms.map((platform) => (
             <div key={platform} className="space-y-2 animate-[fadeIn_0.4s_ease]">
               <div className="flex justify-between items-center">
-                <h3 className="font-[600] capitalize text-[18px] text-foreground group-hover:text-primary transition-colors duration-300 mb-[16px]">
+                <h3 className="font-[600] capitalize text-[16px] text-foreground group-hover:text-primary transition-colors duration-300">
                   {platform}
                 </h3>
                 <CharacterCounter 
