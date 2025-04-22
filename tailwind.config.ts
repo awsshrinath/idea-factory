@@ -1,4 +1,3 @@
-
 import type { Config } from "tailwindcss";
 
 export default {
@@ -117,7 +116,8 @@ export default {
         shimmer: "shimmer 2.5s infinite linear",
         pulse: "pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
         float: "float 3s ease-in-out infinite",
-        glow: "glow 2s ease-in-out infinite"
+        glow: "glow 2s ease-in-out infinite",
+        "template-glow": "glow 2s ease-in-out infinite",
       },
       backgroundImage: {
         "gradient-primary": "linear-gradient(90deg, #FF416C, #FF4B2B)",
@@ -127,6 +127,12 @@ export default {
         "gradient-friendly": "linear-gradient(90deg, #42E695, #3BB2B8)",
         "gradient-casual": "linear-gradient(90deg, #FFD54F, #FFB74D)",
         "gradient-creative": "linear-gradient(90deg, #6A5ACD, #8A2BE2)",
+        "tone-button": "linear-gradient(to right, #2b5876, #4e4376)",
+        "tone-button-hover": "linear-gradient(to right, #243B55, #141E30)",
+        "template-purple": "linear-gradient(135deg, rgba(108,95,211,0.1), rgba(108,95,211,0.3))",
+        "template-blue": "linear-gradient(135deg, rgba(66,153,225,0.1), rgba(66,153,225,0.3))",
+        "template-green": "linear-gradient(135deg, rgba(72,187,120,0.1), rgba(72,187,120,0.3))",
+        "template-pink": "linear-gradient(135deg, rgba(237,100,166,0.1), rgba(237,100,166,0.3))",
       },
     },
   },

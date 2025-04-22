@@ -1,4 +1,3 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -61,30 +60,26 @@ export function RecentContent() {
   }
 
   return (
-    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
-      <CardHeader className="p-[24px]">
-        <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-[16px]">
-          <Clock className="w-6 h-6" />
+    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
+      <CardHeader className="p-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+          <Clock className="w-5 h-5" />
           Recent Content
         </CardTitle>
-        <CardDescription>Your previously created content</CardDescription>
       </CardHeader>
-      <CardContent className="p-[24px]">
-        <div className="space-y-4">
+      <CardContent className="p-4">
+        <div className="space-y-3">
           {content?.map((item) => (
             <div
               key={item.id}
-              className="p-6 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
+              className="p-3 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group"
             >
-              <div className="flex justify-between items-start gap-4">
+              <div className="flex justify-between items-start gap-3">
                 <div className="flex-1">
-                  <h3 className="font-[600] text-[18px] mb-[16px] group-hover:text-primary transition-colors duration-300">
+                  <h3 className="font-medium text-base mb-1 group-hover:text-primary transition-colors duration-300">
                     {item.title}
                   </h3>
-                  <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
                     <span>
                       {formatDistanceToNow(new Date(item.created_at), {
                         addSuffix: true,
@@ -94,7 +89,7 @@ export function RecentContent() {
                     <span className="capitalize">{item.status}</span>
                   </div>
                 </div>
-                <div className="flex gap-2">
+                <div className="flex gap-1">
                   <Button
                     variant="ghost"
                     size="icon"
@@ -122,20 +117,14 @@ export function RecentContent() {
           ))}
 
           {content?.length === 0 && (
-            <div className="text-center py-12 px-4">
-              <FileText className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
-              <p className="text-lg font-medium text-muted-foreground mb-2">
+            <div className="text-center py-8 px-4">
+              <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
+              <p className="text-base font-medium text-muted-foreground mb-2">
                 No content yet
               </p>
               <p className="text-sm text-muted-foreground mb-4">
                 Start by generating your first piece of content
               </p>
-              <Button
-                variant="outline"
-                className="bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-primary-foreground hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] transition-all duration-300 rounded-lg"
-              >
-                Create Your First Content
-              </Button>
             </div>
           )}
         </div>

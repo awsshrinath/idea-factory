@@ -1,4 +1,3 @@
-
 import { Tone } from "@/types/content";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
@@ -34,16 +33,12 @@ const tones: { value: Tone; icon: React.ReactNode; label: string }[] = [
   },
 ];
 
-// Unified gradient for selected tone buttons
-const selectedGradient = "bg-gradient-to-r from-[#2b5876] to-[#4e4376]";
-const selectedShadow = "shadow-[0_0_8px_rgba(255,255,255,0.2)]";
-
 export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) {
   const isMobile = useIsMobile();
   
   return (
-    <div className="space-y-3 mb-6">
-      <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
+    <div className="space-y-2 mb-4">
+      <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2">
         Select Tone
         <Tooltip>
           <TooltipTrigger>
@@ -55,39 +50,30 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
         </Tooltip>
       </label>
       <div className={cn(
-        "tone-button-group", // Class for mobile targeting
-        "flex flex-wrap gap-3",
+        "tone-button-group",
+        "flex flex-wrap gap-2",
         isMobile ? "justify-center" : ""
       )}>
         {tones.map(({ value, icon, label }) => (
           <Button
             key={value}
             type="button"
-            variant="outline"
             onClick={() => onToneSelect(value)}
             className={cn(
-              "tone-button", // Class for mobile targeting
-              "flex-none items-center justify-center gap-2 h-auto",
-              "rounded-full text-base font-semibold",
+              "tone-button",
+              "flex-none items-center justify-center gap-2 h-9",
+              "rounded-full text-sm font-medium",
               "transition-all duration-200 ease-in-out",
-              "border-2",
-              "hover:scale-[1.03] hover:shadow-[0_4px_12px_rgba(255,255,255,0.1)] hover:brightness-95",
-              "active:scale-[0.98]", // Scale effect on click
-              isMobile ? "px-4 py-3 text-sm min-w-[48%]" : "px-6 py-3",
+              "hover:scale-[1.02] hover:shadow-[0_0_12px_rgba(255,255,255,0.15)]",
+              "active:scale-[0.98]",
+              isMobile ? "px-3 py-2 text-sm min-w-[45%]" : "px-4 py-2",
               selectedTone === value
-                ? cn(
-                    selectedGradient,
-                    "text-white",
-                    selectedShadow,
-                    "border-white/20"
-                  )
-                : "bg-transparent border-white/10 text-white hover:bg-transparent"
+                ? "bg-tone-button text-white shadow-[0_0_8px_rgba(255,255,255,0.1)]"
+                : "bg-muted/20 text-white hover:bg-tone-button-hover"
             )}
           >
             {icon}
-            <span className={cn(isMobile && "text-sm")}>
-              {label}
-            </span>
+            <span>{label}</span>
           </Button>
         ))}
       </div>

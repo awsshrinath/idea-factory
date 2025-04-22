@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ContentForm } from "@/components/content/ContentForm";
@@ -43,13 +42,13 @@ export function Content() {
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-2 md:p-3 lg:p-4 animate-fade-in w-full max-w-full",
-        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+        "flex-1 p-4 md:p-6 animate-fade-in w-full max-w-full",
+        isMobile ? "ml-0 pt-16" : "ml-64",
         "overflow-x-hidden"
       )}>
-        <div className="max-w-7xl mx-auto space-y-4 w-full">
-          {/* Header Section - Modern, compact style */}
-          <div className="mb-2 animate-slide-in-right px-1">
+        <div className="max-w-[90%] mx-auto space-y-4 w-full">
+          {/* Header Section */}
+          <div className="mb-2 animate-slide-in-right">
             <div className="flex items-center gap-2 justify-between">
               <h1 className={cn(
                 "font-bold font-heading bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
@@ -87,12 +86,12 @@ export function Content() {
             }));
           }} />
 
-          {/* Main Content Layout - Responsive Grid */}
+          {/* Main Content Layout */}
           <div className={cn(
             "grid gap-4",
             isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"
           )}>
-            {/* Content Form + Preview Column (2/3 width on desktop) */}
+            {/* Content Form + Preview Column */}
             <div className={cn(
               "space-y-4 w-full",
               !isMobile && "lg:col-span-2"
@@ -121,24 +120,20 @@ export function Content() {
               </div>
             </div>
             
-            {/* Right Sidebar (1/3 width on desktop) */}
+            {/* Right Sidebar */}
             <div className={cn(
               "space-y-4 w-full",
               isMobile ? "mt-2" : ""
             )}>
-              <div className="transform hover:scale-[1.005] transition-transform duration-300 w-full">
-                <TrendingTopics
-                  onSelect={(topic) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: topic.description,
-                    }))
-                  }
-                />
-              </div>
-              <div className="transform hover:scale-[1.005] transition-transform duration-300 w-full">
-                <RecentContent />
-              </div>
+              <RecentContent />
+              <TrendingTopics
+                onSelect={(topic) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: topic.description,
+                  }))
+                }
+              />
             </div>
           </div>
         </div>
