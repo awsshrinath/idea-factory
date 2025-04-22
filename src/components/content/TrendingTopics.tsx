@@ -1,9 +1,10 @@
-
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Sparkles } from "lucide-react";
+import { FileText } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 interface TrendingTopic {
   id: string;
@@ -30,58 +31,39 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
     },
   });
 
-  if (isLoading) {
-    return (
-      <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in rounded-[12px]">
-        <CardHeader className="p-[24px]">
-          <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-[16px]">
-            <Sparkles className="w-6 h-6" />
-            Trending Topics
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="p-[24px]">
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-24 rounded-lg bg-background/50 animate-pulse"
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
-      <CardHeader className="p-[24px]">
-        <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-[16px]">
-          <Sparkles className="w-6 h-6" />
+    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
+      <CardHeader className="p-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+          <Sparkles className="w-5 h-5" />
           Trending Topics
         </CardTitle>
       </CardHeader>
-      <CardContent className="p-[24px]">
-        <div className="space-y-4">
+      <CardContent className="p-4">
+        {/* Empty State */}
+        {!topics && (
+          <div className="text-center py-8">
+            <FileText className="w-12 h-12 mx-auto text-muted-foreground opacity-50 mb-3" />
+            <p className="text-sm text-muted-foreground">
+              Loading trending topics...
+            </p>
+          </div>
+        )}
+
+        {/* Topics Grid */}
+        <div className="grid gap-3">
           {topics?.map((topic) => (
             <div
               key={topic.id}
-              className="p-6 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.02] hover:border-primary/50 group"
+              className="p-4 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group cursor-pointer"
+              onClick={() => onSelect(topic)}
             >
-              <h3 className="font-[600] text-[18px] mb-[16px] group-hover:text-primary transition-colors duration-300">
+              <h3 className="font-[600] text-[16px] mb-2 group-hover:text-primary transition-colors duration-300">
                 {topic.title}
               </h3>
-              <p className="text-sm text-muted-foreground mb-3 line-clamp-2">
+              <p className="text-sm text-muted-foreground line-clamp-2">
                 {topic.description}
               </p>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => onSelect(topic)}
-                className="bg-gradient-to-r from-secondary to-secondary/80 text-secondary-foreground hover:shadow-xl transition-all duration-300 group-hover:scale-105 rounded-lg"
-              >
-                Use This Topic
-              </Button>
             </div>
           ))}
         </div>

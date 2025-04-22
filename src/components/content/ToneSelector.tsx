@@ -37,7 +37,7 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
   const isMobile = useIsMobile();
   
   return (
-    <div className="space-y-2 mb-4">
+    <div className="space-y-1.5 mb-3">
       <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2">
         Select Tone
         <Tooltip>
@@ -52,7 +52,7 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
       <div className={cn(
         "tone-button-group",
         "flex flex-wrap gap-2",
-        isMobile ? "justify-center" : ""
+        isMobile ? "justify-center" : "justify-start"
       )}>
         {tones.map(({ value, icon, label }) => (
           <Button
@@ -68,8 +68,8 @@ export function ToneSelector({ selectedTone, onToneSelect }: ToneSelectorProps) 
               "active:scale-[0.98]",
               isMobile ? "px-3 py-2 text-sm min-w-[45%]" : "px-4 py-2",
               selectedTone === value
-                ? "bg-tone-button text-white shadow-[0_0_8px_rgba(255,255,255,0.1)]"
-                : "bg-muted/20 text-white hover:bg-tone-button-hover"
+                ? "bg-gradient-to-r from-primary/90 to-secondary/90 text-white shadow-[0_0_8px_rgba(255,255,255,0.1)]"
+                : "bg-muted/20 text-white hover:bg-white/5"
             )}
           >
             {icon}

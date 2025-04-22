@@ -88,8 +88,8 @@ export function PromptTemplates({ onSelectTemplate }: PromptTemplatesProps) {
   };
 
   return (
-    <div className="w-full mb-4 animate-fadeIn px-2">
-      <div className="flex items-center justify-between mb-1">
+    <div className="w-full mb-4 animate-fadeIn">
+      <div className="flex items-center justify-between mb-2 px-1">
         <div className="flex items-center gap-2">
           <FileText className="h-4 w-4 text-primary" />
           <h2 className="font-semibold font-heading text-foreground">Prompt Templates</h2>
@@ -120,15 +120,18 @@ export function PromptTemplates({ onSelectTemplate }: PromptTemplatesProps) {
       
       <ScrollArea 
         id="templates-scroll-container"
-        className="pb-2 w-full"
+        className="w-full pb-2"
       >
         <div className="flex gap-2 min-w-max p-1">
           {templates.map((template) => (
             <Card
               key={template.id}
               className={cn(
-                "overflow-hidden cursor-pointer min-w-[180px] max-w-[180px] transition-all duration-300 border-white/5",
-                "hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:border-white/20 hover:scale-[1.02]",
+                "overflow-hidden cursor-pointer min-w-[160px] max-w-[160px]",
+                "transition-all duration-300 border-white/5",
+                "hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]",
+                "hover:border-white/20 hover:scale-[1.02]",
+                "hover:ring-1 hover:ring-white/10"
               )}
               onClick={() => onSelectTemplate(template)}
               onMouseEnter={() => setHoveredId(template.id)}

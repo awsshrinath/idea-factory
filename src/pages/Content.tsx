@@ -42,11 +42,14 @@ export function Content() {
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 animate-fade-in w-full max-w-full",
-        isMobile ? "ml-0 pt-16" : "ml-64",
-        "overflow-x-hidden"
+        "flex-1 animate-fade-in w-full max-w-full",
+        "p-3 md:p-4 lg:p-5",
+        isMobile ? "ml-0 pt-16" : "ml-64"
       )}>
-        <div className="max-w-[90%] mx-auto space-y-4 w-full">
+        <div className={cn(
+          "mx-auto space-y-4 w-full",
+          "max-w-[95%] xl:max-w-[90%]"
+        )}>
           {/* Header Section */}
           <div className="mb-2 animate-slide-in-right">
             <div className="flex items-center gap-2 justify-between">
@@ -89,50 +92,32 @@ export function Content() {
           {/* Main Content Layout */}
           <div className={cn(
             "grid gap-4",
-            isMobile ? "grid-cols-1" : "grid-cols-1 lg:grid-cols-3"
+            isMobile ? 
+              "grid-cols-1" : 
+              "grid-cols-1 xl:grid-cols-[1fr,400px]"
           )}>
-            {/* Content Form + Preview Column */}
-            <div className={cn(
-              "space-y-4 w-full",
-              !isMobile && "lg:col-span-2"
-            )}>
-              {/* Content Form */}
-              <div className="transform hover:scale-[1.005] transition-transform duration-300 w-full">
-                <ContentForm
-                  formData={formData}
-                  onChange={setFormData}
-                />
-              </div>
-              
-              {/* Live Preview Section */}
-              <div className="w-full">
-                <h2 className={cn(
-                  "font-bold px-1 mb-2 bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent flex items-center gap-2",
-                  isMobile ? "text-lg" : "text-xl"
-                )}>
-                  Live Preview
-                </h2>
-                <div className="transform hover:scale-[1.005] transition-transform duration-300 w-full">
-                  <ContentPreview formData={formData} onContentChange={(newContent) => {
-                    setFormData(prev => ({...prev, description: newContent}));
-                  }} />
-                </div>
-              </div>
+            {/* Content Form Column */}
+            <div className="space-y-4">
+              <ContentForm
+                formData={formData}
+                onChange={setFormData}
+              />
             </div>
-            
-            {/* Right Sidebar */}
-            <div className={cn(
-              "space-y-4 w-full",
-              isMobile ? "mt-2" : ""
-            )}>
+
+            {/* Preview and Sidebar Column */}
+            <div className="space-y-4">
+              <ContentPreview
+                formData={formData}
+                onContentChange={(content) => {
+                  setFormData(prev => ({...prev, description: content}));
+                }}
+              />
               <RecentContent />
               <TrendingTopics
-                onSelect={(topic) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: topic.description,
-                  }))
-                }
+                onSelect={(topic) => setFormData((prev) => ({
+                  ...prev,
+                  description: topic.description,
+                }))}
               />
             </div>
           </div>
