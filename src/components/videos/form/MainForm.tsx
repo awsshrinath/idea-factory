@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { VideoTemplates } from "../VideoTemplates";
 import { VideoStyleCard } from "../VideoStyleCard";
@@ -11,7 +12,53 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CircleX, Loader2, Wand2 } from "lucide-react";
+import { CircleX, Loader2, Wand2, Film, Sparkles, PenLine, ChalkboardUser, Presentation, TextQuote } from "lucide-react";
+
+// Define the video styles that were missing
+const videoStyles = [
+  {
+    id: "cinematic",
+    title: "Cinematic",
+    description: "Professional, movie-like videos with high production value",
+    icon: Film,
+    imageUrl: "https://images.unsplash.com/photo-1585951237318-9ea5e175b891?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+  },
+  {
+    id: "animated",
+    title: "Animated",
+    description: "Engaging cartoon and motion graphics style videos",
+    icon: Sparkles,
+    imageUrl: "https://images.unsplash.com/photo-1632776350300-894bbdcf0e12?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+  },
+  {
+    id: "socialReel",
+    title: "Social Reel",
+    description: "Trendy, attention-grabbing videos for social media",
+    icon: PenLine,
+    imageUrl: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+  },
+  {
+    id: "explainer",
+    title: "Explainer",
+    description: "Clear, educational videos that break down complex topics",
+    icon: ChalkboardUser,
+    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+  },
+  {
+    id: "whiteboard",
+    title: "Whiteboard",
+    description: "Hand-drawn style visuals with step-by-step explanations",
+    icon: Presentation,
+    imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+  },
+  {
+    id: "typography",
+    title: "Typography",
+    description: "Text-focused videos with dynamic typography animations",
+    icon: TextQuote,
+    imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
+  }
+];
 
 type VideoStyle = "cinematic" | "animated" | "socialReel" | "explainer" | "whiteboard" | "typography";
 
@@ -32,6 +79,21 @@ export function MainForm({ onGenerateVideo }: MainFormProps) {
   });
   const [isGenerating, setIsGenerating] = useState(false);
   const [generationState, setGenerationState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+  // Add the missing resetForm function
+  const resetForm = () => {
+    setVideoIdea("");
+    setSelectedStyle(null);
+    setAspectRatio("16:9");
+    setDuration("30");
+    setLanguage("en");
+    setAdvancedOptions({
+      voiceoverType: "female",
+      backgroundMusic: "none",
+      playbackSpeed: "normal",
+    });
+    setGenerationState('idle');
+  };
 
   const handleGenerate = () => {
     setIsGenerating(true);
@@ -142,7 +204,7 @@ export function MainForm({ onGenerateVideo }: MainFormProps) {
                 description={style.description}
                 imageUrl={style.imageUrl}
                 isSelected={selectedStyle === style.id}
-                onClick={() => setSelectedStyle(style.id)}
+                onClick={() => setSelectedStyle(style.id as VideoStyle)}
               />
             ))}
           </div>
@@ -235,3 +297,4 @@ export function MainForm({ onGenerateVideo }: MainFormProps) {
     </Card>
   );
 }
+
