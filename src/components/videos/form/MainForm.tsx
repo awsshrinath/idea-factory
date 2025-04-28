@@ -12,7 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CircleX, Loader2, Wand2, Film, Sparkles, PenLine, ChalkboardUser, Presentation, TextQuote } from "lucide-react";
+import { CircleX, Loader2, Wand2, Film, Sparkles, PenLine, School, Presentation, TextQuote } from "lucide-react";
 
 // Define the video styles that were missing
 const videoStyles = [
@@ -41,7 +41,7 @@ const videoStyles = [
     id: "explainer",
     title: "Explainer",
     description: "Clear, educational videos that break down complex topics",
-    icon: ChalkboardUser,
+    icon: School,
     imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
   },
   {
