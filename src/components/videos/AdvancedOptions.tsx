@@ -9,6 +9,8 @@ import {
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Mic, Music, Speed } from "lucide-react";
 
 interface AdvancedOptionsProps {
   onOptionsChange: (options: AdvancedVideoOptions) => void;
@@ -16,16 +18,18 @@ interface AdvancedOptionsProps {
 
 export interface AdvancedVideoOptions {
   voiceoverType: string;
-  backgroundMusic: boolean;
-  textOverlays: boolean;
+  voiceFile?: File;
+  backgroundMusic: string;
+  playbackSpeed: string;
 }
 
 export function AdvancedOptions({ onOptionsChange }: AdvancedOptionsProps) {
   const [options, setOptions] = useState<AdvancedVideoOptions>({
     voiceoverType: "female",
-    backgroundMusic: true,
-    textOverlays: true,
+    backgroundMusic: "none",
+    playbackSpeed: "normal",
   });
+  const [voiceFile, setVoiceFile] = useState<File | null>(null);
 
   const updateOption = <K extends keyof AdvancedVideoOptions>(
     key: K,
@@ -44,43 +48,91 @@ export function AdvancedOptions({ onOptionsChange }: AdvancedOptionsProps) {
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-6 p-2">
-            <div className="space-y-2">
-              <Label htmlFor="voiceover-type" className="text-foreground">Voiceover Type</Label>
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Mic className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-foreground">Voice Over</Label>
+              </div>
               <Select
                 value={options.voiceoverType}
                 onValueChange={(value) => updateOption("voiceoverType", value)}
               >
-                <SelectTrigger id="voiceover-type" className="bg-background border-accent/20">
-                  <SelectValue placeholder="Select voiceover type" />
+                <SelectTrigger className="bg-background border-accent/20">
+                  <SelectValue placeholder="Select voice type" />
                 </SelectTrigger>
-                <SelectContent className="bg-background border-accent/20">
-                  <SelectItem value="male">Male Voice</SelectItem>
-                  <SelectItem value="female">Female Voice</SelectItem>
-                  <SelectItem value="none">No Voiceover</SelectItem>
+                <SelectContent>
+                  <SelectItem value="female">AI Female Voice</SelectItem>
+                  <SelectItem value="male">AI Male Voice</SelectItem>
+                  <SelectItem value="upload">Upload Voice</SelectItem>
+                  <SelectItem value="none">No Voice Over</SelectItem>
+                </SelectContent>
+              </Select>
+              {options.voiceoverType === "upload" && (
+                <div className="mt-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => document.getElementById("voice-file")?.click()}
+                    className="w-full border-accent/20"
+                  >
+                    {voiceFile ? voiceFile.name : "Upload Voice File"}
+                  </Button>
+                  <input
+                    id="voice-file"
+                    type="file"
+                    accept="audio/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        setVoiceFile(file);
+                        updateOption("voiceFile", file);
+                      }
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Music className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-foreground">Background Music</Label>
+              </div>
+              <Select
+                value={options.backgroundMusic}
+                onValueChange={(value) => updateOption("backgroundMusic", value)}
+              >
+                <SelectTrigger className="bg-background border-accent/20">
+                  <SelectValue placeholder="Select music style" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="happy">Happy & Upbeat</SelectItem>
+                  <SelectItem value="corporate">Corporate & Professional</SelectItem>
+                  <SelectItem value="dramatic">Dramatic & Intense</SelectItem>
+                  <SelectItem value="epic">Epic & Inspiring</SelectItem>
+                  <SelectItem value="none">No Background Music</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
-            <div className="flex items-center justify-between">
-              <Label htmlFor="background-music" className="text-foreground">
-                Background Music
-              </Label>
-              <Switch
-                id="background-music"
-                checked={options.backgroundMusic}
-                onCheckedChange={(checked) => updateOption("backgroundMusic", checked)}
-              />
-            </div>
-
-            <div className="flex items-center justify-between">
-              <Label htmlFor="text-overlays" className="text-foreground">
-                Text Overlays
-              </Label>
-              <Switch
-                id="text-overlays"
-                checked={options.textOverlays}
-                onCheckedChange={(checked) => updateOption("textOverlays", checked)}
-              />
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Speed className="h-4 w-4 text-muted-foreground" />
+                <Label className="text-foreground">Playback Speed</Label>
+              </div>
+              <Select
+                value={options.playbackSpeed}
+                onValueChange={(value) => updateOption("playbackSpeed", value)}
+              >
+                <SelectTrigger className="bg-background border-accent/20">
+                  <SelectValue placeholder="Select playback speed" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="slow">Slow</SelectItem>
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="fast">Fast</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
         </AccordionContent>

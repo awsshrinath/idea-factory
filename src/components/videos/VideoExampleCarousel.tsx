@@ -1,66 +1,77 @@
+
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Play, Copy } from "lucide-react";
-import { useState, useEffect } from "react";
-import { supabase } from "@/integrations/supabase/client";
-import { Tables } from "@/integrations/supabase/types";
 
-type SampleVideo = Tables<"sample_videos">;
+interface ExampleVideo {
+  id: string;
+  title: string;
+  description: string;
+  thumbnail_url: string;
+}
 
 export function VideoExampleCarousel() {
-  const [sampleVideos, setSampleVideos] = useState<SampleVideo[]>([]);
-
-  useEffect(() => {
-    async function fetchSampleVideos() {
-      const { data, error } = await supabase
-        .from('sample_videos')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(5);
-
-      if (!error && data) {
-        setSampleVideos(data);
-      }
+  const exampleVideos: ExampleVideo[] = [
+    {
+      id: "1",
+      title: "Product Showcase",
+      description: "Dynamic product presentation with engaging transitions",
+      thumbnail_url: "https://images.unsplash.com/photo-1526406915894-7bcd65f60845?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "2",
+      title: "Company Culture",
+      description: "Team-focused video with modern corporate style",
+      thumbnail_url: "https://images.unsplash.com/photo-1521737604893-d14cc237f11d?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "3",
+      title: "Tutorial Style",
+      description: "Step-by-step guide with clear explanations",
+      thumbnail_url: "https://images.unsplash.com/photo-1552664730-d307ca884978?auto=format&fit=crop&w=800&q=80"
+    },
+    {
+      id: "4",
+      title: "Social Media Ad",
+      description: "Engaging short-form content for social platforms",
+      thumbnail_url: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
     }
-
-    fetchSampleVideos();
-  }, []);
+  ];
 
   return (
     <Card className="bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
       <CardContent className="p-6">
         <h3 className="text-lg font-semibold mb-4 text-foreground">Example Videos</h3>
-        <div className="flex gap-4 overflow-x-auto pb-4">
-          {sampleVideos.map((video) => (
-            <div key={video.id} className="flex-none w-72">
-              <div className="relative group">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {exampleVideos.map((video) => (
+            <div key={video.id} className="group relative">
+              <div className="aspect-video rounded-lg overflow-hidden">
                 <img 
                   src={video.thumbnail_url} 
                   alt={video.title}
-                  className="w-full h-40 object-cover rounded-lg shadow-card"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
                 />
                 <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity 
-                              flex items-center justify-center gap-2 rounded-lg">
+                            flex items-center justify-center gap-2">
                   <Button 
                     size="sm" 
-                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 
-                              hover:shadow-glow flex items-center gap-2"
+                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
                   >
-                    <Play className="h-4 w-4" />
-                    Play
+                    <Play className="h-4 w-4 mr-1" />
+                    Preview
                   </Button>
                   <Button 
                     size="sm" 
-                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 
-                              hover:shadow-glow flex items-center gap-2"
+                    variant="outline"
+                    className="border-white/20"
                   >
-                    <Copy className="h-4 w-4" />
-                    Use Template
+                    <Copy className="h-4 w-4 mr-1" />
+                    Use
                   </Button>
                 </div>
               </div>
-              <h4 className="font-medium mt-2 text-foreground">{video.title}</h4>
-              <p className="text-sm text-muted-foreground">{video.description}</p>
+              <h4 className="font-medium mt-2 text-sm">{video.title}</h4>
+              <p className="text-xs text-muted-foreground">{video.description}</p>
             </div>
           ))}
         </div>
