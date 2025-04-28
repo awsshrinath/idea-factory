@@ -1,71 +1,129 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { VideoSuggestions } from "@/components/videos/VideoSuggestions";
-import { WorkflowSteps } from "@/components/videos/WorkflowSteps";
-import { WorkflowSelection } from "@/components/videos/WorkflowSelection";
+import { VideoTemplates } from "@/components/videos/VideoTemplates";
 import { TipsSection } from "@/components/videos/TipsSection";
 import { VideoExampleCarousel } from "@/components/videos/VideoExampleCarousel";
 import { RecentVideos } from "@/components/videos/RecentVideos";
+import { VideoStyleCard } from "@/components/videos/VideoStyleCard";
+import { AspectRatioSelector } from "@/components/videos/AspectRatioSelector";
+import { AdvancedOptions, AdvancedVideoOptions } from "@/components/videos/AdvancedOptions";
+import { EmptyRecentVideos } from "@/components/videos/EmptyRecentVideos";
 import { 
   Wand2, 
-  Mic, 
-  Subtitles, 
-  Download,
-  HelpCircle,
-  ArrowLeft
+  Film,
+  Play,
+  ArrowRight,
+  PencilRuler,
+  VideoIcon,
+  BarChart3,
+  Type,
+  SquarePen,
+  CircleX,
+  Loader2
 } from "lucide-react";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
 
-type WorkflowStep = "script" | "visuals" | "audio" | "preview";
-type WorkflowType = "direct" | "fine-tuned" | null;
+type VideoStyle = "cinematic" | "animated" | "socialReel" | "explainer" | "whiteboard" | "typography";
 
 export function Videos() {
-  const [workflowType, setWorkflowType] = useState<WorkflowType>(null);
-  const [currentStep, setCurrentStep] = useState<WorkflowStep>("script");
   const [videoIdea, setVideoIdea] = useState("");
+  const [selectedStyle, setSelectedStyle] = useState<VideoStyle | null>(null);
+  const [aspectRatio, setAspectRatio] = useState("16:9");
+  const [duration, setDuration] = useState("30");
+  const [language, setLanguage] = useState("en");
+  const [advancedOptions, setAdvancedOptions] = useState<AdvancedVideoOptions>({
+    voiceoverType: "female",
+    backgroundMusic: true,
+    textOverlays: true,
+  });
+  const [isGenerating, setIsGenerating] = useState(false);
 
-  const workflowSteps: { [key in WorkflowStep]: string } = {
-    script: "Script Generation",
-    visuals: "Visual Selection",
-    audio: "Audio Integration",
-    preview: "Preview & Export"
+  const handleGenerateVideo = () => {
+    setIsGenerating(true);
+    // Simulate generation process
+    setTimeout(() => {
+      setIsGenerating(false);
+    }, 3000);
   };
 
-  const handleBack = () => {
-    setWorkflowType(null);
-    setCurrentStep("script");
+  const resetForm = () => {
     setVideoIdea("");
+    setSelectedStyle(null);
+    setAspectRatio("16:9");
+    setDuration("30");
+    setLanguage("en");
+    setAdvancedOptions({
+      voiceoverType: "female",
+      backgroundMusic: true,
+      textOverlays: true,
+    });
   };
+
+  const videoStyles = [
+    { 
+      id: "cinematic" as VideoStyle, 
+      title: "Cinematic", 
+      icon: Film,
+      description: "Professional quality with cinematic transitions and effects",
+      imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" 
+    },
+    { 
+      id: "animated" as VideoStyle, 
+      title: "Animated", 
+      icon: Play,
+      description: "Engaging animated graphics and dynamic movement",
+      imageUrl: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?auto=format&fit=crop&w=300&q=80"  
+    },
+    { 
+      id: "socialReel" as VideoStyle, 
+      title: "Social Reel", 
+      icon: ArrowRight,
+      description: "Vertical format optimized for social media engagement",
+      imageUrl: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=300&q=80"  
+    },
+    { 
+      id: "explainer" as VideoStyle, 
+      title: "Explainer", 
+      icon: BarChart3,
+      description: "Clear and educational with helpful visuals",
+      imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=300&q=80"  
+    },
+    { 
+      id: "whiteboard" as VideoStyle, 
+      title: "Whiteboard Sketch", 
+      icon: SquarePen,
+      description: "Hand-drawn illustration style with sketching animations",
+      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80"  
+    },
+    { 
+      id: "typography" as VideoStyle, 
+      title: "Kinetic Typography", 
+      icon: Type,
+      description: "Dynamic animated text with motion graphics",
+      imageUrl: "https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=300&q=80" 
+    }
+  ];
+
+  const hasRecentVideos = false; // This would be determined by checking actual videos
 
   return (
     <div className="min-h-screen flex bg-background">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8">
-        <div className="max-w-6xl mx-auto space-y-8">
+      <main className="flex-1 ml-64 p-0">
+        <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-8">
           {/* Header Section */}
           <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-4xl font-heading font-bold text-foreground">Create Stunning AI-Generated Videos</h1>
-              <TooltipProvider>
-                <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircle className="h-6 w-6 text-muted-foreground hover:text-secondary transition-colors" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Example: "A motivational video about teamwork"</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
-            </div>
+            <h1 className="text-4xl font-heading font-bold text-foreground bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+              Create Your Video Story
+            </h1>
             <p className="text-xl text-muted-foreground mt-2 font-sans">
               Transform your ideas into engaging videos with AI
             </p>
@@ -75,117 +133,159 @@ export function Videos() {
           <VideoExampleCarousel />
 
           {/* Main Content */}
-          <div className="grid md:grid-cols-[1fr,300px] gap-6">
-            <div className="space-y-6">
-              {!workflowType ? (
-                <WorkflowSelection onSelect={setWorkflowType} />
-              ) : (
-                <>
-                  <WorkflowSteps currentStep={currentStep} steps={workflowSteps} />
-                  <Card className="bg-card border-accent/20">
-                    <CardHeader>
-                      <Button 
-                        variant="ghost" 
-                        className="w-fit mb-4 flex items-center gap-2 text-foreground hover:text-primary transition-colors"
-                        onClick={handleBack}
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back to workflow selection
-                      </Button>
-                      <CardTitle className="text-foreground font-heading">
-                        {workflowType === "direct" ? "Direct Video Generation" : "Fine-Tuned Video Generation"}
-                      </CardTitle>
-                      <CardDescription className="text-muted-foreground font-sans">
-                        {workflowType === "direct" 
-                          ? "Create your video directly from a script" 
-                          : "Create precise visuals before generating your video"}
-                      </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <Tabs defaultValue="script" className="w-full">
-                        <TabsList className="grid w-full grid-cols-4 bg-background border border-accent/20">
-                          <TabsTrigger value="script" className="data-[state=active]:bg-primary">Script</TabsTrigger>
-                          <TabsTrigger value="generation" className="data-[state=active]:bg-primary">Generation</TabsTrigger>
-                          <TabsTrigger value="audio" className="data-[state=active]:bg-primary">Audio</TabsTrigger>
-                          <TabsTrigger value="preview" className="data-[state=active]:bg-primary">Preview</TabsTrigger>
-                        </TabsList>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Left Column - Creative Input */}
+            <div className="lg:col-span-2 space-y-6">
+              <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
+                <CardHeader>
+                  <CardTitle>Tell Us Your Vision</CardTitle>
+                  <CardDescription>
+                    Describe what you'd like to create and we'll bring it to life
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  {/* Templates */}
+                  <VideoTemplates onSelect={setVideoIdea} />
+                  
+                  {/* Input Area */}
+                  <div className="space-y-2">
+                    <Label htmlFor="video-idea" className="text-foreground">
+                      Describe Your Video
+                    </Label>
+                    <Textarea
+                      id="video-idea"
+                      placeholder="Write about teamwork and collaboration in the workplace..."
+                      value={videoIdea}
+                      onChange={(e) => setVideoIdea(e.target.value)}
+                      className="min-h-[120px] bg-background border-accent/20 focus:border-primary transition-colors"
+                    />
+                  </div>
 
-                        <TabsContent value="script">
-                          <div className="space-y-4">
-                            <div>
-                              <label className="text-sm font-medium text-foreground font-sans">Your Video Idea</label>
-                              <Textarea
-                                placeholder="Write about teamwork and collaboration in the workplace..."
-                                value={videoIdea}
-                                onChange={(e) => setVideoIdea(e.target.value)}
-                                className="mt-1.5 bg-background text-foreground border-accent/20 focus:border-primary transition-colors"
-                                rows={4}
-                              />
-                            </div>
-                            <div className="flex gap-2">
-                              <Button className="bg-primary text-foreground hover:bg-primary/90 transition-colors">
-                                <Wand2 className="h-4 w-4 mr-2" />
-                                Generate Script
-                              </Button>
-                            </div>
-                          </div>
-                        </TabsContent>
+                  {/* Video Styles */}
+                  <div className="space-y-3">
+                    <Label className="text-foreground">Select Video Style</Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                      {videoStyles.map((style) => (
+                        <VideoStyleCard 
+                          key={style.id}
+                          title={style.title}
+                          icon={style.icon}
+                          description={style.description}
+                          imageUrl={style.imageUrl}
+                          isSelected={selectedStyle === style.id}
+                          onClick={() => setSelectedStyle(style.id)}
+                        />
+                      ))}
+                    </div>
+                  </div>
 
-                        <TabsContent value="generation">
-                          <div className="space-y-4">
-                            {workflowType === "direct" ? (
-                              <div className="text-center py-8">
-                                <p className="text-muted-foreground">
-                                  Visual generation options will appear here after script creation...
-                                </p>
-                              </div>
-                            ) : (
-                              <div className="text-center py-8">
-                                <p className="text-muted-foreground">
-                                  Image generation interface will appear here for fine-tuned control...
-                                </p>
-                              </div>
-                            )}
-                          </div>
-                        </TabsContent>
+                  {/* Video Settings */}
+                  <div className="space-y-6">
+                    <Separator className="border-white/10" />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                      <div className="space-y-2">
+                        <Label className="text-foreground">Aspect Ratio</Label>
+                        <AspectRatioSelector 
+                          value={aspectRatio} 
+                          onChange={setAspectRatio} 
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label htmlFor="duration" className="text-foreground">
+                          Video Duration
+                        </Label>
+                        <Select value={duration} onValueChange={setDuration}>
+                          <SelectTrigger id="duration" className="bg-background border-accent/20">
+                            <SelectValue placeholder="Select duration" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border-accent/20">
+                            <SelectItem value="15">15 seconds</SelectItem>
+                            <SelectItem value="30">30 seconds</SelectItem>
+                            <SelectItem value="60">60 seconds</SelectItem>
+                            <SelectItem value="120">2 minutes</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
 
-                        <TabsContent value="audio">
-                          <div className="space-y-4">
-                            <div className="flex gap-4">
-                              <Button className="flex items-center gap-2">
-                                <Mic className="h-4 w-4" />
-                                Generate Voice
-                              </Button>
-                              <Button className="flex items-center gap-2">
-                                <Subtitles className="h-4 w-4" />
-                                Generate Captions
-                              </Button>
-                            </div>
-                          </div>
-                        </TabsContent>
+                      <div className="space-y-2">
+                        <Label htmlFor="language" className="text-foreground">
+                          Language
+                        </Label>
+                        <Select value={language} onValueChange={setLanguage}>
+                          <SelectTrigger id="language" className="bg-background border-accent/20">
+                            <SelectValue placeholder="Select language" />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border-accent/20">
+                            <SelectItem value="en">English</SelectItem>
+                            <SelectItem value="es">Spanish</SelectItem>
+                            <SelectItem value="fr">French</SelectItem>
+                            <SelectItem value="de">German</SelectItem>
+                            <SelectItem value="ja">Japanese</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </div>
 
-                        <TabsContent value="preview">
-                          <div className="space-y-4">
-                            <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                              <p className="text-muted-foreground">Video preview will appear here...</p>
-                            </div>
-                            <Button className="flex items-center gap-2">
-                              <Download className="h-4 w-4" />
-                              Export Video
-                            </Button>
+                  {/* Advanced Options */}
+                  <AdvancedOptions onOptionsChange={setAdvancedOptions} />
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center justify-center gap-4 pt-4">
+                    <Button
+                      onClick={resetForm}
+                      variant="outline"
+                      className="border-white/10 bg-background hover:bg-background/80"
+                    >
+                      <CircleX className="w-4 h-4 mr-2" />
+                      Reset
+                    </Button>
+
+                    <Button
+                      onClick={handleGenerateVideo}
+                      disabled={isGenerating || !videoIdea || !selectedStyle}
+                      className={`min-w-[180px] bg-gradient-primary hover:bg-primary/90 text-white group relative ${
+                        isGenerating ? 'animate-pulse' : ''
+                      }`}
+                    >
+                      {isGenerating ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Generating...
+                          <div className="absolute inset-0 w-full h-full overflow-hidden">
+                            <div className="absolute inset-0 translate-x-[-100%] animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
                           </div>
-                        </TabsContent>
-                      </Tabs>
-                    </CardContent>
-                  </Card>
-                </>
-              )}
-              
+                        </>
+                      ) : (
+                        <>
+                          <Wand2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
+                          Generate Video
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
               {/* Recent Videos Section */}
-              <RecentVideos />
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-semibold text-foreground">Your Recent Videos</h2>
+                  <Button variant="outline" size="sm" className="border-white/10 bg-background hover:bg-background/80">
+                    View All
+                  </Button>
+                </div>
+                
+                {hasRecentVideos ? (
+                  <RecentVideos />
+                ) : (
+                  <EmptyRecentVideos />
+                )}
+              </div>
             </div>
 
-            {/* Right Sidebar */}
+            {/* Right Column - Suggestions & Tips */}
             <div className="space-y-6">
               <VideoSuggestions onSuggestionClick={setVideoIdea} />
               <TipsSection />
