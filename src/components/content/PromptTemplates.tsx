@@ -128,9 +128,9 @@ export function PromptTemplates({ onSelectTemplate }: PromptTemplatesProps) {
               key={template.id}
               className={cn(
                 "overflow-hidden cursor-pointer min-w-[160px] max-w-[160px]",
-                "transition-all duration-300 border-white/5",
+                "transition-all duration-300 border-white/5 hover:scale-[1.03]",
                 "hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]",
-                "hover:border-white/20 hover:scale-[1.02]",
+                "hover:border-white/20",
                 "hover:ring-1 hover:ring-white/10"
               )}
               onClick={() => onSelectTemplate(template)}

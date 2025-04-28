@@ -16,6 +16,24 @@ interface TrendingTopicsProps {
   onSelect: (topic: TrendingTopic) => void;
 }
 
+const dummyTopics = [
+  {
+    id: "1",
+    title: "#AIMarketing",
+    description: "Explore AI-powered marketing strategies and tools",
+  },
+  {
+    id: "2",
+    title: "#SocialGrowth",
+    description: "Tips and tricks for growing your social media presence",
+  },
+  {
+    id: "3",
+    title: "#ContentCreation",
+    description: "Best practices for creating engaging content",
+  },
+];
+
 export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
   const { data: topics, isLoading } = useQuery({
     queryKey: ["trending-topics"],
@@ -31,6 +49,8 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
     },
   });
 
+  const displayTopics = topics?.length ? topics : dummyTopics;
+
   return (
     <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
       <CardHeader className="p-4">
@@ -40,19 +60,8 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
         </CardTitle>
       </CardHeader>
       <CardContent className="p-4">
-        {/* Empty State */}
-        {!topics && (
-          <div className="text-center py-8">
-            <FileText className="w-12 h-12 mx-auto text-muted-foreground opacity-50 mb-3" />
-            <p className="text-sm text-muted-foreground">
-              Loading trending topics...
-            </p>
-          </div>
-        )}
-
-        {/* Topics Grid */}
         <div className="grid gap-3">
-          {topics?.map((topic) => (
+          {displayTopics.map((topic) => (
             <div
               key={topic.id}
               className="p-4 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group cursor-pointer"

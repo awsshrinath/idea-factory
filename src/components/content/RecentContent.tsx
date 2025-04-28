@@ -69,63 +69,71 @@ export function RecentContent() {
       </CardHeader>
       <CardContent className="p-4">
         <div className="space-y-3">
-          {content?.map((item) => (
-            <div
-              key={item.id}
-              className="p-3 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group"
-            >
-              <div className="flex justify-between items-start gap-3">
-                <div className="flex-1">
-                  <h3 className="font-medium text-base mb-1 group-hover:text-primary transition-colors duration-300">
-                    {item.title}
-                  </h3>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>
-                      {formatDistanceToNow(new Date(item.created_at), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                    <span>•</span>
-                    <span className="capitalize">{item.status}</span>
-                  </div>
-                </div>
-                <div className="flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-accent/50 transition-colors group rounded-lg"
-                  >
-                    <Eye className="w-4 h-4 group-hover:text-primary transition-colors" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-accent/50 transition-colors group rounded-lg"
-                  >
-                    <Copy className="w-4 h-4 group-hover:text-primary transition-colors" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hover:bg-accent/50 transition-colors group rounded-lg"
-                  >
-                    <Trash className="w-4 h-4 group-hover:text-primary transition-colors" />
-                  </Button>
+          {content?.length === 0 ? (
+            <div className="text-center py-8 px-4">
+              <div className="w-16 h-16 mx-auto mb-4 relative">
+                <div className="absolute inset-0 animate-float">
+                  <img
+                    src="https://images.unsplash.com/photo-1487887235947-a955ef187fcc"
+                    alt="Rocket"
+                    className="w-full h-full object-contain opacity-70"
+                  />
                 </div>
               </div>
-            </div>
-          ))}
-
-          {content?.length === 0 && (
-            <div className="text-center py-8 px-4">
-              <FileText className="w-10 h-10 mx-auto text-muted-foreground mb-3" />
               <p className="text-base font-medium text-muted-foreground mb-2">
-                No content yet
+                No content yet! 🚀
               </p>
-              <p className="text-sm text-muted-foreground mb-4">
-                Start by generating your first piece of content
+              <p className="text-sm text-muted-foreground">
+                Create your first post and launch your journey!
               </p>
             </div>
+          ) : (
+            content?.map((item) => (
+              <div
+                key={item.id}
+                className="p-3 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group"
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-base mb-1 group-hover:text-primary transition-colors duration-300">
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {formatDistanceToNow(new Date(item.created_at), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      <span>•</span>
+                      <span className="capitalize">{item.status}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-accent/50 transition-colors group rounded-lg"
+                    >
+                      <Eye className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-accent/50 transition-colors group rounded-lg"
+                    >
+                      <Copy className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-accent/50 transition-colors group rounded-lg"
+                    >
+                      <Trash className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </CardContent>
