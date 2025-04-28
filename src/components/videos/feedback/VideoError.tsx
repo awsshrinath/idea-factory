@@ -11,13 +11,13 @@ export function VideoError({ onRetry, onEdit }: VideoErrorProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 space-y-6 text-center">
       <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center animate-bounce-slow">
-        <span className="text-4xl">🤔</span>
+        <span className="text-4xl">😔</span>
       </div>
       
       <div className="space-y-2">
         <h3 className="text-xl font-semibold text-white">Oops! Something went wrong.</h3>
         <p className="text-muted-foreground max-w-sm">
-          Don't worry! These things happen. Let's try again or adjust your prompt for better results.
+          Looks like our creative engines need a little boost. Try again or adjust your input.
         </p>
       </div>
 

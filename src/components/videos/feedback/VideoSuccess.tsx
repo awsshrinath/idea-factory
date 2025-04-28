@@ -1,28 +1,28 @@
 
 import { Button } from "@/components/ui/button";
-import { Calendar, Download, Play } from "lucide-react";
-import { toast } from "sonner";
+import { Play, Download, Calendar } from "lucide-react";
 
 interface VideoSuccessProps {
-  videoUrl: string;
   onWatch: () => void;
   onDownload: () => void;
   onSchedule: () => void;
 }
 
-export function VideoSuccess({ videoUrl, onWatch, onDownload, onSchedule }: VideoSuccessProps) {
+export function VideoSuccess({ onWatch, onDownload, onSchedule }: VideoSuccessProps) {
   return (
     <div className="flex flex-col items-center justify-center p-8 space-y-6 text-center">
       <div className="relative">
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary/10 rounded-full animate-pulse" />
         <div className="relative z-10 h-24 w-24 rounded-full bg-primary/20 flex items-center justify-center">
-          <div className="text-4xl">🎉</div>
+          <span className="text-4xl">🎉</span>
         </div>
       </div>
       
       <div className="space-y-2">
-        <h3 className="text-2xl font-semibold text-white">Awesome! Your video is ready to shine!</h3>
-        <p className="text-muted-foreground">What would you like to do next?</p>
+        <h3 className="text-2xl font-semibold text-white">Your video is ready!</h3>
+        <p className="text-muted-foreground">
+          Great job! Let's preview it or schedule it for your audience.
+        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-3 w-full max-w-md">
