@@ -1,16 +1,17 @@
-
 import { useState } from "react";
 import { VideoTemplates } from "../VideoTemplates";
 import { VideoStyleCard } from "../VideoStyleCard";
 import { AspectRatioSelector } from "../AspectRatioSelector";
 import { AdvancedOptions, type AdvancedVideoOptions } from "../AdvancedOptions";
+import { VideoError } from "../feedback/VideoError";
+import { VideoSuccess } from "../feedback/VideoSuccess";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CircleX, Loader2, Wand2, Film, Play, ArrowRight, BarChart3, SquarePen, Type } from "lucide-react";
+import { CircleX, Loader2, Wand2 } from "lucide-react";
 
 type VideoStyle = "cinematic" | "animated" | "socialReel" | "explainer" | "whiteboard" | "typography";
 
@@ -30,70 +31,81 @@ export function MainForm({ onGenerateVideo }: MainFormProps) {
     playbackSpeed: "normal",
   });
   const [isGenerating, setIsGenerating] = useState(false);
+  const [generationState, setGenerationState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
 
   const handleGenerate = () => {
     setIsGenerating(true);
-    onGenerateVideo();
-    setTimeout(() => setIsGenerating(false), 3000);
+    setGenerationState('loading');
+
+    // Simulate random success/error (90% success rate)
+    const willSucceed = Math.random() > 0.1;
+
+    setTimeout(() => {
+      setIsGenerating(false);
+      setGenerationState(willSucceed ? 'success' : 'error');
+    }, 3000);
   };
 
-  const resetForm = () => {
-    setVideoIdea("");
-    setSelectedStyle(null);
-    setAspectRatio("16:9");
-    setDuration("30");
-    setLanguage("en");
-    setAdvancedOptions({
-      voiceoverType: "female",
-      backgroundMusic: "none",
-      playbackSpeed: "normal",
-    });
+  const handleRetry = () => {
+    setGenerationState('idle');
+    setIsGenerating(false);
   };
 
-  const videoStyles = [
-    { 
-      id: "cinematic" as VideoStyle, 
-      title: "Cinematic", 
-      icon: Film,
-      description: "Professional quality with cinematic transitions and effects",
-      imageUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=300&q=80" 
-    },
-    { 
-      id: "animated" as VideoStyle, 
-      title: "Animated", 
-      icon: Play,
-      description: "Engaging animated graphics and dynamic movement",
-      imageUrl: "https://images.unsplash.com/photo-1470813740244-df37b8c1edcb?auto=format&fit=crop&w=300&q=80"  
-    },
-    { 
-      id: "socialReel" as VideoStyle, 
-      title: "Social Reel", 
-      icon: ArrowRight,
-      description: "Vertical format optimized for social media engagement",
-      imageUrl: "https://images.unsplash.com/photo-1582562124811-c09040d0a901?auto=format&fit=crop&w=300&q=80"  
-    },
-    { 
-      id: "explainer" as VideoStyle, 
-      title: "Explainer", 
-      icon: BarChart3,
-      description: "Clear and educational with helpful visuals",
-      imageUrl: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?auto=format&fit=crop&w=300&q=80"  
-    },
-    { 
-      id: "whiteboard" as VideoStyle, 
-      title: "Whiteboard Sketch", 
-      icon: SquarePen,
-      description: "Hand-drawn illustration style with sketching animations",
-      imageUrl: "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=300&q=80"  
-    },
-    { 
-      id: "typography" as VideoStyle, 
-      title: "Kinetic Typography", 
-      icon: Type,
-      description: "Dynamic animated text with motion graphics",
-      imageUrl: "https://images.unsplash.com/photo-1500673922987-e212871fec22?auto=format&fit=crop&w=300&q=80" 
-    }
-  ];
+  const handleWatch = () => {
+    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank'); // Placeholder video
+  };
+
+  const handleDownload = () => {
+    const link = document.createElement('a');
+    link.href = 'https://www.w3schools.com/html/mov_bbb.mp4'; // Placeholder video
+    link.download = 'your-video.mp4';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const handleSchedule = () => {
+    // We'll implement this in the next iteration
+    console.log('Schedule clicked');
+  };
+
+  if (generationState === 'loading') {
+    return (
+      <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
+        <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
+          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+          <h3 className="text-xl font-semibold text-white">✨ Generating your video magic...</h3>
+          <p className="text-muted-foreground">Please wait while we craft something special.</p>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (generationState === 'error') {
+    return (
+      <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
+        <CardContent className="p-0">
+          <VideoError onRetry={handleRetry} onEdit={() => setGenerationState('idle')} />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (generationState === 'success') {
+    return (
+      <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
+        <CardContent className="p-0">
+          <VideoSuccess 
+            onWatch={handleWatch}
+            onDownload={handleDownload}
+            onSchedule={handleSchedule}
+          />
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
