@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import {
   Accordion,
@@ -30,6 +29,7 @@ export function AdvancedOptions({ onOptionsChange }: AdvancedOptionsProps) {
     playbackSpeed: "normal",
   });
   const [voiceFile, setVoiceFile] = useState<File | null>(null);
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const updateOption = <K extends keyof AdvancedVideoOptions>(
     key: K,
@@ -41,10 +41,20 @@ export function AdvancedOptions({ onOptionsChange }: AdvancedOptionsProps) {
   };
 
   return (
-    <Accordion type="single" collapsible className="w-full">
+    <Accordion 
+      type="single" 
+      collapsible 
+      className="w-full"
+      onValueChange={(value) => setIsExpanded(!!value)}
+    >
       <AccordionItem value="advanced-options" className="border-white/10">
         <AccordionTrigger className="text-foreground hover:text-primary transition-colors">
           Advanced Options
+          {!isExpanded && (
+            <div className="text-xs text-muted-foreground ml-2">
+              Voice Over, Music, Speed 🔓
+            </div>
+          )}
         </AccordionTrigger>
         <AccordionContent>
           <div className="space-y-6 p-2">

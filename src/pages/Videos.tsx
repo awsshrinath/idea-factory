@@ -115,13 +115,13 @@ export function Videos() {
   const hasRecentVideos = false; // This would be determined by checking actual videos
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-gradient-to-br from-background via-background/95 to-background/90">
       <Sidebar />
-      <main className="flex-1 ml-64 p-0">
-        <div className="max-w-[1400px] mx-auto px-8 py-8 space-y-8">
+      <main className="flex-1 ml-64">
+        <div className="max-w-[1200px] mx-auto px-6 py-8 space-y-8">
           {/* Header Section */}
           <div>
-            <h1 className="text-4xl font-heading font-bold text-foreground bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
+            <h1 className="text-4xl font-heading font-bold text-foreground bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent animate-gradient">
               Create Your Video Story
             </h1>
             <p className="text-xl text-muted-foreground mt-2 font-sans">
@@ -133,13 +133,13 @@ export function Videos() {
           <VideoExampleCarousel />
 
           {/* Main Content */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Left Column - Creative Input */}
             <div className="lg:col-span-2 space-y-6">
               <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
                 <CardHeader>
-                  <CardTitle>Tell Us Your Vision</CardTitle>
-                  <CardDescription>
+                  <CardTitle className="text-2xl">Tell Us Your Vision</CardTitle>
+                  <CardDescription className="text-base">
                     Describe what you'd like to create and we'll bring it to life
                   </CardDescription>
                 </CardHeader>

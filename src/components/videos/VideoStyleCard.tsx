@@ -23,9 +23,9 @@ export function VideoStyleCard({
   return (
     <Card
       className={cn(
-        "relative overflow-hidden border transition-all duration-300 transform hover:scale-[1.03] cursor-pointer group",
+        "relative overflow-hidden border transition-all duration-300 transform hover:scale-[1.02] cursor-pointer group",
         isSelected 
-          ? "border-primary/50 shadow-[0_0_15px_rgba(255,65,108,0.3)]" 
+          ? "border-primary/50 shadow-[0_0_15px_rgba(255,65,108,0.3)] animate-pulse" 
           : "border-white/10 hover:border-primary/30 hover:shadow-[0_0_10px_rgba(255,65,108,0.2)]"
       )}
       onClick={onClick}
@@ -40,7 +40,7 @@ export function VideoStyleCard({
         </div>
       )}
       
-      <CardContent className="p-4 relative z-10">
+      <CardContent className="p-4 relative z-10 backdrop-blur-sm">
         <div className="flex items-center gap-3 mb-2">
           <Icon className={cn(
             "w-5 h-5 transition-colors",

@@ -105,6 +105,16 @@ export default {
         glow: {
           "0%, 100%": { boxShadow: "0 0 5px rgba(255, 255, 255, 0.1)" },
           "50%": { boxShadow: "0 0 20px rgba(255, 255, 255, 0.4)" }
+        },
+        gradient: {
+          '0%, 100%': {
+            'background-size': '200% 200%',
+            'background-position': 'left center'
+          },
+          '50%': {
+            'background-size': '200% 200%',
+            'background-position': 'right center'
+          }
         }
       },
       animation: {
@@ -118,6 +128,7 @@ export default {
         float: "float 3s ease-in-out infinite",
         glow: "glow 2s ease-in-out infinite",
         "template-glow": "glow 2s ease-in-out infinite",
+        'gradient': 'gradient 8s ease infinite',
       },
       backgroundImage: {
         "gradient-primary": "linear-gradient(90deg, #FF416C, #FF4B2B)",
@@ -133,6 +144,7 @@ export default {
         "template-blue": "linear-gradient(135deg, rgba(66,153,225,0.1), rgba(66,153,225,0.3))",
         "template-green": "linear-gradient(135deg, rgba(72,187,120,0.1), rgba(72,187,120,0.3))",
         "template-pink": "linear-gradient(135deg, rgba(237,100,166,0.1), rgba(237,100,166,0.3))",
+        "noise": 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
       },
     },
   },
