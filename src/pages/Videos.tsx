@@ -9,20 +9,20 @@ import { RecentVideosSection } from "@/components/videos/recent/RecentVideosSect
 
 export function Videos() {
   return (
-    <div className="min-h-screen flex bg-gradient-to-br from-background via-background/95 to-background/90">
+    <div className="min-h-screen flex bg-[#1E1E2E]">
       <Sidebar />
-      <main className="flex-1 ml-64 overflow-y-auto">
-        <div className="max-w-[1200px] mx-auto py-8 px-4 md:px-6 space-y-6">
+      <main className="flex-1 ml-64">
+        <div className="max-w-[1400px] mx-auto py-6 px-4">
           <HeroSection />
           <VideoExampleCarousel />
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            <div className="lg:col-span-2 space-y-5">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 mt-4">
+            <div className="lg:col-span-2 space-y-4">
               <MainForm onGenerateVideo={() => {}} />
               <RecentVideosSection />
             </div>
 
-            <div className="space-y-5">
+            <div className="space-y-4">
               <VideoSuggestions onSuggestionClick={() => {}} />
               <TipsSection />
             </div>
