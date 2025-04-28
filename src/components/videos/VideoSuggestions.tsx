@@ -30,9 +30,9 @@ export function VideoSuggestions({ onSuggestionClick }: VideoSuggestionsProps) {
   ];
 
   return (
-    <Card className="w-full bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
+    <Card className="border border-white/10 bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300">
       <CardHeader>
-        <CardTitle className="text-lg text-foreground">Suggestions</CardTitle>
+        <CardTitle className="text-xl font-semibold text-foreground">Suggestions</CardTitle>
         <CardDescription className="text-muted-foreground">Click to use these example prompts</CardDescription>
       </CardHeader>
       <CardContent className="grid gap-3">
@@ -41,14 +41,14 @@ export function VideoSuggestions({ onSuggestionClick }: VideoSuggestionsProps) {
             key={suggestion.title}
             variant="ghost"
             className="w-full justify-start h-auto whitespace-normal text-left p-4 hover:bg-muted/20 
-                     transition-colors border border-white/5 rounded-lg group"
+                     transition-all duration-300 border border-white/5 rounded-lg group hover:scale-[1.02]"
             onClick={() => onSuggestionClick(suggestion.description)}
           >
             <div className="relative w-16 h-12 rounded overflow-hidden mr-4 group-hover:ring-2 ring-primary/30 transition-all">
               <img 
                 src={suggestion.image} 
                 alt={suggestion.title} 
-                className="w-full h-full object-cover"
+                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
             </div>
             <div className="space-y-1 flex-1">

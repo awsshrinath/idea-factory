@@ -39,23 +39,23 @@ export function VideoExampleCarousel() {
   ];
 
   return (
-    <Card className="bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
+    <Card className="border border-white/10 bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300 mb-6">
       <CardContent className="p-6">
-        <h3 className="text-lg font-semibold mb-4 text-foreground">Example Videos</h3>
+        <h3 className="text-xl font-semibold mb-4 text-foreground">Example Videos</h3>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {exampleVideos.map((video) => (
-            <div key={video.id} className="group relative">
+            <div key={video.id} className="group relative transform transition-all duration-300 hover:scale-[1.03]">
               <div className="aspect-video rounded-lg overflow-hidden">
                 <img 
                   src={video.thumbnail_url} 
                   alt={video.title}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity 
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-all duration-300 
                             flex items-center justify-center gap-2">
                   <Button 
                     size="sm" 
-                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
+                    className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 hover:scale-105"
                   >
                     <Play className="h-4 w-4 mr-1" />
                     Preview
@@ -63,7 +63,7 @@ export function VideoExampleCarousel() {
                   <Button 
                     size="sm" 
                     variant="outline"
-                    className="border-white/20"
+                    className="border-white/20 hover:border-white/40 transition-all duration-300 hover:scale-105"
                   >
                     <Copy className="h-4 w-4 mr-1" />
                     Use
