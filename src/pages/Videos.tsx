@@ -12,17 +12,19 @@ export function Videos() {
     <div className="min-h-screen flex bg-[#1E1E2E]">
       <Sidebar />
       <main className="flex-1 ml-64">
-        <div className="max-w-[1400px] mx-auto py-8 px-6">
+        <div className="max-w-[1440px] mx-auto p-6 lg:p-8">
           <HeroSection />
-          <VideoExampleCarousel />
+          <div className="mt-8">
+            <VideoExampleCarousel />
+          </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-            <div className="lg:col-span-2 space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
+            <div className="lg:col-span-2 space-y-8">
               <MainForm onGenerateVideo={() => {}} />
               <RecentVideosSection />
             </div>
 
-            <div className="space-y-6">
+            <div className="space-y-8">
               <VideoSuggestions onSuggestionClick={() => {}} />
               <TipsSection />
             </div>
