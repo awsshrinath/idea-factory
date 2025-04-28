@@ -10,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Mic, Music, Speed } from "lucide-react";
+import { Mic, Music, Gauge } from "lucide-react";
 
 interface AdvancedOptionsProps {
   onOptionsChange: (options: AdvancedVideoOptions) => void;
@@ -117,7 +117,7 @@ export function AdvancedOptions({ onOptionsChange }: AdvancedOptionsProps) {
 
             <div className="space-y-4">
               <div className="flex items-center gap-2">
-                <Speed className="h-4 w-4 text-muted-foreground" />
+                <Gauge className="h-4 w-4 text-muted-foreground" />
                 <Label className="text-foreground">Playback Speed</Label>
               </div>
               <Select

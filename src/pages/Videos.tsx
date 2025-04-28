@@ -41,8 +41,8 @@ export function Videos() {
   const [language, setLanguage] = useState("en");
   const [advancedOptions, setAdvancedOptions] = useState<AdvancedVideoOptions>({
     voiceoverType: "female",
-    backgroundMusic: true,
-    textOverlays: true,
+    backgroundMusic: "none",
+    playbackSpeed: "normal",
   });
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -62,8 +62,8 @@ export function Videos() {
     setLanguage("en");
     setAdvancedOptions({
       voiceoverType: "female",
-      backgroundMusic: true,
-      textOverlays: true,
+      backgroundMusic: "none",
+      playbackSpeed: "normal",
     });
   };
 
