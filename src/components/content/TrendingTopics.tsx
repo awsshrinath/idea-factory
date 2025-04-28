@@ -2,9 +2,14 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles } from "lucide-react";
-import { FileText } from "lucide-react";
+import { Sparkles, FileText } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+  TooltipProvider,
+} from "@/components/ui/tooltip";
 
 interface TrendingTopic {
   id: string;
@@ -62,18 +67,26 @@ export function TrendingTopics({ onSelect }: TrendingTopicsProps) {
       <CardContent className="p-4">
         <div className="grid gap-3">
           {displayTopics.map((topic) => (
-            <div
-              key={topic.id}
-              className="p-4 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group cursor-pointer"
-              onClick={() => onSelect(topic)}
-            >
-              <h3 className="font-[600] text-[16px] mb-2 group-hover:text-primary transition-colors duration-300">
-                {topic.title}
-              </h3>
-              <p className="text-sm text-muted-foreground line-clamp-2">
-                {topic.description}
-              </p>
-            </div>
+            <TooltipProvider key={topic.id}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div
+                    className="p-4 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group cursor-pointer"
+                    onClick={() => onSelect(topic)}
+                  >
+                    <h3 className="font-[600] text-[16px] mb-2 group-hover:text-primary transition-colors duration-300">
+                      {topic.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground line-clamp-2">
+                      {topic.description}
+                    </p>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="top" className="bg-background/95 backdrop-blur-sm border-primary/20">
+                  <p>Trending now — tap to add to your post</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           ))}
         </div>
       </CardContent>

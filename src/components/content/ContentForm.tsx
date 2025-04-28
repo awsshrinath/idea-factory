@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -121,7 +120,6 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
       <div className="space-y-4 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-4 rounded-xl shadow-[0_12px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
-        {/* Textarea for content description */}
         <div className="space-y-2">
           <div className="flex justify-between items-center">
             <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
@@ -165,13 +163,11 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           </div>
         </div>
 
-        {/* Platform selector section */}
         <PlatformSelector
           selectedPlatforms={formData.platforms}
           onPlatformToggle={handlePlatformToggle}
         />
 
-        {/* Inline row for Language and AI Model */}
         <ModelLanguageSelector
           selectedModel={formData.aiModel}
           selectedLanguage={formData.language}
@@ -179,25 +175,26 @@ export function ContentForm({ formData, onChange }: ContentFormProps) {
           onLanguageSelect={(language) => onChange({ ...formData, language: language })}
         />
 
-        {/* Tone selector section */}
         <ToneSelector
           selectedTone={formData.tone}
           onToneSelect={(tone) => onChange({ ...formData, tone: tone })}
         />
 
-        {/* Action buttons */}
         <div className="flex gap-3">
           <Button
             type="submit"
             size="lg"
             isLoading={isGenerating}
-            className="flex-1 h-12 transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-white rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]"
+            className={cn(
+              "flex-1 h-12 transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-white rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
+              isGenerating && "relative overflow-hidden before:absolute before:inset-0 before:translate-x-[-100%] before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent"
+            )}
             disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
           >
             <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
             {isGenerating ? "Generating..." : "Generate Content"}
           </Button>
-          
+
           <Button
             type="button"
             size="lg"
