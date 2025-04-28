@@ -5,7 +5,7 @@ import {
   Sparkles, 
   Rocket, 
   ShoppingBag, 
-  PresentationChart, 
+  Presentation, 
   Quote, 
   MessageSquareText
 } from "lucide-react";
@@ -43,7 +43,7 @@ export function VideoTemplates({ onSelect }: VideoTemplateProps) {
     },
     {
       id: "explainer",
-      icon: <PresentationChart />,
+      icon: <Presentation />,
       title: "Explainer Video",
       prompt: "Create a clear, concise explainer video about our service that breaks down complex concepts simply.",
     },
@@ -66,7 +66,7 @@ export function VideoTemplates({ onSelect }: VideoTemplateProps) {
       <label className="text-sm font-medium text-foreground block mb-2">
         Quick Templates
       </label>
-      <ScrollArea className="w-full whitespace-nowrap pb-2" orientation="horizontal">
+      <ScrollArea className="w-full whitespace-nowrap pb-2">
         <div className="flex gap-2">
           {templates.map((template) => (
             <Button
