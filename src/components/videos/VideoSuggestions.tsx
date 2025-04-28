@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { VideoIcon, BookOpen, PresentationIcon } from "lucide-react";
@@ -30,18 +29,18 @@ export function VideoSuggestions({ onSuggestionClick }: VideoSuggestionsProps) {
   ];
 
   return (
-    <Card className="border border-white/10 bg-gradient-card shadow-md hover:shadow-lg transition-all duration-300">
-      <CardHeader>
-        <CardTitle className="text-xl font-semibold text-foreground">Suggestions</CardTitle>
+    <Card className="border border-white/10 bg-[#1F1F33]/50 backdrop-blur-sm shadow-lg transition-all duration-300">
+      <CardHeader className="p-8 pb-0">
+        <CardTitle className="text-xl font-semibold text-white">Suggestions</CardTitle>
         <CardDescription className="text-muted-foreground">Click to use these example prompts</CardDescription>
       </CardHeader>
-      <CardContent className="grid gap-3">
+      <CardContent className="grid gap-4 p-8 pt-6">
         {suggestions.map((suggestion) => (
           <Button
             key={suggestion.title}
             variant="ghost"
-            className="w-full justify-start h-auto whitespace-normal text-left p-4 hover:bg-muted/20 
-                     transition-all duration-300 border border-white/5 rounded-lg group hover:scale-[1.02]"
+            className="w-full justify-start h-auto whitespace-normal text-left p-6 hover:bg-muted/20 
+                     transition-all duration-300 border border-white/5 rounded-lg group hover:scale-[1.02] hover:shadow-lg"
             onClick={() => onSuggestionClick(suggestion.description)}
           >
             <div className="relative w-16 h-12 rounded overflow-hidden mr-4 group-hover:ring-2 ring-primary/30 transition-all">
@@ -51,12 +50,12 @@ export function VideoSuggestions({ onSuggestionClick }: VideoSuggestionsProps) {
                 className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
               />
             </div>
-            <div className="space-y-1 flex-1">
+            <div className="space-y-2 flex-1">
               <div className="flex items-center gap-2">
                 <suggestion.icon className="w-4 h-4 text-primary" />
-                <h4 className="font-medium text-sm text-foreground">{suggestion.title}</h4>
+                <h4 className="font-semibold text-sm text-white">{suggestion.title}</h4>
               </div>
-              <p className="text-sm text-muted-foreground leading-snug line-clamp-2">
+              <p className="text-sm text-muted-foreground leading-relaxed line-clamp-2">
                 {suggestion.description}
               </p>
             </div>
