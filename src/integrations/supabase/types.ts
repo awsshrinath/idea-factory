@@ -9,26 +9,53 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      // Define your tables here as they are created
-      // Example:
-      // users: {
-      //   Row: {
-      //     id: string
-      //     created_at: string
-      //     email: string | null
-      //   }
-      //   Insert: {
-      //     id: string
-      //     created_at?: string
-      //     email?: string | null
-      //   }
-      //   Update: {
-      //     id?: string
-      //     created_at?: string
-      //     email?: string | null
-      //   }
-      //   Relationships: []
-      // }
+      content: {
+        Row: {
+          created_at: string | null
+          description: string
+          generated_content: string | null
+          id: string
+          platforms: string[]
+          status: string
+          title: string
+          tone: string
+          updated_at: string | null
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description: string
+          generated_content?: string | null
+          id: string
+          platforms: string[]
+          status?: string
+          title: string
+          tone: string
+          updated_at?: string | null
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string
+          generated_content?: string | null
+          id?: string
+          platforms?: string[]
+          status?: string
+          title?: string
+          tone?: string
+          updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "content_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
