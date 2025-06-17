@@ -1,0 +1,53 @@
+
+import React from "react";
+import { ImageCard } from "./ImageCard";
+
+interface GeneratedImage {
+  id: string;
+  user_id: string;
+  prompt: string;
+  style: string;
+  aspect_ratio: string;
+  image_path: string;
+  created_at: string;
+  updated_at?: string;
+  title?: string | null;
+  is_favorite?: boolean | null;
+}
+
+interface GridViewProps {
+  images: GeneratedImage[];
+  onImageClick: (image: GeneratedImage) => void;
+  onRegenerate: (image: GeneratedImage) => void;
+  onDownload: (image: GeneratedImage) => void;
+  onDelete: (id: string) => void;
+  onToggleFavorite: (image: GeneratedImage) => void;
+  onSaveTitle: (id: string, title: string) => void;
+}
+
+export function GridView({
+  images,
+  onImageClick,
+  onRegenerate,
+  onDownload,
+  onDelete,
+  onToggleFavorite,
+  onSaveTitle
+}: GridViewProps) {
+  return (
+    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+      {images.map((image) => (
+        <ImageCard
+          key={image.id}
+          image={image}
+          onImageClick={onImageClick}
+          onRegenerate={onRegenerate}
+          onDownload={onDownload}
+          onDelete={onDelete}
+          onToggleFavorite={onToggleFavorite}
+          onSaveTitle={onSaveTitle}
+        />
+      ))}
+    </div>
+  );
+}

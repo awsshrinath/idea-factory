@@ -9,99 +9,26 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      content: {
-        Row: {
-          created_at: string | null
-          description: string
-          generated_content: string | null
-          id: string
-          platforms: string[]
-          status: string
-          title: string
-          tone: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          generated_content?: string | null
-          id?: string
-          platforms: string[]
-          status?: string
-          title: string
-          tone: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          generated_content?: string | null
-          id?: string
-          platforms?: string[]
-          status?: string
-          title?: string
-          tone?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      generated_images: {
-        Row: {
-          aspect_ratio: string
-          created_at: string | null
-          id: string
-          image_path: string
-          prompt: string
-          style: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          aspect_ratio: string
-          created_at?: string | null
-          id?: string
-          image_path: string
-          prompt: string
-          style: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          aspect_ratio?: string
-          created_at?: string | null
-          id?: string
-          image_path?: string
-          prompt?: string
-          style?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      trending_topics: {
-        Row: {
-          created_at: string | null
-          description: string
-          id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          id?: string
-          title: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          id?: string
-          title?: string
-        }
-        Relationships: []
-      }
+      // Define your tables here as they are created
+      // Example:
+      // users: {
+      //   Row: {
+      //     id: string
+      //     created_at: string
+      //     email: string | null
+      //   }
+      //   Insert: {
+      //     id: string
+      //     created_at?: string
+      //     email?: string | null
+      //   }
+      //   Update: {
+      //     id?: string
+      //     created_at?: string
+      //     email?: string | null
+      //   }
+      //   Relationships: []
+      // }
     }
     Views: {
       [_ in never]: never
