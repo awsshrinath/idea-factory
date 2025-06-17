@@ -57,16 +57,16 @@ export function Sidebar() {
           variant="ghost"
           size="icon"
           onClick={toggleSidebar}
-          className="fixed top-4 left-4 z-50 bg-background/80 backdrop-blur-sm rounded-full shadow-md h-10 w-10 flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-lg"
+          className="fixed top-4 left-4 z-50 bg-slate-800/80 backdrop-blur-sm rounded-full shadow-md h-10 w-10 flex items-center justify-center hover:scale-110 transition-all duration-300 hover:shadow-lg border border-slate-700/50"
         >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
+          {mobileOpen ? <X className="h-5 w-5 text-slate-200" /> : <Menu className="h-5 w-5 text-slate-200" />}
         </Button>
       )}
 
       {/* Desktop sidebar */}
       <div
         className={cn(
-          "h-screen fixed left-0 top-0 z-40 flex flex-col glass border-r border-border transition-all duration-300",
+          "h-screen fixed left-0 top-0 z-40 flex flex-col glass border-r border-slate-700/60 transition-all duration-300",
           isMobile 
             ? mobileOpen 
               ? "translate-x-0 opacity-100 w-64" 
@@ -74,12 +74,12 @@ export function Sidebar() {
             : collapsed 
               ? "w-16" 
               : "w-64",
-          "bg-background/90 backdrop-blur-md",
+          "bg-slate-900/90 backdrop-blur-md",
         )}
       >
         <div className="flex items-center justify-between p-6">
           {!(collapsed && !isMobile) && (
-            <h1 className="text-xl font-heading font-black bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent truncate">
+            <h1 className="text-xl font-heading font-black bg-gradient-to-r from-slate-300 to-indigo-400 bg-clip-text text-transparent truncate">
               Content AI
             </h1>
           )}
@@ -90,7 +90,7 @@ export function Sidebar() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="ml-auto hover:scale-110 transition-all duration-300 hover:bg-white/10 rounded-xl"
+                    className="ml-auto hover:scale-110 transition-all duration-300 hover:bg-slate-700/50 rounded-xl text-slate-300 hover:text-slate-100"
                     onClick={toggleSidebar}
                   >
                     <Menu className="h-4 w-4" />
@@ -118,26 +118,26 @@ export function Sidebar() {
                             "flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-300 relative group",
                             isMobile && "py-4",
                             isActive 
-                              ? "bg-gradient-to-r from-blue-600/20 to-blue-700/20 text-blue-400 border border-blue-500/30 shadow-lg shadow-blue-500/20" 
-                              : "hover:bg-white/10 hover:scale-105 hover:shadow-md hover:border hover:border-white/20"
+                              ? "bg-slate-700/50 text-indigo-400 border-l-4 border-indigo-500 shadow-lg shadow-indigo-500/20" 
+                              : "hover:bg-slate-700/30 hover:scale-105 hover:shadow-md hover:border hover:border-slate-600/40 text-slate-300 hover:text-slate-100"
                           )}
                           onClick={() => isMobile && setMobileOpen(false)}
                         >
                           <item.icon className={cn(
                             "h-5 w-5 transition-all duration-300",
-                            isActive ? "text-blue-400" : "text-muted-foreground group-hover:text-white",
+                            isActive ? "text-indigo-400" : "text-slate-400 group-hover:text-slate-200",
                             "group-hover:scale-110"
                           )} />
                           {!(collapsed && !isMobile) && (
                             <span className={cn(
                               "text-sm font-semibold transition-colors duration-300",
-                              isActive ? "text-blue-400" : "group-hover:text-white"
+                              isActive ? "text-indigo-400" : "group-hover:text-slate-100"
                             )}>
                               {item.label}
                             </span>
                           )}
                           {isActive && (
-                            <div className="absolute right-2 w-2 h-2 bg-blue-400 rounded-full animate-pulse" />
+                            <div className="absolute right-2 w-2 h-2 bg-indigo-400 rounded-full animate-pulse" />
                           )}
                         </Link>
                       </TooltipTrigger>

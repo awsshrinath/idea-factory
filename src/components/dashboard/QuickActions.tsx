@@ -12,8 +12,8 @@ export const QuickActions = () => {
       description: "Create engaging posts for your social media platforms",
       icon: FileText,
       path: "/content",
-      gradient: "from-blue-600 to-blue-700",
-      hoverGradient: "hover:from-blue-700 hover:to-blue-800",
+      gradient: "from-slate-600 to-slate-700",
+      hoverGradient: "hover:from-slate-700 hover:to-slate-800",
       emoji: "📝",
     },
     {
@@ -21,8 +21,8 @@ export const QuickActions = () => {
       description: "Generate unique images using AI technology",
       icon: Image,
       path: "/images",
-      gradient: "from-indigo-600 to-indigo-700",
-      hoverGradient: "hover:from-indigo-700 hover:to-indigo-800",
+      gradient: "from-indigo-600 to-purple-600",
+      hoverGradient: "hover:from-indigo-700 hover:to-purple-700",
       emoji: "🖼️",
     },
     {
@@ -30,8 +30,8 @@ export const QuickActions = () => {
       description: "Produce professional videos with AI assistance",
       icon: Video,
       path: "/videos",
-      gradient: "from-blue-500 to-cyan-600",
-      hoverGradient: "hover:from-blue-600 hover:to-cyan-700",
+      gradient: "from-teal-600 to-cyan-600",
+      hoverGradient: "hover:from-teal-700 hover:to-cyan-700",
       emoji: "🎬",
     },
     {
@@ -39,15 +39,15 @@ export const QuickActions = () => {
       description: "Plan and schedule your content calendar",
       icon: Calendar,
       path: "/schedule",
-      gradient: "from-purple-600 to-purple-700",
-      hoverGradient: "hover:from-purple-700 hover:to-purple-800",
+      gradient: "from-violet-600 to-purple-600",
+      hoverGradient: "hover:from-violet-700 hover:to-purple-700",
       emoji: "📅",
     },
   ];
 
   return (
     <section className="mb-8 animate-fadeIn">
-      <h2 className="text-3xl font-black mb-6 text-foreground leading-tight">Quick Actions</h2>
+      <h2 className="text-3xl font-black mb-6 text-slate-100 leading-tight">Quick Actions</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {actions.map((action, index) => {
           const Icon = action.icon;
@@ -55,7 +55,7 @@ export const QuickActions = () => {
             <div
               key={action.title}
               className={`bg-gradient-to-br ${action.gradient} relative rounded-2xl transition-all duration-300 hover:scale-105 
-                         shadow-lg hover:shadow-2xl group overflow-hidden border border-white/10 hover:border-white/20
+                         shadow-lg hover:shadow-2xl group overflow-hidden border border-slate-700/50 hover:border-slate-600/60
                          animate-fadeIn cursor-pointer transform hover:-translate-y-1`}
               style={{ animationDelay: `${index * 100}ms` }}
               onClick={() => navigate(action.path)}

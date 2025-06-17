@@ -29,10 +29,10 @@ const sparklineData = [
 
 const chartConfig = {
   primary: {
-    color: "#3B82F6",
+    color: "#6366f1",
   },
   secondary: {
-    color: "#06B6D4",
+    color: "#64748b",
   },
 };
 
@@ -60,20 +60,20 @@ export const PerformanceMetrics = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn" style={{ animationDelay: "600ms" }}>
-      <Card className="bg-gradient-to-br from-card/80 via-card/60 to-muted/40 border border-white/20 
+      <Card className="bg-slate-800/30 border border-slate-700/60 
                       shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
-                      hover:border-white/30 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2 text-xl font-bold">
+          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
             Total Content
             <div className="flex items-center gap-1">
-              <ArrowUp className="h-4 w-4 text-green-400 animate-bounce" />
-              <span className="text-sm text-green-400 font-semibold">(+15%)</span>
+              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
+              <span className="text-sm text-emerald-400 font-semibold">(+15%)</span>
             </div>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground hover:text-blue-400 transition-colors cursor-help" />
+                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Total content pieces created across all platforms</p>
@@ -81,7 +81,7 @@ export const PerformanceMetrics = () => {
               </UITooltip>
             </TooltipProvider>
           </CardTitle>
-          <CardDescription className="font-medium">This month's performance</CardDescription>
+          <CardDescription className="font-medium text-slate-300">This month's performance</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="h-[160px] w-full group-hover:scale-105 transition-transform duration-300">
@@ -90,16 +90,16 @@ export const PerformanceMetrics = () => {
                 <AreaChart data={data}>
                   <defs>
                     <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#3B82F6" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="#3B82F6" stopOpacity={0.1} />
+                      <stop offset="5%" stopColor="#475569" stopOpacity={0.6} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1} />
                     </linearGradient>
                   </defs>
-                  <XAxis dataKey="name" stroke="#A0A0A0" fontSize={12} />
-                  <YAxis stroke="#A0A0A0" fontSize={12} />
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
+                  <YAxis stroke="#64748b" fontSize={12} />
                   <Tooltip 
                     contentStyle={{ 
                       background: 'rgba(30, 41, 59, 0.95)', 
-                      border: '1px solid rgba(255,255,255,0.2)',
+                      border: '1px solid rgba(100,116,139,0.4)',
                       borderRadius: '12px',
                       backdropFilter: 'blur(10px)',
                       animation: 'fadeIn 0.2s ease-out'
@@ -108,10 +108,10 @@ export const PerformanceMetrics = () => {
                   <Area
                     type="monotone"
                     dataKey="value"
-                    stroke="#3B82F6"
+                    stroke="#6366f1"
                     fill="url(#colorValue)"
                     strokeWidth={3}
-                    className="hover:stroke-[#1D4ED8] transition-colors duration-300"
+                    className="hover:stroke-[#334155] transition-colors duration-300"
                   />
                 </AreaChart>
               </ResponsiveContainer>
@@ -120,16 +120,16 @@ export const PerformanceMetrics = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-card/80 via-card/60 to-muted/40 border border-white/20 
+      <Card className="bg-slate-800/30 border border-slate-700/60 
                       shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
-                      hover:border-white/30 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2 text-xl font-bold">
+          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
             Engagement
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground hover:text-blue-400 transition-colors cursor-help" />
+                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Total views and interactions across all content</p>
@@ -137,13 +137,13 @@ export const PerformanceMetrics = () => {
               </UITooltip>
             </TooltipProvider>
           </CardTitle>
-          <CardDescription className="font-medium">Views and interactions</CardDescription>
+          <CardDescription className="font-medium text-slate-300">Views and interactions</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="text-3xl font-black text-white mb-3 leading-tight tabular-nums">
+          <div className="text-3xl font-black text-slate-100 mb-3 leading-tight tabular-nums">
             {animatedValue.toFixed(1)}K
           </div>
-          <p className="text-cyan-400 flex items-center gap-2 mb-3 text-sm font-semibold">
+          <p className="text-indigo-400 flex items-center gap-2 mb-3 text-sm font-semibold">
             <TrendingUp className="h-4 w-4 animate-pulse" />
             <ArrowUp className="h-3 w-3 animate-bounce" />
             32% increase
@@ -152,18 +152,18 @@ export const PerformanceMetrics = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={sparklineData}>
                 <defs>
-                  <linearGradient id="colorCyan" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#06B6D4" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#06B6D4" stopOpacity={0.1} />
+                  <linearGradient id="colorIndigo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#06B6D4"
-                  fill="url(#colorCyan)"
+                  stroke="#6366f1"
+                  fill="url(#colorIndigo)"
                   strokeWidth={3}
-                  className="hover:stroke-[#0891B2] transition-colors duration-300"
+                  className="hover:stroke-[#475569] transition-colors duration-300"
                 />
               </AreaChart>
             </ResponsiveContainer>
@@ -171,16 +171,16 @@ export const PerformanceMetrics = () => {
         </CardContent>
       </Card>
 
-      <Card className="bg-gradient-to-br from-card/80 via-card/60 to-muted/40 border border-white/20 
+      <Card className="bg-slate-800/30 border border-slate-700/60 
                       shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
-                      hover:border-white/30 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
         <CardHeader className="pb-3">
-          <CardTitle className="text-white flex items-center gap-2 text-xl font-bold">
+          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
             Top Content
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger>
-                  <Info className="h-4 w-4 text-muted-foreground hover:text-blue-400 transition-colors cursor-help" />
+                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Your best performing content piece this month</p>
@@ -188,17 +188,17 @@ export const PerformanceMetrics = () => {
               </UITooltip>
             </TooltipProvider>
           </CardTitle>
-          <CardDescription className="font-medium">Best performing post</CardDescription>
+          <CardDescription className="font-medium text-slate-300">Best performing post</CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex items-center gap-3 mb-3">
-            <Star className="h-6 w-6 text-yellow-400 animate-pulse" />
-            <span className="text-white text-sm font-semibold leading-relaxed">
+            <Star className="h-6 w-6 text-indigo-400 animate-pulse" />
+            <span className="text-slate-100 text-sm font-semibold leading-relaxed">
               "10 Tips for Better Content" reached 12K views
             </span>
           </div>
           <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center gap-1 text-green-400 text-sm font-semibold">
+            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold">
               <ArrowUp className="h-3 w-3 animate-bounce" />
               +250% vs last month
             </div>
@@ -207,18 +207,18 @@ export const PerformanceMetrics = () => {
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={sparklineData}>
                 <defs>
-                  <linearGradient id="colorYellow" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#F59E0B" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#F59E0B" stopOpacity={0.1} />
+                  <linearGradient id="colorSlate" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#64748b" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#64748b" stopOpacity={0.1} />
                   </linearGradient>
                 </defs>
                 <Area
                   type="monotone"
                   dataKey="value"
-                  stroke="#F59E0B"
-                  fill="url(#colorYellow)"
+                  stroke="#64748b"
+                  fill="url(#colorSlate)"
                   strokeWidth={3}
-                  className="hover:stroke-[#D97706] transition-colors duration-300"
+                  className="hover:stroke-[#475569] transition-colors duration-300"
                 />
               </AreaChart>
             </ResponsiveContainer>
