@@ -73,7 +73,7 @@ export const QuickActions = () => {
                   {action.description}
                 </p>
                 <Button
-                  className={`w-full mt-4 bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/40 transition-all duration-300 text-sm font-semibold backdrop-blur-sm shadow-md hover:shadow-lg transform hover:scale-105 group-hover:animate-pulse ${action.hoverGradient}`}
+                  className={`w-full mt-4 bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/40 transition-all duration-300 text-sm font-semibold backdrop-blur-sm shadow-md hover:shadow-lg transform hover:scale-105 group-hover:animate-pulse ${action.hoverGradient} hover:shadow-white/10`}
                 >
                   Get Started
                 </Button>

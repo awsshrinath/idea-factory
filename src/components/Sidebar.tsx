@@ -22,12 +22,12 @@ import {
 } from "@/components/ui/tooltip";
 
 const menuItems = [
-  { icon: Home, label: "Dashboard", path: "/" },
-  { icon: FileText, label: "Content", path: "/content" },
-  { icon: Image, label: "Images", path: "/images" },
-  { icon: Video, label: "Videos", path: "/videos" },
-  { icon: Calendar, label: "Schedule", path: "/schedule" },
-  { icon: Settings, label: "Settings", path: "/settings" },
+  { icon: Home, label: "Dashboard", path: "/", shortcut: "⌘1" },
+  { icon: FileText, label: "Content", path: "/content", shortcut: "⌘2" },
+  { icon: Image, label: "Images", path: "/images", shortcut: "⌘3" },
+  { icon: Video, label: "Videos", path: "/videos", shortcut: "⌘4" },
+  { icon: Calendar, label: "Schedule", path: "/schedule", shortcut: "⌘5" },
+  { icon: Settings, label: "Settings", path: "/settings", shortcut: "⌘," },
 ];
 
 export function Sidebar() {
@@ -118,7 +118,7 @@ export function Sidebar() {
                             "flex items-center space-x-3 px-3 py-3 rounded-xl transition-all duration-300 relative group",
                             isMobile && "py-4",
                             isActive 
-                              ? "bg-slate-700/50 text-indigo-400 border-l-4 border-indigo-500 shadow-lg shadow-indigo-500/20" 
+                              ? "bg-slate-700/50 text-indigo-400 shadow-lg shadow-indigo-500/20 border-l-4 border-indigo-500 ml-0 pl-2" 
                               : "hover:bg-slate-700/30 hover:scale-105 hover:shadow-md hover:border hover:border-slate-600/40 text-slate-300 hover:text-slate-100"
                           )}
                           onClick={() => isMobile && setMobileOpen(false)}
@@ -130,10 +130,15 @@ export function Sidebar() {
                           )} />
                           {!(collapsed && !isMobile) && (
                             <span className={cn(
-                              "text-sm font-semibold transition-colors duration-300",
+                              "text-sm font-semibold transition-colors duration-300 flex-1",
                               isActive ? "text-indigo-400" : "group-hover:text-slate-100"
                             )}>
                               {item.label}
+                            </span>
+                          )}
+                          {!(collapsed && !isMobile) && (
+                            <span className="text-xs text-slate-500 opacity-0 group-hover:opacity-100 transition-opacity">
+                              {item.shortcut}
                             </span>
                           )}
                           {isActive && (
@@ -143,7 +148,10 @@ export function Sidebar() {
                       </TooltipTrigger>
                       {collapsed && !isMobile && (
                         <TooltipContent side="right">
-                          <p>{item.label}</p>
+                          <div className="flex items-center gap-2">
+                            <span>{item.label}</span>
+                            <span className="text-xs text-slate-400">{item.shortcut}</span>
+                          </div>
                         </TooltipContent>
                       )}
                     </Tooltip>

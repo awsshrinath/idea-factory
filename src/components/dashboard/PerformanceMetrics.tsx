@@ -1,4 +1,3 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
 import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
@@ -81,10 +80,20 @@ export const PerformanceMetrics = () => {
               </UITooltip>
             </TooltipProvider>
           </CardTitle>
-          <CardDescription className="font-medium text-slate-300">This month's performance</CardDescription>
+          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
+            This month's performance
+            <span className="text-xs text-slate-400">vs last month</span>
+          </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="h-[160px] w-full group-hover:scale-105 transition-transform duration-300">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-3xl font-black text-slate-100 tabular-nums">1,247</div>
+            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
+              <ArrowUp className="h-3 w-3" />
+              +15.3%
+            </div>
+          </div>
+          <div className="h-[100px] w-full group-hover:scale-105 transition-transform duration-300">
             <ChartContainer config={chartConfig}>
               <ResponsiveContainer width="100%" height="100%">
                 <AreaChart data={data}>
@@ -126,6 +135,10 @@ export const PerformanceMetrics = () => {
         <CardHeader className="pb-3">
           <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
             Engagement
+            <div className="flex items-center gap-1">
+              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
+              <span className="text-sm text-emerald-400 font-semibold">(+32%)</span>
+            </div>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger>
@@ -137,16 +150,24 @@ export const PerformanceMetrics = () => {
               </UITooltip>
             </TooltipProvider>
           </CardTitle>
-          <CardDescription className="font-medium text-slate-300">Views and interactions</CardDescription>
+          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
+            Views and interactions
+            <span className="text-xs text-slate-400">vs last month</span>
+          </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
-          <div className="text-3xl font-black text-slate-100 mb-3 leading-tight tabular-nums">
-            {animatedValue.toFixed(1)}K
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-3xl font-black text-slate-100 leading-tight tabular-nums">
+              {animatedValue.toFixed(1)}K
+            </div>
+            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
+              <ArrowUp className="h-3 w-3" />
+              +32.1%
+            </div>
           </div>
           <p className="text-indigo-400 flex items-center gap-2 mb-3 text-sm font-semibold">
             <TrendingUp className="h-4 w-4 animate-pulse" />
-            <ArrowUp className="h-3 w-3 animate-bounce" />
-            32% increase
+            Trending upward
           </p>
           <div className="h-[60px] group-hover:scale-105 transition-transform duration-300">
             <ResponsiveContainer width="100%" height="100%">
@@ -177,6 +198,10 @@ export const PerformanceMetrics = () => {
         <CardHeader className="pb-3">
           <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
             Top Content
+            <div className="flex items-center gap-1">
+              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
+              <span className="text-sm text-emerald-400 font-semibold">(+250%)</span>
+            </div>
             <TooltipProvider>
               <UITooltip>
                 <TooltipTrigger>
@@ -188,7 +213,10 @@ export const PerformanceMetrics = () => {
               </UITooltip>
             </TooltipProvider>
           </CardTitle>
-          <CardDescription className="font-medium text-slate-300">Best performing post</CardDescription>
+          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
+            Best performing post
+            <span className="text-xs text-slate-400">vs last month</span>
+          </CardDescription>
         </CardHeader>
         <CardContent className="pt-0">
           <div className="flex items-center gap-3 mb-3">
@@ -197,11 +225,14 @@ export const PerformanceMetrics = () => {
               "10 Tips for Better Content" reached 12K views
             </span>
           </div>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold">
-              <ArrowUp className="h-3 w-3 animate-bounce" />
-              +250% vs last month
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
+                <ArrowUp className="h-3 w-3" />
+                +250%
+              </div>
             </div>
+            <span className="text-xs text-slate-400">vs last month</span>
           </div>
           <div className="h-[60px] group-hover:scale-105 transition-transform duration-300">
             <ResponsiveContainer width="100%" height="100%">

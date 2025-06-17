@@ -15,17 +15,7 @@ const badgeVariants = cva(
           "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
         destructive:
           "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-        outline: "text-foreground border-input",
-        accent: "border-transparent bg-accent text-accent-foreground hover:bg-accent/80",
-        success: "border-transparent bg-emerald-500/20 text-emerald-400 hover:bg-emerald-500/30",
-        info: "border-transparent bg-blue-500/20 text-blue-400 hover:bg-blue-500/30",
-        warning: "border-transparent bg-amber-500/20 text-amber-400 hover:bg-amber-500/30",
-        // Image metadata badge variants
-        style: "border-transparent bg-primary/20 text-primary-foreground/90 hover:bg-primary/30",
-        mood: "border-transparent bg-accent/20 text-accent-foreground/90 hover:bg-accent/30", 
-        dimension: "border-transparent bg-secondary/20 text-secondary-foreground/90 hover:bg-secondary/30",
-        // Shimmer effect for placeholder badges
-        shimmer: "border-transparent bg-gradient-to-r from-muted/20 via-muted/30 to-muted/20 text-muted-foreground/80 animate-shimmer bg-[length:200%_100%]"
+        outline: "text-foreground",
       },
     },
     defaultVariants: {
