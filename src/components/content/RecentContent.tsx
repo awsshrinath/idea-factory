@@ -8,7 +8,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Clock, Copy, Eye, Trash } from "lucide-react";
+import { Clock, Copy, Eye, Trash, FileText } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 
 interface Content {
@@ -37,20 +37,20 @@ export function RecentContent() {
 
   if (isLoading) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Clock className="w-5 h-5" />
+      <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in rounded-[12px]">
+        <CardHeader className="p-[24px]">
+          <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-[16px]">
+            <Clock className="w-6 h-6" />
             Recent Content
           </CardTitle>
           <CardDescription>Your previously created content</CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-[24px]">
           <div className="space-y-4">
             {[1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="h-24 rounded-md bg-muted animate-pulse"
+                className="h-24 rounded-lg bg-background/50 animate-pulse"
               />
             ))}
           </div>
@@ -60,56 +60,80 @@ export function RecentContent() {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
+    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
+      <CardHeader className="p-4">
+        <CardTitle className="flex items-center gap-2 text-lg font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
           <Clock className="w-5 h-5" />
           Recent Content
         </CardTitle>
-        <CardDescription>Your previously created content</CardDescription>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {content?.map((item) => (
-            <div
-              key={item.id}
-              className="p-4 rounded-md border bg-card"
-            >
-              <div className="flex justify-between items-start gap-4">
-                <div>
-                  <h3 className="font-medium mb-1">{item.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {item.description}
-                  </p>
-                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                    <span>
-                      {formatDistanceToNow(new Date(item.created_at), {
-                        addSuffix: true,
-                      })}
-                    </span>
-                    <span>•</span>
-                    <span className="capitalize">{item.status}</span>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  <Button variant="ghost" size="icon">
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                  <Button variant="ghost" size="icon">
-                    <Trash className="w-4 h-4" />
-                  </Button>
+      <CardContent className="p-4">
+        <div className="space-y-3">
+          {content?.length === 0 ? (
+            <div className="text-center py-8 px-4">
+              <div className="w-16 h-16 mx-auto mb-4 relative">
+                <div className="absolute inset-0 animate-float">
+                  <img
+                    src="https://images.unsplash.com/photo-1487887235947-a955ef187fcc"
+                    alt="Rocket"
+                    className="w-full h-full object-contain opacity-70"
+                  />
                 </div>
               </div>
+              <p className="text-base font-medium text-muted-foreground mb-2">
+                No content yet! 🚀
+              </p>
+              <p className="text-sm text-muted-foreground">
+                Create your first post and launch your journey!
+              </p>
             </div>
-          ))}
-
-          {content?.length === 0 && (
-            <div className="text-center text-muted-foreground py-8">
-              No content created yet
-            </div>
+          ) : (
+            content?.map((item) => (
+              <div
+                key={item.id}
+                className="p-3 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group"
+              >
+                <div className="flex justify-between items-start gap-3">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-base mb-1 group-hover:text-primary transition-colors duration-300">
+                      {item.title}
+                    </h3>
+                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                      <span>
+                        {formatDistanceToNow(new Date(item.created_at), {
+                          addSuffix: true,
+                        })}
+                      </span>
+                      <span>•</span>
+                      <span className="capitalize">{item.status}</span>
+                    </div>
+                  </div>
+                  <div className="flex gap-1">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-accent/50 transition-colors group rounded-lg"
+                    >
+                      <Eye className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-accent/50 transition-colors group rounded-lg"
+                    >
+                      <Copy className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="hover:bg-accent/50 transition-colors group rounded-lg"
+                    >
+                      <Trash className="w-4 h-4 group-hover:text-primary transition-colors" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
+            ))
           )}
         </div>
       </CardContent>

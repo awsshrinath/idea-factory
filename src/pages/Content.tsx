@@ -4,6 +4,7 @@ import { ContentForm } from "@/components/content/ContentForm";
 import { TrendingTopics } from "@/components/content/TrendingTopics";
 import { RecentContent } from "@/components/content/RecentContent";
 import { ContentPreview } from "@/components/content/ContentPreview";
+import { PromptTemplates } from "@/components/content/PromptTemplates";
 import { HelpCircle } from "lucide-react";
 import {
   Tooltip,
@@ -11,14 +12,20 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export type Platform = "linkedin" | "twitter" | "facebook";
 export type Tone = "professional" | "friendly" | "casual" | "creative";
+export type AIModel = "chatgpt" | "deepseek";
+export type Language = "English" | "Spanish" | "French" | "German" | "Chinese";
 
 export interface ContentFormData {
   description: string;
   platforms: Platform[];
   tone: Tone;
+  aiModel: AIModel;
+  language: Language;
 }
 
 export function Content() {
@@ -26,23 +33,36 @@ export function Content() {
     description: "",
     platforms: [],
     tone: "professional",
+    aiModel: "chatgpt",
+    language: "English",
   });
+  const isMobile = useIsMobile();
 
   return (
-    <div className="min-h-screen flex">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
-      <main className="flex-1 ml-64 p-8">
-        <div className="max-w-7xl mx-auto">
+      <main className={cn(
+        "flex-1 animate-fade-in w-full max-w-full",
+        "p-3 md:p-4 lg:p-5",
+        isMobile ? "ml-0 pt-16" : "ml-64"
+      )}>
+        <div className={cn(
+          "mx-auto space-y-4 w-full",
+          "max-w-[95%] xl:max-w-[90%]"
+        )}>
           {/* Header Section */}
-          <div className="mb-8">
-            <div className="flex items-center gap-2">
-              <h1 className="text-4xl font-bold bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent">
-                Create Your Next Masterpiece
+          <div className="mb-2 animate-slide-in-right">
+            <div className="flex items-center gap-2 justify-between">
+              <h1 className={cn(
+                "font-bold font-heading bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
+                isMobile ? "text-2xl" : "text-3xl"
+              )}>
+                Create Content
               </h1>
               <TooltipProvider>
                 <Tooltip>
-                  <TooltipTrigger>
-                    <HelpCircle className="w-5 h-5 text-muted-foreground" />
+                  <TooltipTrigger className="group">
+                    <HelpCircle className="w-5 h-5 text-muted-foreground group-hover:text-secondary transition-colors" />
                   </TooltipTrigger>
                   <TooltipContent>
                     <p className="max-w-xs">
@@ -53,31 +73,51 @@ export function Content() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <p className="text-lg text-muted-foreground mt-2">
-              Use AI to generate professional, engaging, and platform-ready content
+            <p className={cn(
+              "text-muted-foreground mt-1",
+              isMobile ? "text-sm" : "text-base"
+            )}>
+              Use AI to craft engaging, platform-ready content in seconds
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            {/* Left Column - Form and Recent Content */}
-            <div className="lg:col-span-2 space-y-8">
+          {/* Prompt Templates Carousel */}
+          <PromptTemplates onSelectTemplate={(template) => {
+            setFormData(prev => ({
+              ...prev,
+              description: template.prompt
+            }));
+          }} />
+
+          {/* Main Content Layout */}
+          <div className={cn(
+            "grid gap-4",
+            isMobile ? 
+              "grid-cols-1" : 
+              "grid-cols-1 xl:grid-cols-[1fr,400px]"
+          )}>
+            {/* Content Form Column */}
+            <div className="space-y-4">
               <ContentForm
                 formData={formData}
                 onChange={setFormData}
               />
-              <RecentContent />
             </div>
 
-            {/* Right Column - Preview and Trending Topics */}
-            <div className="space-y-8">
-              <ContentPreview formData={formData} />
+            {/* Preview and Sidebar Column */}
+            <div className="space-y-4">
+              <ContentPreview
+                formData={formData}
+                onContentChange={(content) => {
+                  setFormData(prev => ({...prev, description: content}));
+                }}
+              />
+              <RecentContent />
               <TrendingTopics
-                onSelect={(topic) =>
-                  setFormData((prev) => ({
-                    ...prev,
-                    description: topic.description,
-                  }))
-                }
+                onSelect={(topic) => setFormData((prev) => ({
+                  ...prev,
+                  description: topic.description,
+                }))}
               />
             </div>
           </div>

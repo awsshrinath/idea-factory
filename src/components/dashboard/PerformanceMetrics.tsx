@@ -1,7 +1,14 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer } from "@/components/ui/chart";
-import { AreaChart, Area, XAxis, YAxis, Tooltip } from "recharts";
-import { TrendingUp, Star } from "lucide-react";
+import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
+import { TrendingUp, Star, Info, ArrowUp, ArrowDown } from "lucide-react";
+import {
+  Tooltip as UITooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useState, useEffect } from "react";
 
 const data = [
   { name: "Jan", value: 400 },
@@ -11,71 +18,241 @@ const data = [
   { name: "May", value: 700 },
 ];
 
+const sparklineData = [
+  { name: "1", value: 40 },
+  { name: "2", value: 30 },
+  { name: "3", value: 60 },
+  { name: "4", value: 50 },
+  { name: "5", value: 75 },
+];
+
 const chartConfig = {
   primary: {
-    color: "#E91E63",
+    color: "#6366f1",
   },
   secondary: {
-    color: "#1DE9B6",
+    color: "#64748b",
   },
 };
 
 export const PerformanceMetrics = () => {
+  const [animatedValue, setAnimatedValue] = useState(0);
+  const targetValue = 8.6;
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      let start = 0;
+      const increment = targetValue / 50;
+      const counter = setInterval(() => {
+        start += increment;
+        if (start >= targetValue) {
+          setAnimatedValue(targetValue);
+          clearInterval(counter);
+        } else {
+          setAnimatedValue(start);
+        }
+      }, 30);
+    }, 600);
+
+    return () => clearTimeout(timer);
+  }, []);
+
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-      <Card className="bg-white/5 border-white/10 hover:shadow-lg transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-white flex items-center gap-2">
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn" style={{ animationDelay: "600ms" }}>
+      <Card className="bg-slate-800/30 border border-slate-700/60 
+                      shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
+                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
             Total Content
-            <span className="text-xs text-green-400">(+15%)</span>
+            <div className="flex items-center gap-1">
+              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
+              <span className="text-sm text-emerald-400 font-semibold">(+15%)</span>
+            </div>
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Total content pieces created across all platforms</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
           </CardTitle>
-          <CardDescription>This month's performance</CardDescription>
+          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
+            This month's performance
+            <span className="text-xs text-slate-400">vs last month</span>
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="h-[200px] w-full">
+        <CardContent className="pt-0">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-3xl font-black text-slate-100 tabular-nums">1,247</div>
+            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
+              <ArrowUp className="h-3 w-3" />
+              +15.3%
+            </div>
+          </div>
+          <div className="h-[100px] w-full group-hover:scale-105 transition-transform duration-300">
             <ChartContainer config={chartConfig}>
-              <AreaChart data={data}>
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Tooltip />
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#E91E63"
-                  fill="#E91E63"
-                  fillOpacity={0.2}
-                />
-              </AreaChart>
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={data}>
+                  <defs>
+                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#475569" stopOpacity={0.6} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1} />
+                    </linearGradient>
+                  </defs>
+                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
+                  <YAxis stroke="#64748b" fontSize={12} />
+                  <Tooltip 
+                    contentStyle={{ 
+                      background: 'rgba(30, 41, 59, 0.95)', 
+                      border: '1px solid rgba(100,116,139,0.4)',
+                      borderRadius: '12px',
+                      backdropFilter: 'blur(10px)',
+                      animation: 'fadeIn 0.2s ease-out'
+                    }} 
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="value"
+                    stroke="#6366f1"
+                    fill="url(#colorValue)"
+                    strokeWidth={3}
+                    className="hover:stroke-[#334155] transition-colors duration-300"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
             </ChartContainer>
           </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-white/5 border-white/10 hover:shadow-lg transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-white">Engagement</CardTitle>
-          <CardDescription>Views and interactions</CardDescription>
+      <Card className="bg-slate-800/30 border border-slate-700/60 
+                      shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
+                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
+            Engagement
+            <div className="flex items-center gap-1">
+              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
+              <span className="text-sm text-emerald-400 font-semibold">(+32%)</span>
+            </div>
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Total views and interactions across all content</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+          </CardTitle>
+          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
+            Views and interactions
+            <span className="text-xs text-slate-400">vs last month</span>
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-white">8.6K</div>
-          <p className="text-green-400 flex items-center gap-1">
-            <TrendingUp className="h-4 w-4" />
-            32% increase
+        <CardContent className="pt-0">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-3xl font-black text-slate-100 leading-tight tabular-nums">
+              {animatedValue.toFixed(1)}K
+            </div>
+            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
+              <ArrowUp className="h-3 w-3" />
+              +32.1%
+            </div>
+          </div>
+          <p className="text-indigo-400 flex items-center gap-2 mb-3 text-sm font-semibold">
+            <TrendingUp className="h-4 w-4 animate-pulse" />
+            Trending upward
           </p>
+          <div className="h-[60px] group-hover:scale-105 transition-transform duration-300">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={sparklineData}>
+                <defs>
+                  <linearGradient id="colorIndigo" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#6366f1"
+                  fill="url(#colorIndigo)"
+                  strokeWidth={3}
+                  className="hover:stroke-[#475569] transition-colors duration-300"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
         </CardContent>
       </Card>
 
-      <Card className="bg-white/5 border-white/10 hover:shadow-lg transition-all duration-300">
-        <CardHeader>
-          <CardTitle className="text-white">Top Content</CardTitle>
-          <CardDescription>Best performing post</CardDescription>
+      <Card className="bg-slate-800/30 border border-slate-700/60 
+                      shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
+                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
+            Top Content
+            <div className="flex items-center gap-1">
+              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
+              <span className="text-sm text-emerald-400 font-semibold">(+250%)</span>
+            </div>
+            <TooltipProvider>
+              <UITooltip>
+                <TooltipTrigger>
+                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Your best performing content piece this month</p>
+                </TooltipContent>
+              </UITooltip>
+            </TooltipProvider>
+          </CardTitle>
+          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
+            Best performing post
+            <span className="text-xs text-slate-400">vs last month</span>
+          </CardDescription>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-2">
-            <Star className="h-5 w-5 text-yellow-400" />
-            <span className="text-white">
+        <CardContent className="pt-0">
+          <div className="flex items-center gap-3 mb-3">
+            <Star className="h-6 w-6 text-indigo-400 animate-pulse" />
+            <span className="text-slate-100 text-sm font-semibold leading-relaxed">
               "10 Tips for Better Content" reached 12K views
             </span>
+          </div>
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
+                <ArrowUp className="h-3 w-3" />
+                +250%
+              </div>
+            </div>
+            <span className="text-xs text-slate-400">vs last month</span>
+          </div>
+          <div className="h-[60px] group-hover:scale-105 transition-transform duration-300">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={sparklineData}>
+                <defs>
+                  <linearGradient id="colorSlate" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#64748b" stopOpacity={0.6} />
+                    <stop offset="95%" stopColor="#64748b" stopOpacity={0.1} />
+                  </linearGradient>
+                </defs>
+                <Area
+                  type="monotone"
+                  dataKey="value"
+                  stroke="#64748b"
+                  fill="url(#colorSlate)"
+                  strokeWidth={3}
+                  className="hover:stroke-[#475569] transition-colors duration-300"
+                />
+              </AreaChart>
+            </ResponsiveContainer>
           </div>
         </CardContent>
       </Card>

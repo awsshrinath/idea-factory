@@ -1,11 +1,41 @@
+
 import { Sidebar } from "@/components/Sidebar";
+import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
+import { QuickStats } from "@/components/schedule/QuickStats";
+import { FilterSection } from "@/components/schedule/FilterSection";
+import { CalendarView } from "@/components/schedule/CalendarView";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function Schedule() {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="min-h-screen flex">
+    <div className={cn(
+      "min-h-screen flex overflow-x-hidden",
+      "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]" // Added dark theme gradient background
+    )}>
       <Sidebar />
-      <main className="flex-1 ml-64 p-8">
-        <h1 className="text-4xl font-bold mb-8">Schedule</h1>
+      <main className={cn(
+        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8", // Updated padding to match other pages
+        isMobile ? "ml-0 pt-16" : "ml-64", // Keep mobile padding for menu button
+        "w-full max-w-full"
+      )}>
+        <div className="max-w-7xl mx-auto page-container">
+          <ScheduleHeader />
+          
+          {/* Main Content Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8">
+            {/* Left Sidebar */}
+            <div className="space-y-6">
+              <QuickStats />
+              <FilterSection />
+            </div>
+
+            {/* Calendar Section */}
+            <CalendarView />
+          </div>
+        </div>
       </main>
     </div>
   );
