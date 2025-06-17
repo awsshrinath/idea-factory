@@ -46,32 +46,34 @@ export const QuickActions = () => {
   ];
 
   return (
-    <section className="mb-8">
-      <h2 className="text-2xl font-bold mb-6 text-foreground leading-tight">Quick Actions</h2>
+    <section className="mb-8 animate-fadeIn">
+      <h2 className="text-3xl font-black mb-6 text-foreground leading-tight">Quick Actions</h2>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {actions.map((action) => {
+        {actions.map((action, index) => {
           const Icon = action.icon;
           return (
             <div
               key={action.title}
               className={`bg-gradient-to-br ${action.gradient} relative rounded-2xl transition-all duration-300 hover:scale-105 
-                         shadow-lg hover:shadow-2xl group overflow-hidden border border-white/10`}
+                         shadow-lg hover:shadow-2xl group overflow-hidden border border-white/10 hover:border-white/20
+                         animate-fadeIn cursor-pointer transform hover:-translate-y-1`}
+              style={{ animationDelay: `${index * 100}ms` }}
+              onClick={() => navigate(action.path)}
             >
               <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
               <div className="relative p-6 h-full flex flex-col">
                 <div className="flex items-center justify-between mb-4">
-                  <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center transform transition-all duration-300 group-hover:scale-110 group-hover:bg-white/30 shadow-lg">
+                  <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center transform transition-all duration-300 group-hover:scale-110 group-hover:bg-white/30 group-hover:rotate-3 shadow-lg">
                     <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">{action.emoji}</span>
+                  <span className="text-2xl group-hover:scale-110 group-hover:animate-bounce transition-transform duration-300">{action.emoji}</span>
                 </div>
-                <h3 className="text-lg font-bold mb-2 text-white leading-tight">{action.title}</h3>
-                <p className="text-sm text-white/80 mb-auto line-clamp-2 leading-relaxed font-medium">
+                <h3 className="text-lg font-bold mb-2 text-white leading-tight group-hover:text-white/90">{action.title}</h3>
+                <p className="text-sm text-white/80 mb-auto line-clamp-2 leading-relaxed font-medium group-hover:text-white/90">
                   {action.description}
                 </p>
                 <Button
-                  className={`w-full mt-4 bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/40 transition-all duration-300 text-sm font-semibold backdrop-blur-sm shadow-md hover:shadow-lg transform hover:scale-105 ${action.hoverGradient}`}
-                  onClick={() => navigate(action.path)}
+                  className={`w-full mt-4 bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/40 transition-all duration-300 text-sm font-semibold backdrop-blur-sm shadow-md hover:shadow-lg transform hover:scale-105 group-hover:animate-pulse ${action.hoverGradient}`}
                 >
                   Get Started
                 </Button>

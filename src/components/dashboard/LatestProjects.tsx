@@ -1,6 +1,6 @@
 
 import { Button } from "@/components/ui/button";
-import { Edit, Copy, ImageIcon, Play, Star, Trash2 } from "lucide-react";
+import { Edit, Copy, ImageIcon, Play, Star, Trash2, Share2, Clock, CheckCircle } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -8,6 +8,7 @@ import { useState } from "react";
 export const LatestProjects = () => {
   const isMobile = useIsMobile();
   const [pinnedProjects, setPinnedProjects] = useState<string[]>([]);
+  const [hoveredProject, setHoveredProject] = useState<string | null>(null);
   
   const projects = [
     {
@@ -17,7 +18,8 @@ export const LatestProjects = () => {
       description: "Email content for subscribers",
       date: "2 hours ago",
       icon: "text",
-      preview: null, // Text doesn't have visual preview
+      preview: null,
+      status: "draft",
     },
     {
       id: "proj2",
@@ -27,6 +29,7 @@ export const LatestProjects = () => {
       date: "Yesterday",
       icon: "image",
       preview: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=500&q=80",
+      status: "published",
     },
     {
       id: "proj3",
@@ -36,6 +39,7 @@ export const LatestProjects = () => {
       date: "3 days ago",
       icon: "video",
       preview: "https://images.unsplash.com/photo-1605810230434-7631ac76ec81?w=500&q=80",
+      status: "scheduled",
     },
     {
       id: "proj4",
@@ -45,6 +49,7 @@ export const LatestProjects = () => {
       date: "4 days ago",
       icon: "text",
       preview: null,
+      status: "published",
     },
   ];
 
@@ -56,20 +61,46 @@ export const LatestProjects = () => {
     );
   };
 
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case "published":
+        return <CheckCircle className="h-3 w-3 text-green-400" />;
+      case "scheduled":
+        return <Clock className="h-3 w-3 text-yellow-400" />;
+      default:
+        return <Edit className="h-3 w-3 text-gray-400" />;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case "published":
+        return "bg-green-500/20 text-green-400 border-green-500/30";
+      case "scheduled":
+        return "bg-yellow-500/20 text-yellow-400 border-yellow-500/30";
+      default:
+        return "bg-gray-500/20 text-gray-400 border-gray-500/30";
+    }
+  };
+
   return (
-    <section className="mb-8">
-      <h2 className="text-2xl font-bold mb-6 text-foreground leading-tight">Latest Projects</h2>
+    <section className="mb-8 animate-fadeIn" style={{ animationDelay: "400ms" }}>
+      <h2 className="text-3xl font-black mb-6 text-foreground leading-tight">Latest Projects</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        {projects.map((project) => {
+        {projects.map((project, index) => {
           const isPinned = pinnedProjects.includes(project.id);
+          const isHovered = hoveredProject === project.id;
           return (
             <div 
               key={project.id} 
               className={cn(
                 "bg-gradient-to-br from-card/80 to-muted/40 border border-white/20 hover:bg-card/90 rounded-2xl",
                 "transition-all duration-300 shadow-lg hover:shadow-2xl group overflow-hidden",
-                "hover:scale-105 hover:border-white/30"
+                "hover:scale-105 hover:border-white/30 transform hover:-translate-y-1 cursor-pointer animate-fadeIn"
               )}
+              style={{ animationDelay: `${500 + index * 100}ms` }}
+              onMouseEnter={() => setHoveredProject(project.id)}
+              onMouseLeave={() => setHoveredProject(null)}
             >
               <div className="h-36 relative overflow-hidden">
                 {project.preview ? (
@@ -82,7 +113,7 @@ export const LatestProjects = () => {
                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     {project.icon === "video" && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="rounded-full bg-blue-600/30 p-3 backdrop-blur-sm border border-white/20 shadow-lg">
+                        <div className="rounded-full bg-blue-600/30 p-3 backdrop-blur-sm border border-white/20 shadow-lg group-hover:scale-110 transition-transform duration-300">
                           <Play className="h-7 w-7 text-white" />
                         </div>
                       </div>
@@ -91,18 +122,48 @@ export const LatestProjects = () => {
                 ) : (
                   <div className="h-full bg-gradient-to-br from-blue-600/20 via-indigo-600/15 to-purple-600/20 flex items-center justify-center border-b border-white/10">
                     {project.icon === "text" && (
-                      <div className="text-4xl font-black text-blue-600/60 select-none">Aa</div>
+                      <div className="text-4xl font-black text-blue-600/60 select-none group-hover:scale-110 transition-transform duration-300">Aa</div>
                     )}
                     {project.icon === "image" && (
-                      <ImageIcon className="h-12 w-12 text-blue-600/60" />
+                      <ImageIcon className="h-12 w-12 text-blue-600/60 group-hover:scale-110 transition-transform duration-300" />
                     )}
                     {project.icon === "video" && (
-                      <div className="rounded-full bg-blue-600/30 p-4 backdrop-blur-sm">
+                      <div className="rounded-full bg-blue-600/30 p-4 backdrop-blur-sm group-hover:scale-110 transition-transform duration-300">
                         <div className="w-8 h-8 rounded-full bg-blue-600/60"></div>
                       </div>
                     )}
                   </div>
                 )}
+                
+                {/* Overlay actions - appear on hover */}
+                <div className={cn(
+                  "absolute inset-0 bg-black/50 flex items-center justify-center gap-2 transition-all duration-300",
+                  isHovered ? "opacity-100" : "opacity-0 pointer-events-none"
+                )}>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60 rounded-xl border border-white/20 transform hover:scale-110 transition-all duration-200"
+                  >
+                    <Edit className="h-4 w-4 text-white" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60 rounded-xl border border-white/20 transform hover:scale-110 transition-all duration-200"
+                  >
+                    <Share2 className="h-4 w-4 text-white" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    className="h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-red-600/60 rounded-xl border border-white/20 transform hover:scale-110 transition-all duration-200"
+                  >
+                    <Trash2 className="h-4 w-4 text-white" />
+                  </Button>
+                </div>
+
+                {/* Pin button */}
                 <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-3 right-3 flex gap-1">
                   <Button 
                     variant="ghost" 
@@ -116,8 +177,16 @@ export const LatestProjects = () => {
                     )} />
                   </Button>
                 </div>
-                <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg text-xs bg-black/50 backdrop-blur-sm text-white/90 font-semibold border border-white/20">
-                  {project.type}
+
+                {/* Project type and status */}
+                <div className="absolute bottom-3 left-3 flex gap-2">
+                  <div className="px-3 py-1.5 rounded-lg text-xs bg-black/50 backdrop-blur-sm text-white/90 font-semibold border border-white/20">
+                    {project.type}
+                  </div>
+                  <div className={`px-2 py-1 rounded-lg text-xs font-semibold border backdrop-blur-sm flex items-center gap-1 ${getStatusColor(project.status)}`}>
+                    {getStatusIcon(project.status)}
+                    {project.status}
+                  </div>
                 </div>
               </div>
               <div className="p-4">
@@ -129,13 +198,18 @@ export const LatestProjects = () => {
                 </p>
                 <div className="flex items-center justify-between mt-2 mb-3">
                   <span className="text-xs text-muted-foreground/80 font-medium">{project.date}</span>
-                  {isPinned && <span className="text-xs text-yellow-400 font-semibold">Pinned</span>}
+                  {isPinned && (
+                    <span className="text-xs text-yellow-400 font-semibold flex items-center gap-1">
+                      <Star className="h-3 w-3 fill-current" />
+                      Pinned
+                    </span>
+                  )}
                 </div>
                 <div className="flex gap-1.5">
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 h-8 text-xs hover:bg-blue-600/20 hover:text-blue-400 hover:border-blue-400/50 transition-all duration-300 font-medium"
+                    className="flex-1 h-8 text-xs hover:bg-blue-600/20 hover:text-blue-400 hover:border-blue-400/50 transition-all duration-300 font-medium transform hover:scale-105"
                   >
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
@@ -143,7 +217,7 @@ export const LatestProjects = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 h-8 text-xs hover:bg-indigo-600/20 hover:text-indigo-400 hover:border-indigo-400/50 transition-all duration-300 font-medium"
+                    className="flex-1 h-8 text-xs hover:bg-indigo-600/20 hover:text-indigo-400 hover:border-indigo-400/50 transition-all duration-300 font-medium transform hover:scale-105"
                   >
                     <Copy className="h-3 w-3 mr-1" />
                     Copy
@@ -151,7 +225,7 @@ export const LatestProjects = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400 hover:border-red-400/50 transition-all duration-300"
+                    className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400 hover:border-red-400/50 transition-all duration-300 transform hover:scale-105"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>
