@@ -57,21 +57,21 @@ export const LatestProjects = () => {
   };
 
   return (
-    <section className="mb-4">
-      <h2 className="text-xl font-semibold mb-3">Latest Projects</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+    <section className="mb-8">
+      <h2 className="text-2xl font-bold mb-6 text-foreground leading-tight">Latest Projects</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {projects.map((project) => {
           const isPinned = pinnedProjects.includes(project.id);
           return (
             <div 
               key={project.id} 
               className={cn(
-                "bg-black/20 border border-white/10 hover:bg-black/30 rounded-xl",
-                "transition-all duration-300 hover:shadow-lg group overflow-hidden",
-                "hover:scale-[1.02] hover:border-white/20"
+                "bg-gradient-to-br from-card/80 to-muted/40 border border-white/20 hover:bg-card/90 rounded-2xl",
+                "transition-all duration-300 shadow-lg hover:shadow-2xl group overflow-hidden",
+                "hover:scale-105 hover:border-white/30"
               )}
             >
-              <div className="h-32 relative overflow-hidden">
+              <div className="h-36 relative overflow-hidden">
                 {project.preview ? (
                   <>
                     <img 
@@ -79,35 +79,35 @@ export const LatestProjects = () => {
                       alt={project.title}
                       className="w-full h-full object-cover transform hover:scale-110 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent"></div>
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent"></div>
                     {project.icon === "video" && (
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <div className="rounded-full bg-primary/20 p-2 backdrop-blur-sm">
-                          <Play className="h-6 w-6 text-white" />
+                        <div className="rounded-full bg-blue-600/30 p-3 backdrop-blur-sm border border-white/20 shadow-lg">
+                          <Play className="h-7 w-7 text-white" />
                         </div>
                       </div>
                     )}
                   </>
                 ) : (
-                  <div className="h-full bg-gradient-to-br from-background/80 via-muted/50 to-background/80 flex items-center justify-center">
+                  <div className="h-full bg-gradient-to-br from-blue-600/20 via-indigo-600/15 to-purple-600/20 flex items-center justify-center border-b border-white/10">
                     {project.icon === "text" && (
-                      <div className="text-3xl font-bold text-primary/30 select-none">Aa</div>
+                      <div className="text-4xl font-black text-blue-600/60 select-none">Aa</div>
                     )}
                     {project.icon === "image" && (
-                      <ImageIcon className="h-10 w-10 text-primary/30" />
+                      <ImageIcon className="h-12 w-12 text-blue-600/60" />
                     )}
                     {project.icon === "video" && (
-                      <div className="rounded-full bg-primary/20 p-3">
-                        <div className="w-6 h-6 rounded-full bg-primary/40"></div>
+                      <div className="rounded-full bg-blue-600/30 p-4 backdrop-blur-sm">
+                        <div className="w-8 h-8 rounded-full bg-blue-600/60"></div>
                       </div>
                     )}
                   </div>
                 )}
-                <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-2 right-2 flex gap-1">
+                <div className="absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300 top-3 right-3 flex gap-1">
                   <Button 
                     variant="ghost" 
                     size="icon" 
-                    className="h-7 w-7 bg-black/40 backdrop-blur-sm hover:bg-black/60"
+                    className="h-8 w-8 bg-black/40 backdrop-blur-sm hover:bg-black/60 rounded-xl border border-white/20"
                     onClick={() => togglePin(project.id)}
                   >
                     <Star className={cn(
@@ -116,26 +116,26 @@ export const LatestProjects = () => {
                     )} />
                   </Button>
                 </div>
-                <div className="absolute bottom-2 left-2 px-2 py-0.5 rounded-md text-xs bg-black/40 backdrop-blur-sm text-white/80">
+                <div className="absolute bottom-3 left-3 px-3 py-1.5 rounded-lg text-xs bg-black/50 backdrop-blur-sm text-white/90 font-semibold border border-white/20">
                   {project.type}
                 </div>
               </div>
-              <div className="p-2">
-                <h3 className="text-sm font-medium truncate group-hover:text-white transition-colors duration-300">
+              <div className="p-4">
+                <h3 className="text-base font-bold truncate group-hover:text-white transition-colors duration-300 leading-tight">
                   {project.title}
                 </h3>
-                <p className="text-xs text-muted-foreground truncate">
+                <p className="text-sm text-muted-foreground truncate leading-relaxed mt-1">
                   {project.description}
                 </p>
-                <div className="flex items-center justify-between mt-1 mb-2">
-                  <span className="text-xs text-muted-foreground/70">{project.date}</span>
-                  {isPinned && <span className="text-xs text-yellow-400">Pinned</span>}
+                <div className="flex items-center justify-between mt-2 mb-3">
+                  <span className="text-xs text-muted-foreground/80 font-medium">{project.date}</span>
+                  {isPinned && <span className="text-xs text-yellow-400 font-semibold">Pinned</span>}
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1.5">
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 h-7 text-xs hover:bg-primary/20 hover:text-primary"
+                    className="flex-1 h-8 text-xs hover:bg-blue-600/20 hover:text-blue-400 hover:border-blue-400/50 transition-all duration-300 font-medium"
                   >
                     <Edit className="h-3 w-3 mr-1" />
                     Edit
@@ -143,7 +143,7 @@ export const LatestProjects = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="flex-1 h-7 text-xs hover:bg-secondary/20 hover:text-secondary"
+                    className="flex-1 h-8 text-xs hover:bg-indigo-600/20 hover:text-indigo-400 hover:border-indigo-400/50 transition-all duration-300 font-medium"
                   >
                     <Copy className="h-3 w-3 mr-1" />
                     Copy
@@ -151,7 +151,7 @@ export const LatestProjects = () => {
                   <Button 
                     variant="outline" 
                     size="sm" 
-                    className="h-7 w-7 p-0 hover:bg-red-500/10 hover:text-red-500"
+                    className="h-8 w-8 p-0 hover:bg-red-500/20 hover:text-red-400 hover:border-red-400/50 transition-all duration-300"
                   >
                     <Trash2 className="h-3 w-3" />
                   </Button>

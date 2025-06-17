@@ -26,45 +26,45 @@ export const PersonalizedGreeting = () => {
   const dailyGoalProgress = 67; // 2/3 = ~67%
   
   return (
-    <div className="mb-4">
-      <div className="bg-gradient-to-r from-black/30 to-black/20 border border-white/10 rounded-xl p-4 backdrop-blur-sm">
+    <div className="mb-8">
+      <div className="bg-gradient-to-br from-card/80 via-card/60 to-muted/40 border border-white/20 rounded-2xl p-6 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-300">
         <div className={cn(
-          "grid gap-4",
+          "grid gap-6",
           isMobile ? "grid-cols-1" : "grid-cols-3"
         )}>
           {/* Left: Welcome message */}
-          <div className="space-y-1">
+          <div className="space-y-2">
             <h1 className={cn(
-              "font-bold bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
-              isMobile ? "text-2xl" : "text-3xl"
+              "font-black leading-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent",
+              isMobile ? "text-3xl" : "text-4xl"
             )}>
               Welcome back, {userName}!
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-base text-muted-foreground font-medium">
               {today}
             </p>
           </div>
           
           {/* Middle: Goal progress */}
-          <div>
-            <div className="flex items-center gap-2">
-              <Target className="h-5 w-5 text-primary" />
-              <span className="text-sm font-medium">Today's Goal</span>
-              <span className="text-xs text-primary ml-auto">2/3 complete</span>
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <Target className="h-6 w-6 text-blue-600" />
+              <span className="text-base font-bold text-foreground">Today's Goal</span>
+              <span className="text-sm text-blue-600 ml-auto font-semibold">2/3 complete</span>
             </div>
-            <Progress value={dailyGoalProgress} className="h-2 mt-2" />
-            <div className="grid grid-cols-3 gap-1 mt-3">
-              <div className="bg-white/5 rounded-md p-1.5 text-center border border-white/5">
-                <span className="text-xs text-white/70">Posts</span>
-                <p className="text-sm font-medium">1/1</p>
+            <Progress value={dailyGoalProgress} className="h-3 rounded-full" />
+            <div className="grid grid-cols-3 gap-2 mt-4">
+              <div className="bg-white/10 rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors duration-200">
+                <span className="text-xs text-white/80 font-medium">Posts</span>
+                <p className="text-base font-bold mt-1">1/1</p>
               </div>
-              <div className="bg-white/5 rounded-md p-1.5 text-center border border-white/5">
-                <span className="text-xs text-white/70">Videos</span>
-                <p className="text-sm font-medium">1/1</p>
+              <div className="bg-white/10 rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors duration-200">
+                <span className="text-xs text-white/80 font-medium">Videos</span>
+                <p className="text-base font-bold mt-1">1/1</p>
               </div>
-              <div className="bg-white/5 rounded-md p-1.5 text-center border border-white/5">
-                <span className="text-xs text-white/70">Images</span>
-                <p className="text-sm font-medium">0/1</p>
+              <div className="bg-white/10 rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors duration-200">
+                <span className="text-xs text-white/80 font-medium">Images</span>
+                <p className="text-base font-bold mt-1">0/1</p>
               </div>
             </div>
           </div>
@@ -72,37 +72,37 @@ export const PersonalizedGreeting = () => {
           {/* Right: Tokens */}
           <div>
             <div className={cn(
-              "flex flex-col",
-              isMobile && "mt-2"
+              "flex flex-col space-y-4",
+              isMobile && "mt-4"
             )}>
-              <div className="flex justify-between items-center mb-2">
+              <div className="flex justify-between items-center">
                 <div>
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-2">
                     <Sparkles className={cn(
-                      "h-4 w-4",
-                      isLowTokens ? "text-primary/70" : "text-accent/70"
+                      "h-5 w-5",
+                      isLowTokens ? "text-blue-500" : "text-blue-600"
                     )} />
-                    <p className="text-sm text-muted-foreground">Available Credits</p>
+                    <p className="text-sm text-muted-foreground font-medium">Available Credits</p>
                   </div>
                   <p className={cn(
-                    "text-xl font-bold bg-gradient-to-r bg-clip-text text-transparent",
-                    isLowTokens ? "from-primary to-primary/70" : "from-accent to-accent/70"
+                    "text-2xl font-black bg-gradient-to-r bg-clip-text text-transparent leading-tight",
+                    isLowTokens ? "from-blue-500 to-blue-600" : "from-blue-600 to-blue-700"
                   )}>
                     {tokenCount} tokens
                   </p>
                 </div>
                 <Button 
                   size="sm" 
-                  className="bg-gradient-to-r from-accent to-secondary border border-white/20 hover:border-white/30 hover:shadow-[0_0_15px_rgba(66,230,149,0.2)]"
+                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border border-white/20 hover:border-white/30 hover:shadow-lg shadow-md transition-all duration-300 transform hover:scale-105"
                   onClick={() => navigate("/content")}
                 >
-                  <Sparkles className="h-4 w-4 mr-1" />
+                  <Sparkles className="h-4 w-4 mr-2" />
                   Use Tokens
                 </Button>
               </div>
               {isTopCreator && (
-                <p className="text-xs text-accent flex items-center gap-1 animate-fadeIn">
-                  <TrendingUp className="h-3 w-3" />
+                <p className="text-sm text-blue-400 flex items-center gap-2 animate-fadeIn font-medium leading-relaxed">
+                  <TrendingUp className="h-4 w-4" />
                   You're in the top 10% of active creators this week! 🏆
                 </p>
               )}

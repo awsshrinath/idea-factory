@@ -15,8 +15,8 @@ export const CreatorSuggestions = () => {
       icon: FileImage,
       action: "Add Image",
       path: "/images",
-      gradient: "from-[#FF416C] to-[#FF4B2B]",
-      iconBg: "bg-gradient-to-br from-[#FF416C] to-[#FF4B2B]",
+      gradient: "from-blue-600 to-blue-700",
+      iconBg: "bg-gradient-to-br from-blue-600 to-blue-700",
     },
     {
       title: "Convert post to video teaser",
@@ -25,8 +25,8 @@ export const CreatorSuggestions = () => {
       icon: Wand2,
       action: "Create Video",
       path: "/videos",
-      gradient: "from-[#00C6FF] to-[#0072FF]",
-      iconBg: "bg-gradient-to-br from-[#00C6FF] to-[#0072FF]",
+      gradient: "from-indigo-600 to-indigo-700",
+      iconBg: "bg-gradient-to-br from-indigo-600 to-indigo-700",
     },
     {
       title: "Add trending hashtags",
@@ -35,8 +35,8 @@ export const CreatorSuggestions = () => {
       icon: TrendingUp,
       action: "Add Hashtags",
       path: "/content",
-      gradient: "from-[#42E695] to-[#3BB2B8]",
-      iconBg: "bg-gradient-to-br from-[#42E695] to-[#3BB2B8]",
+      gradient: "from-cyan-600 to-cyan-700",
+      iconBg: "bg-gradient-to-br from-cyan-600 to-cyan-700",
     },
     {
       title: "Plan a content streak",
@@ -45,44 +45,41 @@ export const CreatorSuggestions = () => {
       icon: Sparkles,
       action: "Schedule Now",
       path: "/schedule",
-      gradient: "from-[#FFD54F] to-[#FFB74D]",
-      iconBg: "bg-gradient-to-br from-[#FFD54F] to-[#FFB74D]",
+      gradient: "from-purple-600 to-purple-700",
+      iconBg: "bg-gradient-to-br from-purple-600 to-purple-700",
     }
   ];
 
   return (
-    <section className="mb-4">
-      <h2 className="text-xl font-semibold mb-3">Smart Suggestions</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+    <section className="mb-8">
+      <h2 className="text-2xl font-bold mb-6 text-foreground leading-tight">Smart Suggestions</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         {suggestions.map((suggestion, index) => (
           <div 
             key={index} 
-            className="bg-black/30 border border-white/10 rounded-xl hover:border-white/20 transition-all duration-300 
-                     hover:shadow-lg group backdrop-blur-sm overflow-hidden hover:scale-[1.02] relative"
-            style={{
-              backgroundImage: `linear-gradient(130deg, rgba(${index % 2 === 0 ? '233, 30, 99, 0.07' : '0, 198, 255, 0.07'}) 0%, rgba(${index % 2 === 0 ? '255, 211, 79, 0.05' : '66, 230, 149, 0.05'}) 100%)`,
-            }}
+            className="bg-gradient-to-br from-card/80 to-muted/40 border border-white/20 rounded-2xl hover:border-white/30 transition-all duration-300 
+                     shadow-lg hover:shadow-2xl group backdrop-blur-sm overflow-hidden hover:scale-105 relative"
           >
-            <div className="p-4 flex flex-col h-full">
-              <div className="flex justify-between items-center mb-3">
-                <div className={`h-9 w-9 rounded-lg ${suggestion.iconBg} flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110 shadow-lg`}>
+            <div className="p-6 flex flex-col h-full">
+              <div className="flex justify-between items-center mb-4">
+                <div className={`h-11 w-11 rounded-xl ${suggestion.iconBg} flex items-center justify-center transform transition-all duration-300 group-hover:scale-110 shadow-lg group-hover:shadow-xl`}>
                   <suggestion.icon className="h-5 w-5 text-white" />
                 </div>
-                <span className="text-xs px-2 py-1 rounded-full bg-white/10 text-white/70 backdrop-blur-sm">
+                <span className="text-xs px-3 py-1.5 rounded-full bg-white/15 text-white/90 backdrop-blur-sm font-semibold border border-white/20">
                   {suggestion.benefit}
                 </span>
               </div>
               
-              <h3 className="text-base font-medium group-hover:text-white transition-colors duration-300">
+              <h3 className="text-base font-bold group-hover:text-white transition-colors duration-300 leading-tight mb-2">
                 {suggestion.title}
               </h3>
-              <p className="text-xs text-muted-foreground mt-1 mb-3 line-clamp-2">
+              <p className="text-sm text-muted-foreground mt-1 mb-4 line-clamp-2 leading-relaxed font-medium">
                 {suggestion.description}
               </p>
               
               <Button 
                 size="sm"
-                className={`mt-auto w-full bg-white/10 hover:bg-gradient-to-r ${suggestion.gradient} border border-white/20 hover:border-white/30 transition-all duration-300`}
+                className={`mt-auto w-full bg-white/10 hover:bg-gradient-to-r ${suggestion.gradient} border border-white/20 hover:border-white/30 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-105`}
               >
                 {suggestion.action}
               </Button>

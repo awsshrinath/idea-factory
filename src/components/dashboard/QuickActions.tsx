@@ -12,7 +12,8 @@ export const QuickActions = () => {
       description: "Create engaging posts for your social media platforms",
       icon: FileText,
       path: "/content",
-      gradient: "from-[#FF416C] to-[#FF4B2B]",
+      gradient: "from-blue-600 to-blue-700",
+      hoverGradient: "hover:from-blue-700 hover:to-blue-800",
       emoji: "📝",
     },
     {
@@ -20,7 +21,8 @@ export const QuickActions = () => {
       description: "Generate unique images using AI technology",
       icon: Image,
       path: "/images",
-      gradient: "from-[#00C6FF] to-[#0072FF]",
+      gradient: "from-indigo-600 to-indigo-700",
+      hoverGradient: "hover:from-indigo-700 hover:to-indigo-800",
       emoji: "🖼️",
     },
     {
@@ -28,7 +30,8 @@ export const QuickActions = () => {
       description: "Produce professional videos with AI assistance",
       icon: Video,
       path: "/videos",
-      gradient: "from-[#42E695] to-[#3BB2B8]",
+      gradient: "from-blue-500 to-cyan-600",
+      hoverGradient: "hover:from-blue-600 hover:to-cyan-700",
       emoji: "🎬",
     },
     {
@@ -36,37 +39,38 @@ export const QuickActions = () => {
       description: "Plan and schedule your content calendar",
       icon: Calendar,
       path: "/schedule",
-      gradient: "from-[#FFD54F] to-[#FFB74D]",
+      gradient: "from-purple-600 to-purple-700",
+      hoverGradient: "hover:from-purple-700 hover:to-purple-800",
       emoji: "📅",
     },
   ];
 
   return (
-    <section className="mb-4">
-      <h2 className="text-xl font-semibold mb-3">Quick Actions</h2>
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+    <section className="mb-8">
+      <h2 className="text-2xl font-bold mb-6 text-foreground leading-tight">Quick Actions</h2>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {actions.map((action) => {
           const Icon = action.icon;
           return (
             <div
               key={action.title}
-              className={`bg-gradient-to-br ${action.gradient} relative rounded-xl transition-all duration-300 hover:scale-[1.02] 
-                         hover:shadow-[0_0_20px_rgba(255,255,255,0.15)] group overflow-hidden`}
+              className={`bg-gradient-to-br ${action.gradient} relative rounded-2xl transition-all duration-300 hover:scale-105 
+                         shadow-lg hover:shadow-2xl group overflow-hidden border border-white/10`}
             >
-              <div className="absolute inset-0 bg-black/40 backdrop-blur-sm"></div>
-              <div className="relative p-4 h-full flex flex-col">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="h-10 w-10 rounded-full bg-white/10 backdrop-blur-md flex items-center justify-center transform transition-transform duration-300 group-hover:scale-110">
-                    <Icon className="h-5 w-5 text-white" />
+              <div className="absolute inset-0 bg-black/20 backdrop-blur-sm"></div>
+              <div className="relative p-6 h-full flex flex-col">
+                <div className="flex items-center justify-between mb-4">
+                  <div className="h-12 w-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center transform transition-all duration-300 group-hover:scale-110 group-hover:bg-white/30 shadow-lg">
+                    <Icon className="h-6 w-6 text-white" />
                   </div>
-                  <span className="text-lg">{action.emoji}</span>
+                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">{action.emoji}</span>
                 </div>
-                <h3 className="text-lg font-semibold mb-1 text-white">{action.title}</h3>
-                <p className="text-xs text-white/70 mb-auto line-clamp-2">
+                <h3 className="text-lg font-bold mb-2 text-white leading-tight">{action.title}</h3>
+                <p className="text-sm text-white/80 mb-auto line-clamp-2 leading-relaxed font-medium">
                   {action.description}
                 </p>
                 <Button
-                  className="w-full mt-3 bg-white/10 hover:bg-white/20 border border-white/20 hover:border-white/30 transition-all duration-300 text-sm"
+                  className={`w-full mt-4 bg-white/15 hover:bg-white/25 border border-white/20 hover:border-white/40 transition-all duration-300 text-sm font-semibold backdrop-blur-sm shadow-md hover:shadow-lg transform hover:scale-105 ${action.hoverGradient}`}
                   onClick={() => navigate(action.path)}
                 >
                   Get Started

@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -27,14 +28,14 @@ export default {
         card: "#212121",
         "card-foreground": "#F5F5F5",
         primary: {
-          DEFAULT: "#FF416C",
+          DEFAULT: "#3B82F6",
           foreground: "#F5F5F5",
-          hover: "#FF4B2B",
+          hover: "#1D4ED8",
         },
         secondary: {
-          DEFAULT: "#00C6FF",
-          foreground: "#121826",
-          hover: "#0072FF",
+          DEFAULT: "#06B6D4",
+          foreground: "#F5F5F5",
+          hover: "#0891B2",
         },
         destructive: {
           DEFAULT: "hsl(var(--destructive))",
@@ -46,9 +47,9 @@ export default {
           hover: "#2C2C4A",
         },
         accent: {
-          DEFAULT: "#42E695",
+          DEFAULT: "#8B5CF6",
           foreground: "#F5F5F5",
-          hover: "#3BB2B8",
+          hover: "#7C3AED",
         },
         popover: {
           DEFAULT: "#1D2433",
@@ -61,13 +62,14 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["Roboto", "sans-serif"],
-        heading: ["Poppins", "sans-serif"],
+        sans: ["Inter", "Roboto", "sans-serif"],
+        heading: ["Inter", "Poppins", "sans-serif"],
       },
       boxShadow: {
         card: "0 4px 8px rgba(0, 0, 0, 0.2)",
         "card-hover": "0 6px 12px rgba(0, 0, 0, 0.3)",
         glow: "0 0 15px rgba(0, 0, 0, 0.6)",
+        "3xl": "0 35px 60px -12px rgba(0, 0, 0, 0.25)",
       },
       keyframes: {
         "accordion-down": {
@@ -103,8 +105,8 @@ export default {
           "50%": { transform: "translateY(-10px)" }
         },
         glow: {
-          "0%, 100%": { boxShadow: "0 0 5px rgba(255, 255, 255, 0.1)" },
-          "50%": { boxShadow: "0 0 20px rgba(255, 255, 255, 0.4)" }
+          "0%, 100%": { boxShadow: "0 0 5px rgba(59, 130, 246, 0.2)" },
+          "50%": { boxShadow: "0 0 20px rgba(59, 130, 246, 0.6)" }
         },
         gradient: {
           '0%, 100%': {
@@ -131,19 +133,19 @@ export default {
         'gradient': 'gradient 8s ease infinite',
       },
       backgroundImage: {
-        "gradient-primary": "linear-gradient(90deg, #FF416C, #FF4B2B)",
-        "gradient-secondary": "linear-gradient(90deg, #00C6FF, #0072FF)",
+        "gradient-primary": "linear-gradient(90deg, #3B82F6, #1D4ED8)",
+        "gradient-secondary": "linear-gradient(90deg, #06B6D4, #0891B2)",
         "gradient-card": "linear-gradient(145deg, #1F1F33, #2C2C4A)",
         "gradient-card-hover": "linear-gradient(145deg, #2C2C4A, #1F1F33)",
-        "gradient-friendly": "linear-gradient(90deg, #42E695, #3BB2B8)",
-        "gradient-casual": "linear-gradient(90deg, #FFD54F, #FFB74D)",
-        "gradient-creative": "linear-gradient(90deg, #6A5ACD, #8A2BE2)",
-        "tone-button": "linear-gradient(to right, #2b5876, #4e4376)",
-        "tone-button-hover": "linear-gradient(to right, #243B55, #141E30)",
-        "template-purple": "linear-gradient(135deg, rgba(108,95,211,0.1), rgba(108,95,211,0.3))",
-        "template-blue": "linear-gradient(135deg, rgba(66,153,225,0.1), rgba(66,153,225,0.3))",
-        "template-green": "linear-gradient(135deg, rgba(72,187,120,0.1), rgba(72,187,120,0.3))",
-        "template-pink": "linear-gradient(135deg, rgba(237,100,166,0.1), rgba(237,100,166,0.3))",
+        "gradient-friendly": "linear-gradient(90deg, #8B5CF6, #7C3AED)",
+        "gradient-casual": "linear-gradient(90deg, #F59E0B, #D97706)",
+        "gradient-creative": "linear-gradient(90deg, #8B5CF6, #7C3AED)",
+        "tone-button": "linear-gradient(to right, #3B82F6, #1D4ED8)",
+        "tone-button-hover": "linear-gradient(to right, #1D4ED8, #1E40AF)",
+        "template-purple": "linear-gradient(135deg, rgba(139,92,246,0.1), rgba(139,92,246,0.3))",
+        "template-blue": "linear-gradient(135deg, rgba(59,130,246,0.1), rgba(59,130,246,0.3))",
+        "template-green": "linear-gradient(135deg, rgba(6,182,212,0.1), rgba(6,182,212,0.3))",
+        "template-pink": "linear-gradient(135deg, rgba(236,72,153,0.1), rgba(236,72,153,0.3))",
         "noise": 'url("data:image/svg+xml,%3Csvg viewBox=\'0 0 200 200\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cfilter id=\'noiseFilter\'%3E%3CfeTurbulence type=\'fractalNoise\' baseFrequency=\'0.65\' numOctaves=\'3\' stitchTiles=\'stitch\'/%3E%3C/filter%3E%3Crect width=\'100%\' height=\'100%\' filter=\'url(%23noiseFilter)\'/%3E%3C/svg%3E")',
       },
     },
