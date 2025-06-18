@@ -84,76 +84,89 @@ export const PremiumBackground: React.FC = () => {
     setShapes(newShapes);
   }, []);
 
+  // Generate CSS keyframes dynamically
+  const generateCSS = () => {
+    let css = `
+      @keyframes float-circle {
+        0% { transform: translate3d(-10vw, -10vh, 0) scale(0.8); }
+        25% { transform: translate3d(10vw, 10vh, 0) scale(1.1); }
+        50% { transform: translate3d(5vw, -5vh, 0) scale(0.9); }
+        75% { transform: translate3d(-5vw, 15vh, 0) scale(1.05); }
+        100% { transform: translate3d(-10vw, -10vh, 0) scale(0.8); }
+      }
+      
+      @keyframes float-polygon {
+        0% { transform: translate3d(-8vw, -8vh, 0) rotate(0deg); }
+        33% { transform: translate3d(8vw, 8vh, 0) rotate(120deg); }
+        66% { transform: translate3d(-4vw, 12vh, 0) rotate(240deg); }
+        100% { transform: translate3d(-8vw, -8vh, 0) rotate(360deg); }
+      }
+      
+      @keyframes float-dot {
+        0% { transform: translate3d(-20px, -20px, 0); }
+        25% { transform: translate3d(20px, -10px, 0); }
+        50% { transform: translate3d(10px, 20px, 0); }
+        75% { transform: translate3d(-10px, 15px, 0); }
+        100% { transform: translate3d(-20px, -20px, 0); }
+      }
+      
+      @keyframes rotate-gentle {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+    `;
+
+    // Add individual bob animations for dots
+    for (let i = 0; i < 25; i++) {
+      css += `
+        @keyframes bob-${i} {
+          0%, 100% { transform: translateY(0px); }
+          50% { transform: translateY(${Math.sin(i) * 8 - 4}px); }
+        }
+      `;
+    }
+
+    return css;
+  };
+
   if (isReducedMotion) {
     return null; // Respect accessibility preferences
   }
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-      {shapes.map((shape) => (
-        <div
-          key={shape.id}
-          className={cn(
-            "absolute will-change-transform",
-            shape.type === 'circle' && "rounded-full",
-            shape.type === 'polygon' && "rounded-lg",
-            shape.type === 'dot' && "rounded-full"
-          )}
-          style={{
-            width: `${shape.size}px`,
-            height: `${shape.size}px`,
-            left: `${shape.x}%`,
-            top: `${shape.y}%`,
-            background: shape.type === 'circle' || shape.type === 'dot' 
-              ? `radial-gradient(circle, ${shape.color}${Math.floor(shape.opacity * 255).toString(16).padStart(2, '0')}, transparent 70%)`
-              : `linear-gradient(45deg, ${shape.color}${Math.floor(shape.opacity * 255).toString(16).padStart(2, '0')}, transparent)`,
-            filter: shape.size > 500 ? 'blur(40px)' : shape.size > 100 ? 'blur(20px)' : 'blur(1px)',
-            transform: shape.rotation ? `rotate(${shape.rotation}deg)` : undefined,
-            animation: `
-              float-${shape.type} ${shape.duration}s infinite linear ${shape.delay}s,
-              ${shape.type === 'dot' ? `bob-${shape.id.split('-')[1]} 4s infinite ease-in-out ${shape.delay}s` : ''}
-              ${shape.rotation !== undefined ? `, rotate-gentle 60s infinite linear ${shape.delay}s` : ''}
-            `.trim(),
-          }}
-        />
-      ))}
-      
-      <style jsx>{`
-        @keyframes float-circle {
-          0% { transform: translate3d(-10vw, -10vh, 0) scale(0.8); }
-          25% { transform: translate3d(10vw, 10vh, 0) scale(1.1); }
-          50% { transform: translate3d(5vw, -5vh, 0) scale(0.9); }
-          75% { transform: translate3d(-5vw, 15vh, 0) scale(1.05); }
-          100% { transform: translate3d(-10vw, -10vh, 0) scale(0.8); }
-        }
-        
-        @keyframes float-polygon {
-          0% { transform: translate3d(-8vw, -8vh, 0) rotate(0deg); }
-          33% { transform: translate3d(8vw, 8vh, 0) rotate(120deg); }
-          66% { transform: translate3d(-4vw, 12vh, 0) rotate(240deg); }
-          100% { transform: translate3d(-8vw, -8vh, 0) rotate(360deg); }
-        }
-        
-        @keyframes float-dot {
-          0% { transform: translate3d(-20px, -20px, 0); }
-          25% { transform: translate3d(20px, -10px, 0); }
-          50% { transform: translate3d(10px, 20px, 0); }
-          75% { transform: translate3d(-10px, 15px, 0); }
-          100% { transform: translate3d(-20px, -20px, 0); }
-        }
-        
-        @keyframes rotate-gentle {
-          from { transform: rotate(0deg); }
-          to { transform: rotate(360deg); }
-        }
-        
-        ${Array.from({ length: 25 }, (_, i) => `
-          @keyframes bob-${i} {
-            0%, 100% { transform: translateY(0px); }
-            50% { transform: translateY(${Math.sin(i) * 8 - 4}px); }
-          }
-        `).join('\n')}
-      `}</style>
-    </div>
+    <>
+      <style dangerouslySetInnerHTML={{ __html: generateCSS() }} />
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {shapes.map((shape) => (
+          <div
+            key={shape.id}
+            className={cn(
+              "absolute will-change-transform",
+              shape.type === 'circle' && "rounded-full",
+              shape.type === 'polygon' && "rounded-lg",
+              shape.type === 'dot' && "rounded-full"
+            )}
+            style={{
+              width: `${shape.size}px`,
+              height: `${shape.size}px`,
+              left: `${shape.x}%`,
+              top: `${shape.y}%`,
+              background: shape.type === 'circle' || shape.type === 'dot' 
+                ? `radial-gradient(circle, ${shape.color}${Math.floor(shape.opacity * 255).toString(16).padStart(2, '0')}, transparent 70%)`
+                : `linear-gradient(45deg, ${shape.color}${Math.floor(shape.opacity * 255).toString(16).padStart(2, '0')}, transparent)`,
+              filter: shape.size > 500 ? 'blur(40px)' : shape.size > 100 ? 'blur(20px)' : 'blur(1px)',
+              transform: shape.rotation ? `rotate(${shape.rotation}deg)` : undefined,
+              animation: `
+                float-${shape.type} ${shape.duration}s infinite linear ${shape.delay}s${
+                  shape.type === 'dot' ? `, bob-${shape.id.split('-')[1]} 4s infinite ease-in-out ${shape.delay}s` : ''
+                }${
+                  shape.rotation !== undefined ? `, rotate-gentle 60s infinite linear ${shape.delay}s` : ''
+                }
+              `.trim(),
+            }}
+          />
+        ))}
+      </div>
+    </>
   );
 };
