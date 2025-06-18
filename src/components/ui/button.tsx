@@ -6,25 +6,27 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)] hover:scale-[1.03]",
+        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-glow hover:scale-[1.02] shadow-soft",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)] hover:scale-[1.03]",
+          "bg-error text-white hover:bg-error/90 hover:shadow-card hover:scale-[1.02] shadow-soft",
         outline:
-          "border border-input bg-background hover:bg-accent/5 hover:text-accent-foreground hover:shadow-[0_4px_12px_rgba(255,255,255,0.1)] hover:scale-[1.03]",
+          "border border-white/20 bg-background hover:bg-white/5 hover:text-foreground hover:shadow-soft hover:scale-[1.02] hover:border-white/30",
         secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-[0_4px_12px_rgba(0,198,255,0.2)] hover:scale-[1.03]",
-        ghost: "hover:bg-accent/10 hover:text-accent-foreground",
+          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-soft hover:scale-[1.02]",
+        ghost: "hover:bg-white/5 hover:text-foreground transition-all duration-200",
         link: "text-primary underline-offset-4 hover:underline",
+        premium: "bg-gradient-accent text-white hover:shadow-premium hover:scale-[1.02] shadow-card premium-button",
+        gold: "bg-gradient-gold text-white hover:shadow-glow hover:scale-[1.02] shadow-card premium-button",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
-        icon: "h-10 w-10",
+        default: "h-9 px-4 py-2",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-10 rounded-lg px-6",
+        icon: "h-9 w-9",
       },
     },
     defaultVariants: {
@@ -53,7 +55,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       >
         {isLoading ? (
           <>
-            <span className="mr-2 inline-block h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
+            <span className="mr-2 inline-block h-3 w-3 animate-spin rounded-full border-2 border-current border-t-transparent"></span>
             {children}
           </>
         ) : (
