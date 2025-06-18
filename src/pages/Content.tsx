@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ContentForm } from "@/components/content/ContentForm";
@@ -6,7 +5,7 @@ import { TrendingTopics } from "@/components/content/TrendingTopics";
 import { RecentContent } from "@/components/content/RecentContent";
 import { ContentPreview } from "@/components/content/ContentPreview";
 import { PromptTemplates } from "@/components/content/PromptTemplates";
-import { AnimatedLayout } from "@/components/layouts/animated-layout";
+import { BackgroundAnimation } from "@/components/ui/background-animation";
 import { HelpCircle } from "lucide-react";
 import {
   Tooltip,
@@ -41,10 +40,11 @@ export function Content() {
   const isMobile = useIsMobile();
 
   return (
-    <AnimatedLayout className="min-h-screen flex bg-background overflow-x-hidden w-full">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
+      <BackgroundAnimation />
       <Sidebar />
       <main className={cn(
-        "flex-1 animate-fade-in w-full max-w-full",
+        "flex-1 animate-fade-in w-full max-w-full relative z-10",
         "p-3 md:p-4 lg:p-5",
         isMobile ? "ml-0 pt-16" : "ml-64"
       )}>
@@ -125,6 +125,6 @@ export function Content() {
           </div>
         </div>
       </main>
-    </AnimatedLayout>
+    </div>
   );
 }

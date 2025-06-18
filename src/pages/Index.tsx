@@ -1,4 +1,3 @@
-
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { PersonalizedGreeting } from "@/components/dashboard/PersonalizedGreeting";
@@ -10,7 +9,7 @@ import { TipsCarousel } from "@/components/dashboard/TipsCarousel";
 import { HeroBanner } from "@/components/dashboard/HeroBanner";
 import { QuickLinkBar } from "@/components/dashboard/QuickLinkBar";
 import { UserProfile } from "@/components/dashboard/UserProfile";
-import { AnimatedLayout } from "@/components/layouts/animated-layout";
+import { PremiumBackground } from "@/components/ui/premium-background";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Video, Home, ChevronRight } from "lucide-react";
@@ -20,10 +19,11 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <AnimatedLayout className="min-h-screen flex bg-background overflow-x-hidden w-full">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
+      <PremiumBackground />
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 animate-fadeIn w-full max-w-full",
+        "flex-1 p-4 md:p-6 animate-fadeIn w-full max-w-full relative z-10",
         isMobile ? "ml-0 pt-16" : "ml-56",
       )}>
         <div className="content-area space-y-6">
@@ -60,7 +60,7 @@ const Index = () => {
           <TipsCarousel />
         </div>
       </main>
-    </AnimatedLayout>
+    </div>
   );
 };
 

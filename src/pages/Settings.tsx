@@ -1,10 +1,10 @@
-
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChangelogSection } from "@/components/settings/ChangelogSection";
 import { RoadmapSection } from "@/components/settings/RoadmapSection";
 import { WorkflowsSection } from "@/components/settings/WorkflowsSection";
 import { TechStackSection } from "@/components/settings/TechStackSection";
+import { BackgroundAnimation } from "@/components/ui/background-animation";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -45,10 +45,11 @@ export function Settings() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
+      <BackgroundAnimation />
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 lg:p-8 animate-fadeIn w-full max-w-full pb-20",
+        "flex-1 p-4 md:p-6 lg:p-8 animate-fadeIn w-full max-w-full pb-20 relative z-10",
         isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
       )}>
         <div className="max-w-5xl mx-auto">

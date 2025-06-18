@@ -1,10 +1,9 @@
-
 import { Sidebar } from "@/components/Sidebar";
 import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
 import { QuickStats } from "@/components/schedule/QuickStats";
 import { FilterSection } from "@/components/schedule/FilterSection";
 import { CalendarView } from "@/components/schedule/CalendarView";
-import { AnimatedLayout } from "@/components/layouts/animated-layout";
+import { BackgroundAnimation } from "@/components/ui/background-animation";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -12,13 +11,14 @@ export function Schedule() {
   const isMobile = useIsMobile();
   
   return (
-    <AnimatedLayout className={cn(
-      "min-h-screen flex overflow-x-hidden",
+    <div className={cn(
+      "min-h-screen flex overflow-x-hidden relative",
       "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]"
     )}>
+      <BackgroundAnimation />
       <Sidebar />
       <main className={cn(
-        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8",
+        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8 relative z-10",
         isMobile ? "ml-0 pt-16" : "ml-64",
         "w-full max-w-full"
       )}>
@@ -38,6 +38,6 @@ export function Schedule() {
           </div>
         </div>
       </main>
-    </AnimatedLayout>
+    </div>
   );
 }
