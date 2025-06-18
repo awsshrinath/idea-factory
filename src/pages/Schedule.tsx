@@ -4,6 +4,7 @@ import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
 import { QuickStats } from "@/components/schedule/QuickStats";
 import { FilterSection } from "@/components/schedule/FilterSection";
 import { CalendarView } from "@/components/schedule/CalendarView";
+import { AnimatedLayout } from "@/components/layouts/animated-layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -11,14 +12,14 @@ export function Schedule() {
   const isMobile = useIsMobile();
   
   return (
-    <div className={cn(
+    <AnimatedLayout className={cn(
       "min-h-screen flex overflow-x-hidden",
-      "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]" // Added dark theme gradient background
+      "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]"
     )}>
       <Sidebar />
       <main className={cn(
-        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8", // Updated padding to match other pages
-        isMobile ? "ml-0 pt-16" : "ml-64", // Keep mobile padding for menu button
+        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8",
+        isMobile ? "ml-0 pt-16" : "ml-64",
         "w-full max-w-full"
       )}>
         <div className="max-w-7xl mx-auto page-container">
@@ -37,6 +38,6 @@ export function Schedule() {
           </div>
         </div>
       </main>
-    </div>
+    </AnimatedLayout>
   );
 }

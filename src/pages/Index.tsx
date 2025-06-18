@@ -10,6 +10,7 @@ import { TipsCarousel } from "@/components/dashboard/TipsCarousel";
 import { HeroBanner } from "@/components/dashboard/HeroBanner";
 import { QuickLinkBar } from "@/components/dashboard/QuickLinkBar";
 import { UserProfile } from "@/components/dashboard/UserProfile";
+import { AnimatedLayout } from "@/components/layouts/animated-layout";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Video, Home, ChevronRight } from "lucide-react";
@@ -19,7 +20,7 @@ const Index = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
+    <AnimatedLayout className="min-h-screen flex bg-background overflow-x-hidden w-full">
       <Sidebar />
       <main className={cn(
         "flex-1 p-4 md:p-6 animate-fadeIn w-full max-w-full",
@@ -59,7 +60,7 @@ const Index = () => {
           <TipsCarousel />
         </div>
       </main>
-    </div>
+    </AnimatedLayout>
   );
 };
 

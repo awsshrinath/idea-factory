@@ -13,6 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Sidebar } from "@/components/Sidebar";
+import { AnimatedLayout } from "@/components/layouts/animated-layout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 
@@ -160,7 +161,7 @@ export function Auth() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background">
+    <AnimatedLayout className="min-h-screen flex bg-background">
       <Sidebar />
       <main className="flex-1 ml-64 p-8 flex items-center justify-center">
         <Card className="w-[450px] bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
@@ -255,6 +256,6 @@ export function Auth() {
           </CardFooter>
         </Card>
       </main>
-    </div>
+    </AnimatedLayout>
   );
 }
