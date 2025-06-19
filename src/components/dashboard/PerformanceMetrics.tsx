@@ -1,261 +1,127 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { ChartContainer } from "@/components/ui/chart";
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
-import { TrendingUp, Star, Info, ArrowUp, ArrowDown } from "lucide-react";
-import {
-  Tooltip as UITooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { useState, useEffect } from "react";
-
-const data = [
-  { name: "Jan", value: 400 },
-  { name: "Feb", value: 300 },
-  { name: "Mar", value: 600 },
-  { name: "Apr", value: 800 },
-  { name: "May", value: 700 },
-];
-
-const sparklineData = [
-  { name: "1", value: 40 },
-  { name: "2", value: 30 },
-  { name: "3", value: 60 },
-  { name: "4", value: 50 },
-  { name: "5", value: 75 },
-];
-
-const chartConfig = {
-  primary: {
-    color: "#6366f1",
-  },
-  secondary: {
-    color: "#64748b",
-  },
-};
+import { TrendingUp, Eye, Heart, Share, Users, BarChart3 } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
 
 export const PerformanceMetrics = () => {
-  const [animatedValue, setAnimatedValue] = useState(0);
-  const targetValue = 8.6;
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      let start = 0;
-      const increment = targetValue / 50;
-      const counter = setInterval(() => {
-        start += increment;
-        if (start >= targetValue) {
-          setAnimatedValue(targetValue);
-          clearInterval(counter);
-        } else {
-          setAnimatedValue(start);
-        }
-      }, 30);
-    }, 600);
-
-    return () => clearTimeout(timer);
-  }, []);
+  const metrics = [
+    {
+      title: "Total Reach",
+      value: "47.2K",
+      change: "+23%",
+      description: "vs last month",
+      icon: Eye,
+      progress: 78,
+      gradient: "from-blue-600/20 to-indigo-600/20",
+      iconBg: "bg-gradient-to-br from-blue-600/20 to-indigo-600/20",
+      borderColor: "border-blue-500/20",
+      changeColor: "text-emerald-400",
+    },
+    {
+      title: "Engagement Rate", 
+      value: "8.4%",
+      change: "+12%",
+      description: "avg across platforms",
+      icon: Heart,
+      progress: 84,
+      gradient: "from-pink-600/20 to-rose-600/20",
+      iconBg: "bg-gradient-to-br from-pink-600/20 to-rose-600/20",
+      borderColor: "border-pink-500/20",
+      changeColor: "text-emerald-400",
+    },
+    {
+      title: "Content Shares",
+      value: "2.8K",
+      change: "+45%",
+      description: "this week",
+      icon: Share,
+      progress: 92,
+      gradient: "from-purple-600/20 to-violet-600/20",
+      iconBg: "bg-gradient-to-br from-purple-600/20 to-violet-600/20",
+      borderColor: "border-purple-500/20",
+      changeColor: "text-emerald-400",
+    },
+    {
+      title: "New Followers",
+      value: "1.2K",
+      change: "+67%",
+      description: "growth rate",
+      icon: Users,
+      progress: 67,
+      gradient: "from-teal-600/20 to-cyan-600/20",
+      iconBg: "bg-gradient-to-br from-teal-600/20 to-cyan-600/20",
+      borderColor: "border-teal-500/20",
+      changeColor: "text-emerald-400",
+    },
+  ];
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 animate-fadeIn" style={{ animationDelay: "600ms" }}>
-      <Card className="bg-slate-800/30 border border-slate-700/60 
-                      shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
-                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
-            Total Content
-            <div className="flex items-center gap-1">
-              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
-              <span className="text-sm text-emerald-400 font-semibold">(+15%)</span>
-            </div>
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total content pieces created across all platforms</p>
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </CardTitle>
-          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
-            This month's performance
-            <span className="text-xs text-slate-400">vs last month</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-3xl font-black text-slate-100 tabular-nums">1,247</div>
-            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
-              <ArrowUp className="h-3 w-3" />
-              +15.3%
-            </div>
-          </div>
-          <div className="h-[100px] w-full group-hover:scale-105 transition-transform duration-300">
-            <ChartContainer config={chartConfig}>
-              <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data}>
-                  <defs>
-                    <linearGradient id="colorValue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#475569" stopOpacity={0.6} />
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1} />
-                    </linearGradient>
-                  </defs>
-                  <XAxis dataKey="name" stroke="#64748b" fontSize={12} />
-                  <YAxis stroke="#64748b" fontSize={12} />
-                  <Tooltip 
-                    contentStyle={{ 
-                      background: 'rgba(30, 41, 59, 0.95)', 
-                      border: '1px solid rgba(100,116,139,0.4)',
-                      borderRadius: '12px',
-                      backdropFilter: 'blur(10px)',
-                      animation: 'fadeIn 0.2s ease-out'
-                    }} 
+    <section className="mb-12 animate-fadeIn" style={{ animationDelay: "600ms" }}>
+      <div className="flex items-center gap-3 mb-8">
+        <h2 className="enterprise-heading text-3xl">Performance Metrics</h2>
+        <BarChart3 className="h-6 w-6 text-indigo-400 animate-pulse" />
+      </div>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {metrics.map((metric, index) => {
+          const Icon = metric.icon;
+          return (
+            <Card
+              key={metric.title}
+              className={`
+                group premium-card premium-card-hover cursor-pointer
+                bg-gradient-to-br from-white/[0.04] to-white/[0.01] ${metric.gradient}
+                ${metric.borderColor} hover:border-white/[0.15]
+                transform transition-all duration-500 ease-out
+                hover:scale-[1.02] hover:-translate-y-1 animate-fadeIn
+                elevation-2 hover:elevation-4
+              `}
+              style={{ animationDelay: `${700 + index * 100}ms` }}
+            >
+              <CardHeader className="pb-4">
+                <div className="flex items-center justify-between">
+                  <div className={`
+                    h-12 w-12 rounded-xl ${metric.iconBg} 
+                    flex items-center justify-center ${metric.borderColor}
+                    shadow-lg group-hover:shadow-xl border
+                    transform transition-all duration-300 
+                    group-hover:scale-110 group-hover:rotate-3
+                  `}>
+                    <Icon className="h-6 w-6 text-white" />
+                  </div>
+                  <div className="text-right">
+                    <div className={`flex items-center gap-1 ${metric.changeColor}`}>
+                      <TrendingUp className="h-3 w-3" />
+                      <span className="text-sm font-bold">{metric.change}</span>
+                    </div>
+                  </div>
+                </div>
+              </CardHeader>
+              
+              <CardContent className="space-y-4">
+                <div>
+                  <CardTitle className="premium-stats text-3xl mb-1 leading-tight">
+                    {metric.value}
+                  </CardTitle>
+                  <CardDescription className="premium-caption text-sm">
+                    {metric.title}
+                  </CardDescription>
+                </div>
+                
+                <div className="space-y-3">
+                  <Progress 
+                    value={metric.progress} 
+                    className="h-2 rounded-full bg-slate-800/50 shadow-inner" 
                   />
-                  <Area
-                    type="monotone"
-                    dataKey="value"
-                    stroke="#6366f1"
-                    fill="url(#colorValue)"
-                    strokeWidth={3}
-                    className="hover:stroke-[#334155] transition-colors duration-300"
-                  />
-                </AreaChart>
-              </ResponsiveContainer>
-            </ChartContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-slate-800/30 border border-slate-700/60 
-                      shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
-                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
-            Engagement
-            <div className="flex items-center gap-1">
-              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
-              <span className="text-sm text-emerald-400 font-semibold">(+32%)</span>
-            </div>
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Total views and interactions across all content</p>
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </CardTitle>
-          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
-            Views and interactions
-            <span className="text-xs text-slate-400">vs last month</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center justify-between mb-4">
-            <div className="text-3xl font-black text-slate-100 leading-tight tabular-nums">
-              {animatedValue.toFixed(1)}K
-            </div>
-            <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
-              <ArrowUp className="h-3 w-3" />
-              +32.1%
-            </div>
-          </div>
-          <p className="text-indigo-400 flex items-center gap-2 mb-3 text-sm font-semibold">
-            <TrendingUp className="h-4 w-4 animate-pulse" />
-            Trending upward
-          </p>
-          <div className="h-[60px] group-hover:scale-105 transition-transform duration-300">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={sparklineData}>
-                <defs>
-                  <linearGradient id="colorIndigo" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#6366f1" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#6366f1" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#6366f1"
-                  fill="url(#colorIndigo)"
-                  strokeWidth={3}
-                  className="hover:stroke-[#475569] transition-colors duration-300"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-
-      <Card className="bg-slate-800/30 border border-slate-700/60 
-                      shadow-xl hover:shadow-2xl rounded-2xl backdrop-blur-sm 
-                      hover:border-slate-600/70 transition-all duration-300 transform hover:scale-105 overflow-hidden group">
-        <CardHeader className="pb-3">
-          <CardTitle className="text-slate-100 flex items-center gap-2 text-xl font-bold">
-            Top Content
-            <div className="flex items-center gap-1">
-              <ArrowUp className="h-4 w-4 text-emerald-400 animate-bounce" />
-              <span className="text-sm text-emerald-400 font-semibold">(+250%)</span>
-            </div>
-            <TooltipProvider>
-              <UITooltip>
-                <TooltipTrigger>
-                  <Info className="h-4 w-4 text-slate-400 hover:text-indigo-400 transition-colors cursor-help" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Your best performing content piece this month</p>
-                </TooltipContent>
-              </UITooltip>
-            </TooltipProvider>
-          </CardTitle>
-          <CardDescription className="font-medium text-slate-300 flex items-center gap-2">
-            Best performing post
-            <span className="text-xs text-slate-400">vs last month</span>
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="pt-0">
-          <div className="flex items-center gap-3 mb-3">
-            <Star className="h-6 w-6 text-indigo-400 animate-pulse" />
-            <span className="text-slate-100 text-sm font-semibold leading-relaxed">
-              "10 Tips for Better Content" reached 12K views
-            </span>
-          </div>
-          <div className="flex items-center justify-between mb-3">
-            <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-emerald-400 text-sm font-semibold bg-emerald-600/20 px-2 py-1 rounded-lg">
-                <ArrowUp className="h-3 w-3" />
-                +250%
-              </div>
-            </div>
-            <span className="text-xs text-slate-400">vs last month</span>
-          </div>
-          <div className="h-[60px] group-hover:scale-105 transition-transform duration-300">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={sparklineData}>
-                <defs>
-                  <linearGradient id="colorSlate" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#64748b" stopOpacity={0.6} />
-                    <stop offset="95%" stopColor="#64748b" stopOpacity={0.1} />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke="#64748b"
-                  fill="url(#colorSlate)"
-                  strokeWidth={3}
-                  className="hover:stroke-[#475569] transition-colors duration-300"
-                />
-              </AreaChart>
-            </ResponsiveContainer>
-          </div>
-        </CardContent>
-      </Card>
-    </div>
+                  <p className="premium-caption text-xs">
+                    {metric.description}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+          );
+        })}
+      </div>
+    </section>
   );
 };

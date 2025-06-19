@@ -66,7 +66,7 @@
     background: linear-gradient(45deg, rgba(88, 28, 135, 0.6), rgba(147, 51, 234, 0.6));
   }
 
-  /* Enterprise-Grade Typography */
+  /* Enterprise-Grade Typography System */
   .enterprise-heading {
     @apply text-4xl font-bold tracking-tight leading-tight;
     background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -78,43 +78,58 @@
 
   .premium-heading {
     @apply text-3xl font-bold tracking-tight leading-tight text-white;
+    background: linear-gradient(135deg, #ffffff 0%, #e2e8f0 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     text-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .premium-subheading {
-    @apply text-xl font-semibold tracking-wide text-white/90;
+    @apply text-xl font-semibold tracking-wide text-white/95;
     letter-spacing: -0.01em;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
   }
 
   .premium-body {
-    @apply text-base font-medium text-white/80 leading-relaxed;
+    @apply text-base font-medium text-white/85 leading-relaxed;
     letter-spacing: 0.01em;
   }
 
   .premium-caption {
-    @apply text-sm font-semibold text-white/70 tracking-wide;
+    @apply text-sm font-semibold text-white/75 tracking-wide;
     letter-spacing: 0.02em;
   }
 
   .premium-stats {
     @apply text-2xl font-bold text-white;
-    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    text-shadow: 0 2px 8px rgba(245, 158, 11, 0.1);
   }
 
   /* Creative Software Glass Effects */
   .glass-card {
     @apply bg-white/[0.02] backdrop-blur-xl border border-white/[0.08];
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.12),
+      0 1px 2px rgba(0, 0, 0, 0.24),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05);
   }
   
   .premium-card {
-    @apply bg-gradient-to-br from-white/[0.03] to-white/[0.01] backdrop-blur-xl border border-white/[0.1] shadow-2xl;
+    @apply bg-gradient-to-br from-white/[0.04] to-white/[0.01] backdrop-blur-xl border border-white/[0.1] shadow-2xl;
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.25),
+      0 8px 32px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
   
   .premium-card-hover {
     @apply hover:shadow-[0_20px_60px_rgba(0,0,0,0.4)] hover:border-white/[0.15] transition-all duration-500;
+    transform-origin: center;
   }
 
   /* Professional Focus States */
@@ -134,7 +149,11 @@
   /* Professional Creative Button Effects */
   .premium-button {
     @apply relative overflow-hidden transition-all duration-300;
-    background: linear-gradient(135deg, rgba(88, 28, 135, 0.8), rgba(147, 51, 234, 0.8));
+    background: linear-gradient(135deg, rgba(88, 28, 135, 0.9), rgba(147, 51, 234, 0.9));
+    box-shadow: 
+      0 2px 8px rgba(88, 28, 135, 0.2),
+      0 4px 16px rgba(147, 51, 234, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
   
   .premium-button::before {
@@ -150,28 +169,47 @@
 
   .premium-button:hover {
     background: linear-gradient(135deg, rgba(88, 28, 135, 1), rgba(147, 51, 234, 1));
-    box-shadow: 0 8px 32px rgba(147, 51, 234, 0.3);
+    box-shadow: 
+      0 8px 32px rgba(147, 51, 234, 0.3),
+      0 4px 16px rgba(88, 28, 135, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-1px);
   }
 
   /* Enterprise Badge System */
   .premium-badge {
     @apply px-3 py-1.5 rounded-full text-xs font-bold border backdrop-blur-sm shadow-lg;
+    box-shadow: 
+      0 2px 8px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1);
   }
 
   .badge-recommended {
     @apply bg-emerald-500/20 text-emerald-300 border-emerald-500/40;
+    box-shadow: 
+      0 2px 8px rgba(16, 185, 129, 0.15),
+      inset 0 1px 0 rgba(16, 185, 129, 0.1);
   }
 
   .badge-trending {
     @apply bg-orange-500/20 text-orange-300 border-orange-500/40;
+    box-shadow: 
+      0 2px 8px rgba(249, 115, 22, 0.15),
+      inset 0 1px 0 rgba(249, 115, 22, 0.1);
   }
 
   .badge-hot {
     @apply bg-red-500/20 text-red-300 border-red-500/40;
+    box-shadow: 
+      0 2px 8px rgba(239, 68, 68, 0.15),
+      inset 0 1px 0 rgba(239, 68, 68, 0.1);
   }
 
   .badge-premium {
     @apply bg-purple-500/20 text-purple-300 border-purple-500/40;
+    box-shadow: 
+      0 2px 8px rgba(147, 51, 234, 0.15),
+      inset 0 1px 0 rgba(147, 51, 234, 0.1);
   }
 
   /* Creative Software Loading States */
@@ -181,21 +219,48 @@
 
   /* Professional Creative Elevation Levels */
   .elevation-1 { 
-    box-shadow: 0 2px 8px rgba(88, 28, 135, 0.1), 0 1px 4px rgba(0, 0, 0, 0.1); 
+    box-shadow: 
+      0 2px 8px rgba(88, 28, 135, 0.1), 
+      0 1px 4px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.05); 
   }
   .elevation-2 { 
-    box-shadow: 0 4px 16px rgba(88, 28, 135, 0.15), 0 2px 8px rgba(0, 0, 0, 0.1); 
+    box-shadow: 
+      0 4px 16px rgba(88, 28, 135, 0.15), 
+      0 2px 8px rgba(0, 0, 0, 0.1),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08); 
   }
   .elevation-3 { 
-    box-shadow: 0 8px 32px rgba(88, 28, 135, 0.2), 0 4px 16px rgba(0, 0, 0, 0.15); 
+    box-shadow: 
+      0 8px 32px rgba(88, 28, 135, 0.2), 
+      0 4px 16px rgba(0, 0, 0, 0.15),
+      inset 0 1px 0 rgba(255, 255, 255, 0.1); 
   }
   .elevation-4 { 
-    box-shadow: 0 16px 64px rgba(88, 28, 135, 0.25), 0 8px 32px rgba(0, 0, 0, 0.2); 
+    box-shadow: 
+      0 16px 64px rgba(88, 28, 135, 0.25), 
+      0 8px 32px rgba(0, 0, 0, 0.2),
+      inset 0 1px 0 rgba(255, 255, 255, 0.12); 
   }
 
   /* Creative Animation Performance */
   .will-change-transform {
     will-change: transform, opacity;
+  }
+
+  /* Line Clamp Utilities */
+  .line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   /* Respect Creative Professional Motion Preferences */
