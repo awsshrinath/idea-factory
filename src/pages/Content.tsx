@@ -5,7 +5,7 @@ import { TrendingTopics } from "@/components/content/TrendingTopics";
 import { RecentContent } from "@/components/content/RecentContent";
 import { ContentPreview } from "@/components/content/ContentPreview";
 import { PromptTemplates } from "@/components/content/PromptTemplates";
-import { BackgroundAnimation } from "@/components/ui/background-animation";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { HelpCircle } from "lucide-react";
 import {
   Tooltip,
@@ -41,7 +41,7 @@ export function Content() {
 
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
-      <BackgroundAnimation />
+      <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
         "flex-1 animate-fade-in w-full max-w-full relative z-10",

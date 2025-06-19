@@ -3,7 +3,7 @@ import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
 import { QuickStats } from "@/components/schedule/QuickStats";
 import { FilterSection } from "@/components/schedule/FilterSection";
 import { CalendarView } from "@/components/schedule/CalendarView";
-import { BackgroundAnimation } from "@/components/ui/background-animation";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 
@@ -15,7 +15,7 @@ export function Schedule() {
       "min-h-screen flex overflow-x-hidden relative",
       "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]"
     )}>
-      <BackgroundAnimation />
+      <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
         "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8 relative z-10",

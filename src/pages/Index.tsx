@@ -9,7 +9,7 @@ import { TipsCarousel } from "@/components/dashboard/TipsCarousel";
 import { HeroBanner } from "@/components/dashboard/HeroBanner";
 import { QuickLinkBar } from "@/components/dashboard/QuickLinkBar";
 import { UserProfile } from "@/components/dashboard/UserProfile";
-import { PremiumBackground } from "@/components/ui/premium-background";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Video, Home, ChevronRight } from "lucide-react";
@@ -20,7 +20,7 @@ const Index = () => {
   
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
-      <PremiumBackground />
+      <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
         "flex-1 p-4 md:p-6 animate-fadeIn w-full max-w-full relative z-10",

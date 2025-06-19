@@ -4,7 +4,7 @@ import { ChangelogSection } from "@/components/settings/ChangelogSection";
 import { RoadmapSection } from "@/components/settings/RoadmapSection";
 import { WorkflowsSection } from "@/components/settings/WorkflowsSection";
 import { TechStackSection } from "@/components/settings/TechStackSection";
-import { BackgroundAnimation } from "@/components/ui/background-animation";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
@@ -46,11 +46,11 @@ export function Settings() {
 
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
-      <BackgroundAnimation />
+      <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
         "flex-1 p-4 md:p-6 lg:p-8 animate-fadeIn w-full max-w-full pb-20 relative z-10",
-        isMobile ? "ml-0 pt-16" : "ml-64", // Add top padding on mobile for the menu button
+        isMobile ? "ml-0 pt-16" : "ml-64", 
       )}>
         <div className="max-w-5xl mx-auto">
           <h1 className={cn(

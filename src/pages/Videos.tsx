@@ -5,12 +5,12 @@ import { TipsSection } from "@/components/videos/TipsSection";
 import { HeroSection } from "@/components/videos/hero/HeroSection";
 import { MainForm } from "@/components/videos/form/MainForm";
 import { RecentVideosSection } from "@/components/videos/recent/RecentVideosSection";
-import { BackgroundAnimation } from "@/components/ui/background-animation";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 
 export function Videos() {
   return (
     <div className="min-h-screen flex bg-[#1E1E2E] relative">
-      <BackgroundAnimation />
+      <MultimediaPremiumBackground />
       <Sidebar />
       <main className="flex-1 ml-64 relative z-10">
         <div className="max-w-[1440px] mx-auto p-6 lg:p-8">
