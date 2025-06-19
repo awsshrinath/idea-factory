@@ -16,6 +16,9 @@ import { Sidebar } from "@/components/Sidebar";
 import { AnimatedLayout } from "@/components/layouts/animated-layout";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function Auth() {
   const [email, setEmail] = useState("");
@@ -25,6 +28,7 @@ export function Auth() {
   const [isInitializing, setIsInitializing] = useState(false);
   const { toast } = useToast();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Check if user is already authenticated
   useEffect(() => {
@@ -161,25 +165,29 @@ export function Auth() {
   };
 
   return (
-    <AnimatedLayout className="min-h-screen flex bg-background">
+    <div className="min-h-screen flex bg-background relative">
+      <MultimediaPremiumBackground />
       <Sidebar />
-      <main className="flex-1 ml-64 p-8 flex items-center justify-center">
-        <Card className="w-[450px] bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300">
-          <CardHeader>
-            <CardTitle className="text-3xl font-bold text-center">
-              {isLogin ? "Login" : "Sign Up"}
+      <main className={cn(
+        "flex-1 p-8 flex items-center justify-center relative z-10",
+        isMobile ? "ml-0 pt-20" : "ml-64"
+      )}>
+        <Card className="w-[480px] premium-card premium-card-hover border border-white/10 shadow-2xl backdrop-blur-xl">
+          <CardHeader className="text-center space-y-4 pb-8">
+            <CardTitle className="enterprise-heading text-3xl">
+              {isLogin ? "Welcome Back" : "Join Creator Studio"}
             </CardTitle>
-            <CardDescription className="text-center">
+            <CardDescription className="premium-body text-base">
               {isLogin
-                ? "Sign in to your account"
-                : "Create a new account"}
+                ? "Sign in to your creative workspace"
+                : "Start creating professional content today"}
             </CardDescription>
           </CardHeader>
-          <CardContent>
-            <form onSubmit={handleAuth} className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="email">
-                  Email
+          <CardContent className="space-y-6">
+            <form onSubmit={handleAuth} className="space-y-6">
+              <div className="space-y-3">
+                <label className="premium-subheading text-sm" htmlFor="email">
+                  Email Address
                 </label>
                 <Input
                   id="email"
@@ -188,12 +196,12 @@ export function Auth() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
-                  className="bg-background border-white/10 focus:border-primary transition-colors"
+                  className="premium-focus bg-white/5 border-white/10 hover:border-white/20 focus:border-purple-400 transition-all duration-300 h-12 text-base rounded-xl"
                   required
                 />
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium leading-none" htmlFor="password">
+              <div className="space-y-3">
+                <label className="premium-subheading text-sm" htmlFor="password">
                   Password
                 </label>
                 <Input
@@ -203,13 +211,13 @@ export function Auth() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   autoComplete={isLogin ? "current-password" : "new-password"}
-                  className="bg-background border-white/10 focus:border-primary transition-colors"
+                  className="premium-focus bg-white/5 border-white/10 hover:border-white/20 focus:border-purple-400 transition-all duration-300 h-12 text-base rounded-xl"
                   required
                 />
               </div>
               <Button
                 type="submit"
-                className="w-full bg-gradient-secondary hover:bg-gradient-primary shadow-glow hover:shadow-card-hover transition-all duration-300"
+                className="w-full h-12 premium-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:shadow-purple-500/25 border border-purple-500/20 hover:border-purple-400/40 font-semibold text-base micro-bounce"
                 disabled={isLoading || isInitializing}
               >
                 {isLoading
@@ -220,21 +228,21 @@ export function Auth() {
               </Button>
             </form>
             
-            <div className="mt-4">
+            <div className="space-y-4">
               <div className="relative">
                 <div className="absolute inset-0 flex items-center">
-                  <Separator />
+                  <Separator className="bg-white/10" />
                 </div>
                 <div className="relative flex justify-center text-xs uppercase">
-                  <span className="bg-card px-2 text-muted-foreground">
-                    Or use
+                  <span className="bg-card px-4 premium-caption">
+                    Or continue with
                   </span>
                 </div>
               </div>
               
               <Button
                 variant="outline"
-                className="w-full mt-4 bg-background/30 hover:bg-primary/20"
+                className="w-full h-12 bg-white/5 hover:bg-white/10 border border-white/10 hover:border-white/20 premium-body text-base rounded-xl transition-all duration-300"
                 onClick={handleDemoAccount}
                 disabled={isLoading || isInitializing}
               >
@@ -242,11 +250,11 @@ export function Auth() {
               </Button>
             </div>
           </CardContent>
-          <CardFooter className="justify-center">
+          <CardFooter className="justify-center pt-6">
             <Button
               variant="link"
               onClick={() => setIsLogin(!isLogin)}
-              className="text-primary hover:text-primary/80"
+              className="premium-body text-purple-400 hover:text-purple-300 transition-colors"
               disabled={isLoading || isInitializing}
             >
               {isLogin
@@ -256,6 +264,6 @@ export function Auth() {
           </CardFooter>
         </Card>
       </main>
-    </AnimatedLayout>
+    </div>
   );
 }
