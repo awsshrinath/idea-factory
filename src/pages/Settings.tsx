@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChangelogSection } from "@/components/settings/ChangelogSection";
@@ -49,8 +50,9 @@ export function Settings() {
       <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 lg:p-8 animate-fadeIn w-full max-w-full pb-20 relative z-10",
-        isMobile ? "ml-0 pt-16" : "ml-64", 
+        "flex-1 animate-fadeIn w-full max-w-full pb-20 relative z-10",
+        "p-6 md:p-8 lg:p-10",
+        isMobile ? "ml-0 pt-20" : "ml-64 pl-8", 
       )}>
         <div className="max-w-5xl mx-auto">
           <h1 className={cn(

@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { PersonalizedGreeting } from "@/components/dashboard/PersonalizedGreeting";
@@ -23,10 +24,10 @@ const Index = () => {
       <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
-        "flex-1 p-4 md:p-6 animate-fadeIn w-full max-w-full relative z-10",
-        isMobile ? "ml-0 pt-16" : "ml-56",
+        "flex-1 p-6 md:p-8 animate-fadeIn w-full max-w-full relative z-10",
+        isMobile ? "ml-0 pt-20" : "ml-64 pl-8",
       )}>
-        <div className="content-area space-y-6">
+        <div className="max-w-7xl mx-auto space-y-6">
           {/* Enhanced Header with Breadcrumbs and User Profile */}
           <div className="flex items-center justify-between mb-6">
             <nav className="flex items-center gap-2 text-sm text-muted-foreground animate-fadeIn">

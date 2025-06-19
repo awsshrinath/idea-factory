@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
 import { QuickStats } from "@/components/schedule/QuickStats";
@@ -18,15 +19,15 @@ export function Schedule() {
       <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
-        "flex-1 px-6 md:px-10 lg:px-14 py-4 md:py-6 lg:py-8 relative z-10",
-        isMobile ? "ml-0 pt-16" : "ml-64",
-        "w-full max-w-full"
+        "flex-1 py-6 lg:py-8 relative z-10",
+        "w-full max-w-full",
+        isMobile ? "ml-0 pt-20 px-4" : "ml-64 pl-8 pr-8"
       )}>
-        <div className="max-w-7xl mx-auto page-container">
+        <div className="max-w-7xl mx-auto">
           <ScheduleHeader />
           
           {/* Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-[300px,1fr] gap-8 mt-6">
             {/* Left Sidebar */}
             <div className="space-y-6">
               <QuickStats />

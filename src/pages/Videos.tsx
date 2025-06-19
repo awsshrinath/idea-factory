@@ -1,3 +1,4 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { VideoExampleCarousel } from "@/components/videos/VideoExampleCarousel";
 import { VideoSuggestions } from "@/components/videos/VideoSuggestions";
@@ -6,14 +7,21 @@ import { HeroSection } from "@/components/videos/hero/HeroSection";
 import { MainForm } from "@/components/videos/form/MainForm";
 import { RecentVideosSection } from "@/components/videos/recent/RecentVideosSection";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function Videos() {
+  const isMobile = useIsMobile();
+  
   return (
     <div className="min-h-screen flex bg-[#1E1E2E] relative">
       <MultimediaPremiumBackground />
       <Sidebar />
-      <main className="flex-1 ml-64 relative z-10">
-        <div className="max-w-[1440px] mx-auto p-6 lg:p-8">
+      <main className={cn(
+        "flex-1 relative z-10",
+        isMobile ? "ml-0 pt-20" : "ml-64 pl-8"
+      )}>
+        <div className="max-w-7xl mx-auto p-6 lg:p-8">
           <HeroSection />
           <div className="mt-8">
             <VideoExampleCarousel />
