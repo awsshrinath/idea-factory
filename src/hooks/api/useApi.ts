@@ -1,112 +1,71 @@
-import { useState, useCallback, useRef } from 'react';
-import { apiClient, ApiError } from '@/api';
-import { HttpMethod, RequestConfig } from '@/types/api';
-import { toast } from '@/components/ui/use-toast';
-import { getErrorMessage } from '@/lib/errors';
-import axios from 'axios';
 
-interface UseApiState<T> {
-  data: T | null;
-  error: ApiError | null;
-  isLoading: boolean;
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { apiClient } from '../../api/ApiClient';
+
+interface UseApiOptions {
+  enabled?: boolean;
+  staleTime?: number;
+  cacheTime?: number;
 }
 
-type ExecuteApi<T> = (
-  method: HttpMethod,
-  endpoint: string,
-  payload?: unknown,
-  config?: RequestConfig
-) => Promise<T | null>;
+export const useApi = () => {
+  const queryClient = useQueryClient();
 
-interface UseApiResult<T> {
-  state: UseApiState<T>;
-  execute: ExecuteApi<T>;
-  cancel: () => void;
-}
+  // GET request
+  const useGet = (url: string, options: UseApiOptions = {}) => {
+    return useQuery({
+      queryKey: [url],
+      queryFn: () => apiClient.get(url),
+      enabled: options.enabled,
+      staleTime: options.staleTime,
+      gcTime: options.cacheTime,
+    });
+  };
 
-export const useApi = <T>(): UseApiResult<T> => {
-  const [state, setState] = useState<UseApiState<T>>({
-    data: null,
-    error: null,
-    isLoading: false,
-  });
+  // POST request
+  const usePost = (url: string) => {
+    return useMutation({
+      mutationFn: (data: any) => apiClient.post(url, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+      },
+    });
+  };
 
-  const abortControllerRef = useRef<AbortController | null>(null);
+  // PUT request
+  const usePut = (url: string) => {
+    return useMutation({
+      mutationFn: (data: any) => apiClient.put(url, data),
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+      },
+    });
+  };
 
-  const execute = useCallback(
-    async (
-      method: HttpMethod,
-      endpoint: string,
-      payload?: unknown,
-      config?: RequestConfig
-    ) => {
-      abortControllerRef.current = new AbortController();
-      setState({ data: null, error: null, isLoading: true });
-      try {
-        let response;
-        const requestConfig = {
-          ...config,
-          signal: abortControllerRef.current.signal,
-        };
+  // DELETE request
+  const useDelete = (baseUrl: string) => {
+    return useMutation({
+      mutationFn: (id: string) => apiClient.delete(`${baseUrl}/${id}`),
+      onSuccess: () => {
+        queryClient.invalidateQueries();
+      },
+    });
+  };
 
-        switch (method) {
-          case 'POST':
-            response = await apiClient.post<T>(endpoint, payload, requestConfig);
-            break;
-          case 'PUT':
-            response = await apiClient.put<T>(endpoint, payload, requestConfig);
-            break;
-          case 'PATCH':
-            response = await apiClient.patch<T>(
-              endpoint,
-              payload,
-              requestConfig
-            );
-            break;
-          case 'DELETE':
-            response = await apiClient.delete<T>(endpoint, requestConfig);
-            break;
-          case 'GET':
-          default:
-            response = await apiClient.get<T>(endpoint, requestConfig);
-            break;
-        }
-        setState({ data: response.data, error: null, isLoading: false });
-        return response.data;
-      } catch (err) {
-        if (axios.isCancel(err)) {
-          console.log('Request canceled:', err.message);
-          setState({ data: null, error: null, isLoading: false });
-          return null;
-        }
-        const apiError =
-          err instanceof ApiError
-            ? err
-            : new ApiError(
-                'An unexpected error occurred.',
-                500,
-                'UNEXPECTED_ERROR'
-              );
-        setState({ data: null, error: apiError, isLoading: false });
-
-        const message = getErrorMessage(apiError.code);
-
-        toast({
-          title: 'Error',
-          description: message,
-          variant: 'destructive',
-        });
-        return null;
-      }
-    },
-    []
-  );
-
-  const cancel = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
+  // Custom invalidation
+  const invalidateQueries = (queryKey?: string[]) => {
+    if (queryKey) {
+      queryClient.invalidateQueries({ queryKey });
+    } else {
+      queryClient.invalidateQueries();
     }
   };
 
-  return { state, execute, cancel };
-}; 
+  return {
+    useGet,
+    usePost,
+    usePut,
+    useDelete,
+    invalidateQueries,
+  };
+};

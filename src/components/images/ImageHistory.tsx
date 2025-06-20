@@ -1,13 +1,11 @@
-
 import { Card } from "@/components/ui/card";
 import { Download, Trash2, RefreshCcw, Heart, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Input } from "@/components/ui/input";
 import { 
   Carousel,
@@ -16,20 +14,7 @@ import {
   CarouselNext,
   CarouselPrevious
 } from "@/components/ui/carousel";
-
-// Update the interface to match our database schema
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string;
-  updated_at?: string;
-  title?: string | null;
-  is_favorite?: boolean | null;
-}
+import { GeneratedImage } from "./gallery/types";
 
 export function ImageHistory() {
   const [images, setImages] = useState<GeneratedImage[]>([]);
@@ -38,14 +23,13 @@ export function ImageHistory() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const { toast } = useToast();
-  const isMobile = useIsMobile();
   const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid");
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-      if (data.session) {
+      const { data: session } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session.data.session);
+      if (session.data.session) {
         fetchImages();
       } else {
         setIsLoading(false);
@@ -154,8 +138,7 @@ export function ImageHistory() {
     }
   };
 
-  const handleRegenerate = async (image: GeneratedImage) => {
-    // This functionality is handled in the parent component
+  const handleRegenerate = async () => {
     toast({
       title: "Regenerate Image",
       description: "Please use the settings in the form to regenerate this image.",
@@ -169,7 +152,6 @@ export function ImageHistory() {
 
   const saveTitle = async (id: string) => {
     try {
-      // Update with the corrected type that includes title field
       const { error } = await supabase
         .from('generated_images')
         .update({ title: editTitle })
@@ -204,7 +186,6 @@ export function ImageHistory() {
     try {
       const newFavoriteStatus = !image.is_favorite;
       
-      // Update with the corrected type that includes is_favorite field
       const { error } = await supabase
         .from('generated_images')
         .update({ is_favorite: newFavoriteStatus })
@@ -256,287 +237,129 @@ export function ImageHistory() {
     );
   }
 
-  if (images.length <= 3 || viewMode === "grid") {
-    return (
-      <ScrollArea className={cn(
-        "rounded-lg border border-white/10 bg-gradient-card shadow-card",
-        "max-h-[calc(100vh-170px)]"
-      )}>
-        <div className="p-2 space-y-3">
-          {images.map((image) => {
-            const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
-            return (
-              <Card key={image.id} className="p-3 bg-muted/10 border border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:border-white/20 transition-all duration-300 group">
-                <div className="flex flex-col gap-3">
-                  <div className="aspect-square w-full overflow-hidden rounded-md">
-                    <img
-                      src={imageUrl}
-                      alt={image.prompt}
-                      className="w-full h-full object-cover border border-white/10 rounded-md transition-transform duration-300 group-hover:scale-[1.02]"
-                      onError={(e) => {
-                        console.error('Error loading image:', e);
-                        (e.target as HTMLImageElement).src = '/placeholder.svg';
-                      }}
-                    />
+  return (
+    <ScrollArea className={cn(
+      "rounded-lg border border-white/10 bg-gradient-card shadow-card",
+      "max-h-[calc(100vh-170px)]"
+    )}>
+      <div className="p-2 space-y-3">
+        {images.map((image) => {
+          const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
+          return (
+            <Card key={image.id} className="p-3 bg-muted/10 border border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:border-white/20 transition-all duration-300 group">
+              <div className="flex flex-col gap-3">
+                <div className="aspect-square w-full overflow-hidden rounded-md">
+                  <img
+                    src={imageUrl}
+                    alt={image.prompt}
+                    className="w-full h-full object-cover border border-white/10 rounded-md transition-transform duration-300 group-hover:scale-[1.02]"
+                    onError={(e) => {
+                      console.error('Error loading image:', e);
+                      (e.target as HTMLImageElement).src = '/placeholder.svg';
+                    }}
+                  />
+                </div>
+                <div className="flex flex-col">
+                  {editingId === image.id ? (
+                    <div className="flex items-center gap-2 mb-2">
+                      <Input 
+                        value={editTitle} 
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        className="text-sm bg-muted/30 border border-white/10"
+                        autoFocus
+                      />
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={() => saveTitle(image.id)}
+                        className="hover:bg-primary/20"
+                      >
+                        <Check className="h-4 w-4" />
+                      </Button>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={cancelEditing}
+                        className="hover:bg-destructive/20"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between mb-2">
+                      <p className="text-sm text-foreground line-clamp-2 flex-1">
+                        {image.title || image.prompt.substring(0, 30) + (image.prompt.length > 30 ? '...' : '')}
+                      </p>
+                      <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        onClick={() => startEditing(image)}
+                        className="h-7 w-7 hover:bg-accent/10"
+                      >
+                        <Edit2 className="h-3.5 w-3.5" />
+                      </Button>
+                    </div>
+                  )}
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    <span className="text-xs bg-primary/20 text-white px-2 py-1 rounded-full">
+                      {image.style || "Default"}
+                    </span>
+                    <span className="text-xs bg-secondary/20 text-white px-2 py-1 rounded-full">
+                      {image.aspect_ratio || "1:1"}
+                    </span>
                   </div>
-                  <div className="flex flex-col">
-                    {editingId === image.id ? (
-                      <div className="flex items-center gap-2 mb-2">
-                        <Input 
-                          value={editTitle} 
-                          onChange={(e) => setEditTitle(e.target.value)}
-                          className="text-sm bg-muted/30 border border-white/10"
-                          autoFocus
-                        />
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          onClick={() => saveTitle(image.id)}
-                          className="hover:bg-primary/20"
-                        >
-                          <Check className="h-4 w-4" />
-                        </Button>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          onClick={cancelEditing}
-                          className="hover:bg-destructive/20"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-between mb-2">
-                        <p className="text-sm text-foreground line-clamp-2 flex-1">
-                          {image.title || image.prompt.substring(0, 30) + (image.prompt.length > 30 ? '...' : '')}
-                        </p>
-                        <Button 
-                          size="icon" 
-                          variant="ghost" 
-                          onClick={() => startEditing(image)}
-                          className="h-7 w-7 hover:bg-accent/10"
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
-                    )}
-                    <div className="flex flex-wrap gap-2 mb-2">
-                      <span className="text-xs bg-primary/20 text-white px-2 py-1 rounded-full">
-                        {image.style || "Default"}
-                      </span>
-                      <span className="text-xs bg-secondary/20 text-white px-2 py-1 rounded-full">
-                        {image.aspect_ratio || "1:1"}
-                      </span>
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(0,198,255,0.4)] hover:scale-[1.02]"
-                        onClick={() => handleRegenerate(image)}
-                      >
-                        <RefreshCcw className="h-3 w-3 mr-1" />
-                        Regenerate
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="flex-1 hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(255,65,108,0.4)] hover:scale-[1.02]"
-                        onClick={() => handleDownload(image)}
-                      >
-                        <Download className="h-3 w-3 mr-1" />
-                        Download
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
+                  <div className="flex flex-wrap gap-1">
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(0,198,255,0.4)] hover:scale-[1.02]"
+                      onClick={handleRegenerate}
+                    >
+                      <RefreshCcw className="h-3 w-3 mr-1" />
+                      Regenerate
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="flex-1 hover:bg-gradient-primary transition-all duration-300 shadow-sm hover:shadow-[0_0_8px_rgba(255,65,108,0.4)] hover:scale-[1.02]"
+                      onClick={() => handleDownload(image)}
+                    >
+                      <Download className="h-3 w-3 mr-1" />
+                      Download
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className={cn(
+                        "transition-all duration-300 hover:scale-[1.02]",
+                        image.is_favorite 
+                          ? "bg-primary/20 text-white hover:bg-primary/30" 
+                          : "hover:bg-accent/20"
+                      )}
+                      onClick={() => toggleFavorite(image)}
+                    >
+                      <Heart 
                         className={cn(
-                          "transition-all duration-300 hover:scale-[1.02]",
-                          image.is_favorite 
-                            ? "bg-primary/20 text-white hover:bg-primary/30" 
-                            : "hover:bg-accent/20"
-                        )}
-                        onClick={() => toggleFavorite(image)}
-                      >
-                        <Heart 
-                          className={cn(
-                            "h-3 w-3", 
-                            image.is_favorite ? "fill-primary text-primary" : ""
-                          )} 
-                        />
-                      </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        className="hover:bg-destructive/20 transition-all duration-300 hover:scale-[1.02]"
-                        onClick={() => handleDelete(image.id)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
+                          "h-3 w-3", 
+                          image.is_favorite ? "fill-primary text-primary" : ""
+                        )} 
+                      />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      className="hover:bg-destructive/20 transition-all duration-300 hover:scale-[1.02]"
+                      onClick={() => handleDelete(image.id)}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </Button>
                   </div>
                 </div>
-              </Card>
-            );
-          })}
-        </div>
-      </ScrollArea>
-    );
-  }
-
-  return (
-    <div className="rounded-lg border border-white/10 bg-gradient-card shadow-card p-4">
-      <div className="mb-4 flex justify-between items-center">
-        <h3 className="text-sm font-medium">Recent Images ({images.length})</h3>
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setViewMode("grid")}
-          className="text-xs"
-        >
-          Switch to Grid
-        </Button>
+              </div>
+            </Card>
+          );
+        })}
       </div>
-      
-      <Carousel 
-        className="w-full"
-        opts={{
-          align: "start",
-          loop: true,
-        }}
-      >
-        <CarouselContent>
-          {images.map((image) => {
-            const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
-            return (
-              <CarouselItem key={image.id} className="md:basis-1/2">
-                <Card className="p-3 bg-muted/10 border border-white/10 hover:shadow-[0_0_15px_rgba(255,255,255,0.1)] hover:border-white/20 transition-all duration-300 h-full">
-                  <div className="flex flex-col gap-3">
-                    <div className="aspect-square w-full overflow-hidden rounded-md">
-                      <img
-                        src={imageUrl}
-                        alt={image.prompt}
-                        className="w-full h-full object-cover border border-white/10 rounded-md"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = '/placeholder.svg';
-                        }}
-                      />
-                    </div>
-                    <div className="flex flex-col">
-                      {editingId === image.id ? (
-                        <div className="flex items-center gap-2 mb-2">
-                          <Input 
-                            value={editTitle} 
-                            onChange={(e) => setEditTitle(e.target.value)}
-                            className="text-sm bg-muted/30 border border-white/10"
-                            autoFocus
-                          />
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            onClick={() => saveTitle(image.id)}
-                            className="hover:bg-primary/20"
-                          >
-                            <Check className="h-4 w-4" />
-                          </Button>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            onClick={cancelEditing}
-                            className="hover:bg-destructive/20"
-                          >
-                            <X className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      ) : (
-                        <div className="flex items-center justify-between mb-2">
-                          <p className="text-sm text-foreground line-clamp-2 flex-1">
-                            {image.title || image.prompt.substring(0, 30) + (image.prompt.length > 30 ? '...' : '')}
-                          </p>
-                          <Button 
-                            size="icon" 
-                            variant="ghost" 
-                            onClick={() => startEditing(image)}
-                            className="h-7 w-7 hover:bg-accent/10"
-                          >
-                            <Edit2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      )}
-                      <div className="flex flex-wrap gap-2 mb-2">
-                        <span className="text-xs bg-primary/20 text-white px-2 py-1 rounded-full">
-                          {image.style || "Default"}
-                        </span>
-                        <span className="text-xs bg-secondary/20 text-white px-2 py-1 rounded-full">
-                          {image.aspect_ratio || "1:1"}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap gap-1">
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1 hover:bg-gradient-secondary transition-all duration-300"
-                          onClick={() => handleRegenerate(image)}
-                        >
-                          <RefreshCcw className="h-3 w-3 mr-1" />
-                          Regenerate
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="flex-1 hover:bg-gradient-primary transition-all duration-300"
-                          onClick={() => handleDownload(image)}
-                        >
-                          <Download className="h-3 w-3 mr-1" />
-                          Download
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className={cn(
-                            "transition-all duration-300",
-                            image.is_favorite 
-                              ? "bg-primary/20 text-white hover:bg-primary/30" 
-                              : "hover:bg-accent/20"
-                          )}
-                          onClick={() => toggleFavorite(image)}
-                        >
-                          <Heart 
-                            className={cn(
-                              "h-3 w-3", 
-                              image.is_favorite ? "fill-primary text-primary" : ""
-                            )} 
-                          />
-                        </Button>
-                        <Button 
-                          variant="outline" 
-                          size="sm"
-                          className="hover:bg-destructive/20 transition-all duration-300"
-                          onClick={() => handleDelete(image.id)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-              </CarouselItem>
-            );
-          })}
-        </CarouselContent>
-        <CarouselPrevious className="left-0" />
-        <CarouselNext className="right-0" />
-      </Carousel>
-      
-      <div className="mt-4 flex justify-center">
-        <Button 
-          variant="outline" 
-          size="sm" 
-          onClick={() => setViewMode("grid")}
-        >
-          View All Images
-        </Button>
-      </div>
-    </div>
+    </ScrollArea>
   );
 }

@@ -1,71 +1,84 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
 
-export const useProfile = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
+import { useEffect, useState } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+
+interface UserProfile {
+  id: string;
+  email?: string;
+  full_name?: string;
+  avatar_url?: string;
+}
+
+export function useProfile() {
+  const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
-    const fetchProfile = async () => {
+    getProfile();
+  }, []);
+
+  async function getProfile() {
+    try {
+      setLoading(true);
+      const { data: { user } } = await supabase.auth.getUser();
+
       if (user) {
-        try {
-          setLoading(true);
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-          if (error) {
-            throw error;
-          }
-
-          setProfile(data);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
-
-  const updateProfile = async (updates: {
-    username: string;
-    full_name: string;
-  }) => {
-    if (user) {
-      try {
-        setLoading(true);
-        const { error } = await supabase.from('profiles').upsert({
+        // For now, we'll use the user data from auth
+        // In the future, we can extend this to use a profiles table
+        setProfile({
           id: user.id,
-          ...updates,
-          updated_at: new Date(),
+          email: user.email,
+          full_name: user.user_metadata?.full_name,
+          avatar_url: user.user_metadata?.avatar_url,
         });
-
-        if (error) {
-          throw error;
-        }
-
-        // Refetch profile to get the latest data
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setProfile(data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
+      } else {
+        setProfile(null);
       }
+    } catch (error: any) {
+      console.error('Error loading user profile:', error);
+      setError(error.message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to load profile",
+      });
+    } finally {
+      setLoading(false);
     }
-  };
+  }
 
-  return { profile, loading, error, updateProfile };
-}; 
+  async function updateProfile(updates: Partial<UserProfile>) {
+    try {
+      const { error } = await supabase.auth.updateUser({
+        data: updates
+      });
+
+      if (error) throw error;
+
+      setProfile(prev => prev ? { ...prev, ...updates } : null);
+      toast({
+        title: "Success",
+        description: "Profile updated successfully",
+      });
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      setError(error.message);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update profile",
+      });
+    }
+  }
+
+  return {
+    profile,
+    loading,
+    error,
+    updateProfile,
+    refetch: getProfile,
+  };
+}

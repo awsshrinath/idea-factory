@@ -1,30 +1,20 @@
-
 import React from "react";
 import {
   Dialog,
   DialogContent,
+  DialogHeader,
   DialogTitle,
   DialogClose,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Heart, RefreshCcw, Download, Trash2, Edit2 } from "lucide-react";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Heart, RefreshCcw, Download, Trash2, Edit2, Check, X, Calendar, Tag } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { cn } from "@/lib/utils";
-
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string;
-  updated_at?: string;
-  title?: string | null;
-  is_favorite?: boolean | null;
-}
+import { useState } from "react";
+import { GeneratedImage } from "./types";
 
 interface ImageDetailModalProps {
   isOpen: boolean;
@@ -62,39 +52,41 @@ export function ImageDetailModal({
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] max-h-[90vh] overflow-y-auto">
-        <DialogTitle className="flex justify-between items-center">
-          <span>{selectedImage?.title || "Image Details"}</span>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={cn(
-                "h-8 transition-all duration-300",
-                selectedImage?.is_favorite 
-                  ? "bg-primary/20 text-white hover:bg-primary/30" 
-                  : "hover:bg-accent/20"
-              )}
-              onClick={() => onToggleFavorite(selectedImage)}
-            >
-              <Heart 
-                className={cn(
-                  "h-4 w-4 mr-1", 
-                  selectedImage?.is_favorite ? "fill-primary text-primary" : ""
-                )} 
-              />
-              {selectedImage?.is_favorite ? "Favorited" : "Favorite"}
-            </Button>
-            <DialogClose asChild>
+        <DialogHeader>
+          <DialogTitle className="flex justify-between items-center">
+            <span>{selectedImage?.title || "Image Details"}</span>
+            <div className="flex gap-2">
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="h-8"
+                size="sm"
+                className={cn(
+                  "h-8 transition-all duration-300",
+                  selectedImage?.is_favorite 
+                    ? "bg-primary/20 text-white hover:bg-primary/30" 
+                    : "hover:bg-accent/20"
+                )}
+                onClick={() => onToggleFavorite(selectedImage)}
               >
-                Close
+                <Heart 
+                  className={cn(
+                    "h-4 w-4 mr-1", 
+                    selectedImage?.is_favorite ? "fill-primary text-primary" : ""
+                  )} 
+                />
+                {selectedImage?.is_favorite ? "Favorited" : "Favorite"}
               </Button>
-            </DialogClose>
-          </div>
-        </DialogTitle>
+              <DialogClose asChild>
+                <Button 
+                  variant="outline" 
+                  size="sm" 
+                  className="h-8"
+                >
+                  Close
+                </Button>
+              </DialogClose>
+            </div>
+          </DialogTitle>
+        </DialogHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="relative bg-black/30 rounded-lg overflow-hidden border border-white/10">

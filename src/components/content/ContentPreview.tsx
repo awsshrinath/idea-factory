@@ -11,10 +11,9 @@ interface ContentPreviewProps {
   content: string;
   platform?: string;
   tone?: string;
-  onContentUpdate?: (content: string) => void;
 }
 
-export function ContentPreview({ content, platform, tone, onContentUpdate }: ContentPreviewProps) {
+export function ContentPreview({ content, platform, tone }: ContentPreviewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
 
@@ -22,8 +21,8 @@ export function ContentPreview({ content, platform, tone, onContentUpdate }: Con
     setEditedContent(e.target.value);
   };
 
-  const wordCount = content.split(/\s+/).filter(Boolean).length;
-  const characterCount = content.length;
+  const wordCount = content ? content.split(/\s+/).filter(Boolean).length : 0;
+  const characterCount = content ? content.length : 0;
 
   return (
     <Card className="premium-card premium-card-hover border border-white/10 shadow-lg backdrop-blur-sm">
@@ -71,7 +70,7 @@ export function ContentPreview({ content, platform, tone, onContentUpdate }: Con
         ) : (
           <ScrollArea className="h-[300px]">
             <div className="premium-body text-base whitespace-pre-line">
-              {content}
+              {content || 'No content to preview'}
             </div>
           </ScrollArea>
         )}

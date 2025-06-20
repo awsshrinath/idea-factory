@@ -1,7 +1,6 @@
-
 import React from "react";
 import { Card } from "@/components/ui/card";
-import { Sparkles } from "lucide-react";
+import { ImageIcon, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RefreshCcw, Download } from "lucide-react";
 import { PlaceholderCards } from "./PlaceholderCards";

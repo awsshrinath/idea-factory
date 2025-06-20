@@ -42,9 +42,9 @@ export function ImageGallery({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-      if (data.session) {
+      const { data: session } = await supabase.auth.getSession();
+      setIsAuthenticated(!!session.data.session);
+      if (session.data.session) {
         fetchImages();
       } else {
         setIsLoading(false);
@@ -53,10 +53,9 @@ export function ImageGallery({
 
     checkAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-      if (data.session) {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      setIsAuthenticated(!!session);
+      if (session) {
         fetchImages();
       } else {
         setImages([]);

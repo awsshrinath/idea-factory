@@ -1,706 +1,353 @@
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import * as z from "zod";
+import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { 
-  Paintbrush, 
-  ImageIcon, 
-  Wand2, 
-  RefreshCcw, 
-  Info,
-  Camera,
-  Monitor,
-  Smartphone,
-  Film,
-  SquareIcon,
-  Sun,
-  Lamp,
-} from "lucide-react";
-import { useState, useEffect } from "react";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { cn } from "@/lib/utils";
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
-import { Card } from "@/components/ui/card";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { 
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Progress } from "@/components/ui/progress";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { StyleTemplates } from "./StyleTemplates";
 import { StyleQuickSwitch } from "./StyleQuickSwitch";
+import { Loader, Download, Sparkles, ImageIcon, Palette, Sliders, Wand2 } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
+import { cn } from "@/lib/utils";
 
-const formSchema = z.object({
-  prompt: z.string().min(1, "Please enter a prompt"),
-  style: z.string().min(1, "Please select a style"),
-  aspectRatio: z.string().min(1, "Please select an aspect ratio"),
-  detailLevel: z.enum(["low", "medium", "high"]).default("medium"),
-  seed: z.string().optional(),
-  lighting: z.enum(["natural", "studio", "cinematic"]).default("natural"),
-});
-
-interface StyleOption {
-  value: string;
-  label: string;
-  gradient: string;
-  description: string;
-  thumbnail: string;
-  icon: React.ReactNode;
-  tooltip: string;
+interface ImageGenerationFormProps {
+  onImageGenerated?: (imageUrl: string) => void;
 }
 
-const styles: StyleOption[] = [
-  { 
-    value: "realistic", 
-    label: "Realistic", 
-    gradient: "bg-gradient-primary",
-    description: "Photo-realistic images with natural details",
-    thumbnail: "https://images.unsplash.com/photo-1532767153582-b1a0e5145009?w=500&q=80",
-    icon: <Camera className="h-5 w-5" />,
-    tooltip: "Photo-realistic style with high fidelity to real-world images"
-  },
-  { 
-    value: "cyberpunk", 
-    label: "Cyberpunk", 
-    gradient: "bg-gradient-creative",
-    description: "Futuristic neon-lit urban aesthetics",
-    thumbnail: "https://images.unsplash.com/photo-1558486012-817176f84c6d?w=500&q=80",
-    icon: <Monitor className="h-5 w-5" />,
-    tooltip: "Futuristic neon-lit urban aesthetic with high tech and low life" 
-  },
-  { 
-    value: "watercolor", 
-    label: "Watercolor", 
-    gradient: "bg-gradient-casual",
-    description: "Soft flowing artistic painting style",
-    thumbnail: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?w=500&q=80",
-    icon: <Paintbrush className="h-5 w-5" />,
-    tooltip: "Gentle watercolor painting style with soft edges and color blends" 
-  },
-  { 
-    value: "anime", 
-    label: "Anime", 
-    gradient: "bg-gradient-friendly",
-    description: "Japanese animation inspired artwork",
-    thumbnail: "https://images.unsplash.com/photo-1578331833071-ce81bd50d300?w=500&q=80",
-    icon: <Wand2 className="h-5 w-5" />,
-    tooltip: "Japanese animation inspired artwork with distinctive stylization" 
-  },
-  { 
-    value: "3d", 
-    label: "3D Render", 
-    gradient: "bg-gradient-secondary",
-    description: "Computer generated 3D graphics",
-    thumbnail: "https://images.unsplash.com/photo-1534158914592-062992fbe900?w=500&q=80",
-    icon: <ImageIcon className="h-5 w-5" />,
-    tooltip: "Computer generated 3D rendered graphics with realistic lighting" 
-  },
-  { 
-    value: "sketch", 
-    label: "Sketch", 
-    gradient: "bg-gradient-muted",
-    description: "Hand-drawn pencil sketch style",
-    thumbnail: "https://images.unsplash.com/photo-1618331833071-ce81bd50d300?w=500&q=80",
-    icon: <Paintbrush className="h-5 w-5" />,
-    tooltip: "Hand-drawn pencil sketch style with detailed linework" 
-  },
+const styles = [
+  "Realistic", "Cartoon", "Anime", "Oil Painting", "Watercolor", 
+  "Digital Art", "3D Render", "Sketch", "Pop Art", "Abstract"
 ];
 
 const aspectRatios = [
-  { 
-    value: "1:1", 
-    label: "Square", 
-    description: "1:1", 
-    icon: <SquareIcon className="h-4 w-4" />,
-    tooltip: "Perfect square aspect ratio (1:1)" 
-  },
-  { 
-    value: "16:9", 
-    label: "Landscape", 
-    description: "16:9", 
-    icon: <Monitor className="h-4 w-4" />,
-    tooltip: "Widescreen landscape format (16:9)" 
-  },
-  { 
-    value: "9:16", 
-    label: "Portrait", 
-    description: "9:16", 
-    icon: <Smartphone className="h-4 w-4" />,
-    tooltip: "Vertical portrait format (9:16)" 
-  },
-  { 
-    value: "4:5", 
-    label: "Instagram", 
-    description: "4:5", 
-    icon: <ImageIcon className="h-4 w-4" />,
-    tooltip: "Instagram optimal aspect ratio (4:5)" 
-  },
+  { value: "1:1", label: "Square (1:1)" },
+  { value: "16:9", label: "Landscape (16:9)" },
+  { value: "9:16", label: "Portrait (9:16)" },
+  { value: "4:3", label: "Classic (4:3)" },
+  { value: "3:4", label: "Portrait (3:4)" }
 ];
 
-export function ImageGenerationForm({ onImageGenerated }: { onImageGenerated: () => void }) {
+export function ImageGenerationForm({ onImageGenerated }: ImageGenerationFormProps) {
+  const [prompt, setPrompt] = useState("");
+  const [style, setStyle] = useState("Realistic");
+  const [aspectRatio, setAspectRatio] = useState("1:1");
   const [isGenerating, setIsGenerating] = useState(false);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [isAdvancedOpen, setIsAdvancedOpen] = useState(false);
-  const [generationProgress, setGenerationProgress] = useState(0);
-  const [moodKeywords, setMoodKeywords] = useState<string[]>([]);
+  const [generatedImage, setGeneratedImage] = useState<string | null>(null);
+  const [showAdvanced, setShowAdvanced] = useState(false);
+  const [seed, setSeed] = useState("");
+  const [steps, setSteps] = useState(20);
+  const [guidanceScale, setGuidanceScale] = useState(7.5);
   const { toast } = useToast();
-  const isMobile = useIsMobile();
+  const imageRef = useRef<HTMLImageElement>(null);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
-    defaultValues: {
-      prompt: "",
-      style: "realistic",
-      aspectRatio: "1:1",
-      detailLevel: "medium",
-      seed: "",
-      lighting: "natural",
-    },
-  });
-
-  useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-    };
-
-    checkAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleTemplateSelected = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      if (customEvent.detail) {
-        const { prompt, style } = customEvent.detail;
-        form.setValue("prompt", prompt);
-        form.setValue("style", style);
-      }
-    };
-    
-    const handleRegenerateImage = (event: Event) => {
-      const customEvent = event as CustomEvent;
-      if (customEvent.detail) {
-        const { prompt, style, aspectRatio } = customEvent.detail;
-        form.setValue("prompt", prompt);
-        form.setValue("style", style);
-        form.setValue("aspectRatio", aspectRatio);
-        
-        const formElement = document.getElementById("image-generation-form");
-        if (formElement) {
-          formElement.scrollIntoView({ behavior: "smooth" });
-        }
-      }
-    };
-
-    window.addEventListener('template-selected', handleTemplateSelected);
-    window.addEventListener('regenerate-image', handleRegenerateImage);
-    
-    return () => {
-      window.removeEventListener('template-selected', handleTemplateSelected);
-      window.removeEventListener('regenerate-image', handleRegenerateImage);
-    };
-  }, [form]);
-
-  const handleReset = () => {
-    form.reset({
-      prompt: "",
-      style: "realistic",
-      aspectRatio: "1:1",
-      detailLevel: "medium",
-      seed: "",
-      lighting: "natural",
-    });
-    setMoodKeywords([]);
-    toast({
-      title: "Form Reset",
-      description: "All settings have been reset to defaults.",
-    });
-  };
-
-  useEffect(() => {
-    if (isGenerating) {
-      const interval = setInterval(() => {
-        setGenerationProgress((prev) => {
-          const increment = Math.random() * 15;
-          const newValue = prev + increment;
-          return newValue >= 100 ? 100 : newValue;
-        });
-      }, 500);
-
-      return () => clearInterval(interval);
-    } else {
-      setGenerationProgress(0);
-    }
-  }, [isGenerating]);
-
-  const enhancePromptWithMood = (originalPrompt: string) => {
-    if (moodKeywords.length === 0) return originalPrompt;
-    
-    if (moodKeywords.length <= 2) return `${originalPrompt}, ${moodKeywords.join(', ')} mood`;
-    
-    const selectedKeywords = moodKeywords.sort(() => Math.random() - 0.5).slice(0, 2);
-    return `${originalPrompt}, ${selectedKeywords.join(', ')} mood`;
-  };
-
-  async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsGenerating(true);
-    setGenerationProgress(0);
-    try {
-      if (!isAuthenticated) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Required",
-          description: "Please log in to generate images.",
-        });
-        return;
-      }
-
-      const { data: { session } } = await supabase.auth.getSession();
+  // Listen for regeneration events
+  React.useEffect(() => {
+    const handleRegenerate = (event: CustomEvent) => {
+      const { prompt: newPrompt, style: newStyle, aspectRatio: newAspectRatio } = event.detail;
+      setPrompt(newPrompt);
+      setStyle(newStyle);
+      setAspectRatio(newAspectRatio);
       
-      if (!session) {
-        toast({
-          variant: "destructive",
-          title: "Authentication Required",
-          description: "Please log in to generate images.",
-        });
-        return;
-      }
-
       toast({
-        title: "Starting image generation",
-        description: "This may take a minute...",
+        title: "Settings Applied",
+        description: "Ready to regenerate with previous settings",
       });
+    };
 
-      const enhancedPrompt = enhancePromptWithMood(values.prompt);
-      const enhancedValues = { ...values, prompt: enhancedPrompt };
+    window.addEventListener('regenerate-image', handleRegenerate as EventListener);
+    return () => window.removeEventListener('regenerate-image', handleRegenerate as EventListener);
+  }, [toast]);
 
-      console.log("Sending request to edge function with values:", enhancedValues);
-      
-      const { data, error } = await supabase.functions.invoke("generate-image", {
-        body: enhancedValues,
-      });
-      
-      if (error) {
-        console.error("Error from edge function:", error);
-        throw new Error(error.message || "Failed to invoke function");
-      }
-      
-      console.log("Response from edge function:", data);
-
-      if (!data || !data.imageUrl) {
-        throw new Error("Invalid response from server");
-      }
-
-      toast({
-        title: "Success",
-        description: "Image generated successfully!",
-      });
-
-      onImageGenerated();
-    } catch (error: any) {
-      console.error('Error generating image:', error);
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!prompt.trim()) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error.message || "Failed to generate image. Please try again.",
+        description: "Please enter a prompt for your image",
+      });
+      return;
+    }
+
+    setIsGenerating(true);
+    setGeneratedImage(null);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('generate-image', {
+        body: {
+          prompt: prompt.trim(),
+          style,
+          aspect_ratio: aspectRatio,
+          seed: seed || undefined,
+          steps,
+          guidance_scale: guidanceScale
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.image_url) {
+        setGeneratedImage(data.image_url);
+        onImageGenerated?.(data.image_url);
+        
+        toast({
+          title: "Success!",
+          description: "Your image has been generated successfully",
+        });
+      }
+    } catch (error: any) {
+      console.error('Error generating image:', error);
+      const errorMessage = error.message || 'Failed to generate image. Please try again.';
+      toast({
+        variant: "destructive",
+        title: "Generation Failed",
+        description: errorMessage,
       });
     } finally {
       setIsGenerating(false);
     }
-  }
+  };
 
-  const handleApplyMood = (keywords: string[]) => {
-    setMoodKeywords(keywords);
-    
-    if (keywords.length > 0) {
-      toast({
-        title: "Mood Applied",
-        description: `Mood keywords will enhance your prompt: ${keywords.join(', ')}`,
-      });
+  const handleDownload = () => {
+    if (generatedImage && imageRef.current) {
+      const link = document.createElement('a');
+      link.href = generatedImage;
+      link.download = `generated-image-${Date.now()}.png`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
   };
 
+  const handleStyleSelect = (selectedStyle: string) => {
+    setStyle(selectedStyle);
+  };
+
   return (
-    <TooltipProvider>
-      <Form {...form}>
-        <form id="image-generation-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          <FormField
-            control={form.control}
-            name="prompt"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel className="text-foreground font-medium flex items-center gap-1">
-                  Describe your image
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p className="max-w-xs">Be descriptive about what you want to see in your image</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </FormLabel>
-                <FormControl>
-                  <Input
-                    placeholder="e.g. A futuristic cityscape with flying cars at sunset"
-                    className="bg-background border-white/10 focus:border-primary transition-colors"
-                    {...field}
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+    <div className="w-full max-w-4xl mx-auto space-y-6">
+      {/* Header */}
+      <div className="text-center space-y-2">
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-600/20 to-pink-600/20 flex items-center justify-center border border-purple-500/20">
+            <ImageIcon className="h-4 w-4 text-purple-400" />
+          </div>
+          <h1 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            AI Image Generator
+          </h1>
+        </div>
+        <p className="text-muted-foreground">
+          Create stunning images with AI. Describe what you want to see and watch it come to life.
+        </p>
+      </div>
 
-          <StyleQuickSwitch onMoodSelect={handleApplyMood} />
-
-          <FormField
-            control={form.control}
-            name="style"
-            render={({ field }) => (
-              <FormItem className="mt-8">
-                <FormLabel className="text-foreground font-medium flex items-center gap-1">
-                  Image Style
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Choose a visual style for your generated image</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </FormLabel>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  {styles.map((style) => (
-                    <Tooltip key={style.value}>
-                      <TooltipTrigger asChild>
-                        <div 
-                          className={cn(
-                            "relative rounded-lg overflow-hidden cursor-pointer transition-all duration-300",
-                            "glass border-2",
-                            field.value === style.value 
-                              ? "border-primary shadow-[0_0_15px_rgba(255,65,108,0.5)] scale-[1.03]" 
-                              : "border-white/10 hover:border-white/30",
-                            "hover:shadow-[0_0_20px_rgba(255,255,255,0.2)] hover:scale-[1.03]"
-                          )}
-                          onClick={() => field.onChange(style.value)}
-                        >
-                          <div className="h-32 overflow-hidden">
-                            <img 
-                              src={style.thumbnail} 
-                              alt={style.label} 
-                              className="w-full h-full object-cover transition-transform duration-500 hover:scale-110" 
-                            />
-                            <div className={cn(
-                              "absolute inset-0 opacity-30",
-                              style.gradient
-                            )} />
-                            {field.value === style.value && (
-                              <div className="absolute inset-0 bg-primary/10 backdrop-blur-[1px]"></div>
-                            )}
-                          </div>
-                          <div className="p-3 bg-background/40 backdrop-blur-sm">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="p-1.5 rounded-full bg-background/70 backdrop-blur-sm">
-                                {style.icon}
-                              </div>
-                              <span className="font-medium">{style.label}</span>
-                            </div>
-                            <p className="text-xs text-muted-foreground">{style.description}</p>
-                          </div>
-                          {field.value === style.value && (
-                            <div className="absolute top-3 right-3 bg-primary rounded-full p-1.5 shadow-[0_0_10px_rgba(255,65,108,0.7)]">
-                              <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7"></path>
-                              </svg>
-                            </div>
-                          )}
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{style.tooltip}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="aspectRatio"
-            render={({ field }) => (
-              <FormItem className="space-y-3 mt-6">
-                <FormLabel className="text-foreground font-medium flex items-center gap-1">
-                  Aspect Ratio
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Select the dimensions for your generated image</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </FormLabel>
-                <div className="flex flex-wrap gap-2">
-                  {aspectRatios.map((ratio) => (
-                    <Tooltip key={ratio.value}>
-                      <TooltipTrigger asChild>
-                        <button
-                          type="button"
-                          onClick={() => field.onChange(ratio.value)}
-                          className={cn(
-                            "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-medium",
-                            "transition-all duration-200 border-2",
-                            field.value === ratio.value
-                              ? "bg-primary/20 border-primary text-white shadow-[0_0_8px_rgba(255,65,108,0.5)] scale-[1.03]"
-                              : "bg-transparent border-white/10 text-white hover:bg-accent/10 hover:scale-[1.03]"
-                          )}
-                        >
-                          {ratio.icon}
-                          {ratio.label} ({ratio.description})
-                        </button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{ratio.tooltip}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  ))}
-                </div>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <Collapsible
-            open={isAdvancedOpen}
-            onOpenChange={setIsAdvancedOpen}
-            className="border border-white/10 rounded-lg p-4 bg-muted/20 backdrop-blur-sm mt-6"
-          >
-            <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium flex items-center gap-1">
-                Advanced Options
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Fine-tune your image with additional settings</p>
-                  </TooltipContent>
-                </Tooltip>
-              </h3>
-              <CollapsibleTrigger asChild>
-                <Button variant="ghost" size="sm">
-                  <span className="sr-only">Toggle advanced options</span>
-                  <div className={cn(
-                    "h-5 w-5 rounded-full border border-white/20 flex items-center justify-center",
-                    "transition-transform duration-300",
-                    isAdvancedOpen ? "rotate-180" : ""
-                  )}>
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path 
-                        d="M3.5 5.5L7 9L10.5 5.5" 
-                        stroke="currentColor" 
-                        strokeWidth="1.5" 
-                        strokeLinecap="round" 
-                        strokeLinejoin="round"
-                      />
-                    </svg>
-                  </div>
-                </Button>
-              </CollapsibleTrigger>
-            </div>
-
-            <CollapsibleContent className="space-y-4 mt-4">
-              <FormField
-                control={form.control}
-                name="detailLevel"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-foreground font-medium flex items-center gap-1">
-                      Detail Level
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Controls the level of detail in the generated image</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="low" id="detail-low" />
-                          <label htmlFor="detail-low">Low</label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="medium" id="detail-medium" />
-                          <label htmlFor="detail-medium">Medium</label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="high" id="detail-high" />
-                          <label htmlFor="detail-high">High</label>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
+      <form onSubmit={handleSubmit} className="space-y-6">
+        {/* Main Input Section */}
+        <div className="grid lg:grid-cols-2 gap-6">
+          {/* Left Column - Controls */}
+          <div className="space-y-6">
+            {/* Prompt Input */}
+            <div className="space-y-2">
+              <Label htmlFor="prompt" className="text-sm font-medium flex items-center gap-2">
+                <Wand2 className="h-4 w-4" />
+                Describe Your Image
+              </Label>
+              <Textarea
+                id="prompt"
+                placeholder="A majestic mountain landscape at sunset with golden light reflecting on a crystal clear lake..."
+                value={prompt}
+                onChange={(e) => setPrompt(e.target.value)}
+                className="min-h-[100px] resize-none bg-background/50 border-white/10 focus:border-purple-400 transition-colors"
               />
-
-              <FormField
-                control={form.control}
-                name="seed"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-foreground font-medium flex items-center gap-1">
-                      Seed (optional)
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Fixed seed enables reproducible results</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <Input
-                        placeholder="Random seed value"
-                        className="bg-background border-white/10"
-                        type="number"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="lighting"
-                render={({ field }) => (
-                  <FormItem className="space-y-3">
-                    <FormLabel className="text-foreground font-medium flex items-center gap-1">
-                      Lighting
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-3.5 w-3.5 text-muted-foreground cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Define the lighting style for your image</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </FormLabel>
-                    <FormControl>
-                      <RadioGroup
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                        className="flex space-x-4"
-                      >
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="natural" id="lighting-natural" />
-                          <label htmlFor="lighting-natural" className="flex items-center gap-1">
-                            <Sun className="h-3.5 w-3.5" />
-                            Natural
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="studio" id="lighting-studio" />
-                          <label htmlFor="lighting-studio" className="flex items-center gap-1">
-                            <Lamp className="h-3.5 w-3.5" />
-                            Studio
-                          </label>
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <RadioGroupItem value="cinematic" id="lighting-cinematic" />
-                          <label htmlFor="lighting-cinematic" className="flex items-center gap-1">
-                            <Film className="h-3.5 w-3.5" />
-                            Cinematic
-                          </label>
-                        </div>
-                      </RadioGroup>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </CollapsibleContent>
-          </Collapsible>
-
-          {isGenerating && (
-            <div className="space-y-2 mt-4">
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Generating Magic...</span>
-                <span>{Math.round(generationProgress)}%</span>
+              <div className="text-xs text-muted-foreground">
+                {prompt.length}/500 characters
               </div>
-              <Progress value={generationProgress} className="h-2" />
             </div>
-          )}
 
-          <div className="flex flex-col sm:flex-row gap-3 justify-between mt-6">
-            <Button
-              type="submit"
-              className={cn(
-                "w-full bg-gradient-secondary shadow-glow transition-all duration-500 group relative overflow-hidden",
-                "hover:shadow-[0_0_25px_rgba(0,198,255,0.6)] hover:bg-gradient-primary",
-                isGenerating ? "animate-pulse" : ""
-              )}
-              disabled={isGenerating || !isAuthenticated}
-              isLoading={isGenerating}
-            >
-              {isGenerating && (
-                <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-[shimmer_2s_infinite]"></span>
-              )}
-              
-              <Wand2 className={cn(
-                "h-4 w-4 mr-2",
-                "transition-transform group-hover:rotate-12"
-              )} />
-              {isGenerating ? "Generating..." : isAuthenticated ? "Generate Image" : "Login Required"}
-            </Button>
-            
+            {/* Style Templates */}
+            <div className="space-y-3">
+              <Label className="text-sm font-medium flex items-center gap-2">
+                <Palette className="h-4 w-4" />
+                Style Templates
+              </Label>
+              <StyleTemplates onStyleSelect={handleStyleSelect} />
+            </div>
+
+            {/* Quick Controls */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="style" className="text-sm font-medium">Style</Label>
+                <Select value={style} onValueChange={setStyle}>
+                  <SelectTrigger className="bg-background/50 border-white/10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {styles.map((s) => (
+                      <SelectItem key={s} value={s}>{s}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="aspectRatio" className="text-sm font-medium">Aspect Ratio</Label>
+                <Select value={aspectRatio} onValueChange={setAspectRatio}>
+                  <SelectTrigger className="bg-background/50 border-white/10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {aspectRatios.map((ratio) => (
+                      <SelectItem key={ratio.value} value={ratio.value}>
+                        {ratio.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Advanced Options Toggle */}
             <Button
               type="button"
-              variant="ghost"
-              onClick={handleReset}
-              className="sm:w-auto"
-              disabled={isGenerating}
+              variant="outline"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full justify-center"
             >
-              <RefreshCcw className="h-4 w-4 mr-2" />
-              Reset
+              <Sliders className="h-4 w-4 mr-2" />
+              {showAdvanced ? "Hide" : "Show"} Advanced Options
+            </Button>
+
+            {showAdvanced && (
+              <div className="space-y-4 p-4 bg-muted/20 rounded-lg border border-white/10">
+                <div className="grid grid-cols-1 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="seed" className="text-sm">Seed (optional)</Label>
+                    <Input
+                      id="seed"
+                      type="number"
+                      placeholder="Random seed for reproducible results"
+                      value={seed}
+                      onChange={(e) => setSeed(e.target.value)}
+                      className="bg-background/50 border-white/10"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="steps" className="text-sm">Steps: {steps}</Label>
+                    <input
+                      id="steps"
+                      type="range"
+                      min={10}
+                      max={50}
+                      value={steps}
+                      onChange={(e) => setSteps(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="guidance" className="text-sm">Guidance Scale: {guidanceScale}</Label>
+                    <input
+                      id="guidance"
+                      type="range"
+                      min={1}
+                      max={20}
+                      step={0.5}
+                      value={guidanceScale}
+                      onChange={(e) => setGuidanceScale(Number(e.target.value))}
+                      className="w-full"
+                    />
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Generate Button */}
+            <Button 
+              type="submit" 
+              disabled={isGenerating || !prompt.trim()}
+              className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader className="h-5 w-5 mr-2 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Sparkles className="h-5 w-5 mr-2" />
+                  Generate Image
+                </>
+              )}
             </Button>
           </div>
-        </form>
-      </Form>
-    </TooltipProvider>
+
+          {/* Right Column - Preview */}
+          <div className="space-y-4">
+            <div className="aspect-square bg-muted/20 rounded-lg border-2 border-dashed border-white/20 flex items-center justify-center relative overflow-hidden">
+              {generatedImage ? (
+                <div className="relative w-full h-full">
+                  <img
+                    ref={imageRef}
+                    src={generatedImage}
+                    alt="Generated"
+                    className="w-full h-full object-cover rounded-lg"
+                  />
+                  <div className="absolute top-2 right-2">
+                    <Button
+                      onClick={handleDownload}
+                      size="sm"
+                      variant="secondary"
+                      className="bg-black/50 hover:bg-black/70 backdrop-blur-sm"
+                    >
+                      <Download className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              ) : isGenerating ? (
+                <div className="text-center space-y-3">
+                  <Loader className="h-8 w-8 animate-spin mx-auto text-purple-400" />
+                  <p className="text-sm text-muted-foreground">Creating your image...</p>
+                </div>
+              ) : (
+                <div className="text-center space-y-2">
+                  <ImageIcon className="h-12 w-12 text-muted-foreground/50 mx-auto" />
+                  <p className="text-sm text-muted-foreground">Your generated image will appear here</p>
+                </div>
+              )}
+            </div>
+
+            {/* Style Quick Switch */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Quick Style Switch</Label>
+              <StyleQuickSwitch currentStyle={style} onStyleChange={setStyle} />
+            </div>
+
+            {/* Selected Settings Display */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">Current Settings</Label>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary" className="text-xs">
+                  {style}
+                </Badge>
+                <Badge variant="secondary" className="text-xs">
+                  {aspectRatio}
+                </Badge>
+                {seed && (
+                  <Badge variant="outline" className="text-xs">
+                    Seed: {seed}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+
+      <Separator className="bg-white/10" />
+    </div>
   );
 }
