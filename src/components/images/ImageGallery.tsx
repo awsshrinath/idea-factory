@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -73,7 +74,8 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
       if (data) {
         const processedImages: GeneratedImage[] = data.map(img => ({
           ...img,
-          created_at: img.created_at || new Date().toISOString()
+          created_at: img.created_at || new Date().toISOString(),
+          updated_at: img.updated_at || undefined
         }));
         setImages(processedImages);
       }
@@ -202,33 +204,29 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
     }
   };
 
-  const handleSaveTitle = (id: string, title: string) => {
-    const saveTitle = async () => {
-      try {
-        const { error } = await supabase
-          .from('generated_images')
-          .update({ title })
-          .eq('id', id);
+  const handleSaveTitle = async (id: string, title: string) => {
+    try {
+      const { error } = await supabase
+        .from('generated_images')
+        .update({ title })
+        .eq('id', id);
 
-        if (error) throw error;
+      if (error) throw error;
 
-        toast({
-          title: "Success!",
-          description: "Title updated successfully"
-        });
-        
-        fetchImages();
-      } catch (error: any) {
-        console.error('Error updating title:', error);
-        toast({
-          variant: "destructive",
-          title: "Error",
-          description: "Failed to update title"
-        });
-      }
-    };
-    
-    saveTitle();
+      toast({
+        title: "Success!",
+        description: "Title updated successfully"
+      });
+      
+      fetchImages();
+    } catch (error: any) {
+      console.error('Error updating title:', error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update title"
+      });
+    }
   };
 
   const filteredImages = images.filter(image =>

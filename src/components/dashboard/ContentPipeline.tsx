@@ -117,7 +117,7 @@ export function ContentPipeline() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {pipelineStages.map((stage, index) => (
+          {pipelineStages.map((stage) => (
             <div key={stage.stage} className="space-y-2">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
@@ -158,8 +158,8 @@ export function ContentPipeline() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {recentActivity.map((activity, index) => (
-            <div key={index} className="premium-card premium-card-hover border border-white/10 p-3 rounded-lg">
+          {recentActivity.map((activity) => (
+            <div key={activity.action} className="premium-card premium-card-hover border border-white/10 p-3 rounded-lg">
               <div className="flex items-start gap-3">
                 <div className="flex-shrink-0 mt-1">
                   {activity.status === 'completed' ? 
@@ -201,8 +201,8 @@ export function ContentPipeline() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {trendingOpportunities.map((opportunity, index) => (
-            <div key={index} className="premium-card premium-card-hover border border-white/10 p-3 rounded-lg cursor-pointer group">
+          {trendingOpportunities.map((opportunity) => (
+            <div key={opportunity.trend} className="premium-card premium-card-hover border border-white/10 p-3 rounded-lg cursor-pointer group">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <h4 className="premium-subheading text-sm">{opportunity.trend}</h4>

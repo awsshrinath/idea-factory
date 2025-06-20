@@ -7,7 +7,6 @@ import {
   Images, 
   Calendar, 
   BarChart3, 
-  Sparkles,
   ArrowRight,
   Zap
 } from "lucide-react";

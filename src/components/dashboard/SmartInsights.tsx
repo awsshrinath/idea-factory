@@ -101,7 +101,7 @@ export function SmartInsights() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          {insights.map((insight, index) => (
+          {insights.map((insight) => (
             <div 
               key={insight.title}
               className="premium-card premium-card-hover border border-white/10 p-4 rounded-lg group cursor-pointer"
@@ -158,7 +158,7 @@ export function SmartInsights() {
           </div>
         </CardHeader>
         <CardContent className="space-y-3">
-          {priorityTasks.map((task, index) => (
+          {priorityTasks.map((task) => (
             <div 
               key={task.task}
               className="premium-card premium-card-hover border border-white/10 p-4 rounded-lg group cursor-pointer"
