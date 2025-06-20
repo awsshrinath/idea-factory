@@ -62,13 +62,6 @@ export function Images() {
       authListener?.subscription?.unsubscribe();
     };
   }, [navigate]);
-
-  const handleImageGenerated = () => {
-    setRefreshTrigger(prev => prev + 1);
-    if (isMobile) {
-      setActiveTab("gallery");
-    }
-  };
   
   const toggleNotifyMe = () => {
     setNotifyMeEnabled(prev => !prev);

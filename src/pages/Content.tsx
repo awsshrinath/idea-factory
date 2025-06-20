@@ -6,61 +6,14 @@ import { ContentPreview } from '@/components/content/ContentPreview';
 import { RecentContent } from '@/components/content/RecentContent';
 import { TrendingTopics } from '@/components/content/TrendingTopics';
 import { PromptTemplates } from '@/components/content/PromptTemplates';
-import { ContentFormData } from '@/types/content';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 
 export function Content() {
-  const [formData, setFormData] = useState<ContentFormData>({
-    description: '',
-    platforms: ['instagram'],
-    tone: 'professional',
-    length: 'medium',
-    language: 'English',
-    model: 'gpt-4'
-  });
-  
   const [generatedContent, setGeneratedContent] = useState<string>('');
-  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
-  const handleGenerate = async () => {
-    if (!formData.description?.trim()) {
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please enter a description for your content"
-      });
-      return;
-    }
-
-    setIsGenerating(true);
-    setGeneratedContent('');
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-content', {
-        body: formData
-      });
-
-      if (error) throw error;
-      
-      if (data?.content) {
-        setGeneratedContent(data.content);
-        toast({
-          title: "Success!",
-          description: "Your content has been generated successfully",
-        });
-      }
-    } catch (error: any) {
-      console.error('Error generating content:', error);
-      toast({
-        variant: "destructive",
-        title: "Generation Failed",
-        description: error.message || 'Failed to generate content. Please try again.',
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+  const handleContentGenerated = (content: string) => {
+    setGeneratedContent(content);
   };
 
   return (
@@ -77,26 +30,23 @@ export function Content() {
 
         <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           <div className="space-y-6">
-            <ContentForm 
-              onGenerate={handleGenerate}
-              isGenerating={isGenerating}
-            />
+            <ContentForm onContentGenerated={handleContentGenerated} />
             
             <Separator className="bg-white/10" />
             
-            <PromptTemplates onSelectTemplate={(template: string) => setFormData({...formData, description: template})} />
+            <PromptTemplates onSelectTemplate={(template: string) => console.log('Template selected:', template)} />
           </div>
 
           <div className="space-y-6">
             <ContentPreview 
               content={generatedContent}
-              platforms={formData.platforms}
-              tone={formData.tone}
+              platform="instagram"
+              tone="professional"
             />
             
             <Separator className="bg-white/10" />
             
-            <TrendingTopics onTopicSelect={(topic: string) => setFormData({...formData, description: topic})} />
+            <TrendingTopics onTopicSelect={(topic: string) => console.log('Topic selected:', topic)} />
           </div>
         </div>
 
