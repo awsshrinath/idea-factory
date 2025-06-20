@@ -6,24 +6,23 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-semibold tracking-wide ring-offset-background transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500/50 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)] hover:scale-[1.03]",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90 hover:shadow-[0_0_12px_rgba(255,65,108,0.4)] hover:scale-[1.03]",
-        outline:
-          "border border-input bg-background hover:bg-accent/5 hover:text-accent-foreground hover:shadow-[0_4px_12px_rgba(255,255,255,0.1)] hover:scale-[1.03]",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80 hover:shadow-[0_4px_12px_rgba(0,198,255,0.2)] hover:scale-[1.03]",
-        ghost: "hover:bg-accent/10 hover:text-accent-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        default: "bg-gradient-to-r from-purple-600 to-indigo-600 text-white shadow-lg hover:shadow-xl hover:shadow-purple-500/25 hover:scale-[1.02] border border-purple-500/20 hover:border-purple-400/40",
+        destructive: "bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-xl hover:shadow-red-500/25 hover:scale-[1.02] border border-red-500/20",
+        outline: "border-2 border-white/20 bg-white/5 hover:bg-white/10 hover:text-white hover:border-white/30 backdrop-blur-sm hover:scale-[1.02] shadow-sm hover:shadow-lg",
+        secondary: "bg-gradient-to-r from-slate-700 to-slate-800 text-slate-100 hover:shadow-lg hover:shadow-slate-500/20 hover:scale-[1.02] border border-slate-600/40",
+        ghost: "hover:bg-white/10 hover:text-white transition-all duration-300 hover:backdrop-blur-sm",
+        link: "text-purple-400 underline-offset-4 hover:underline hover:text-purple-300 transition-colors",
+        premium: "bg-gradient-to-r from-purple-600 via-indigo-600 to-purple-700 text-white shadow-xl hover:shadow-2xl hover:shadow-purple-500/30 hover:scale-[1.02] border border-purple-500/30 hover:border-purple-400/50",
+        gold: "bg-gradient-to-r from-amber-500 via-yellow-500 to-amber-600 text-white shadow-xl hover:shadow-2xl hover:shadow-amber-500/30 hover:scale-[1.02] border border-amber-500/30",
       },
       size: {
-        default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-md px-3",
-        lg: "h-11 rounded-md px-8",
+        default: "h-10 px-5 py-2.5",
+        sm: "h-8 rounded-md px-3 text-xs font-medium",
+        lg: "h-12 rounded-lg px-8 text-base",
         icon: "h-10 w-10",
       },
     },

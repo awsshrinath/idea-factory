@@ -2,19 +2,17 @@
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Calendar, Target, Gift, TrendingUp } from "lucide-react";
+import { Sparkles, Target, TrendingUp } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { useNavigate } from "react-router-dom";
 
 export const PersonalizedGreeting = () => {
   const isMobile = useIsMobile();
   const navigate = useNavigate();
-  const userName = "Creator"; // This would come from user state in a real app
+  const userName = "Creator";
   const tokenCount = 1250;
-  const isLowTokens = tokenCount < 500;
   const isTopCreator = true;
   
-  // Format today's date
   const today = new Date().toLocaleDateString("en-US", {
     weekday: "long",
     year: "numeric",
@@ -22,78 +20,79 @@ export const PersonalizedGreeting = () => {
     day: "numeric",
   });
   
-  // Daily goal progress (2 of 3 posts completed)
-  const dailyGoalProgress = 67; // 2/3 = ~67%
+  const dailyGoalProgress = 67;
   
   return (
     <div className="mb-8">
-      <div className="bg-gradient-to-br from-card/80 via-card/60 to-muted/40 border border-white/20 rounded-2xl p-6 backdrop-blur-sm shadow-2xl hover:shadow-3xl transition-all duration-300">
+      <div className="premium-card premium-card-hover rounded-2xl p-8 backdrop-blur-sm border border-white/10">
         <div className={cn(
-          "grid gap-6",
+          "grid gap-8",
           isMobile ? "grid-cols-1" : "grid-cols-3"
         )}>
-          {/* Left: Welcome message */}
-          <div className="space-y-2">
+          {/* Welcome message */}
+          <div className="space-y-3">
             <h1 className={cn(
-              "font-black leading-tight bg-gradient-to-r from-blue-600 via-blue-500 to-blue-700 bg-clip-text text-transparent",
+              "enterprise-heading mb-2",
               isMobile ? "text-3xl" : "text-4xl"
             )}>
               Welcome back, {userName}!
             </h1>
-            <p className="text-base text-muted-foreground font-medium">
+            <p className="premium-caption">
               {today}
             </p>
           </div>
           
-          {/* Middle: Goal progress */}
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
-              <Target className="h-6 w-6 text-blue-600" />
-              <span className="text-base font-bold text-foreground">Today's Goal</span>
-              <span className="text-sm text-blue-600 ml-auto font-semibold">2/3 complete</span>
+          {/* Goal progress */}
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-3">
+                <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-purple-600/20 to-indigo-600/20 flex items-center justify-center border border-purple-500/20">
+                  <Target className="h-5 w-5 text-purple-400" />
+                </div>
+                <div>
+                  <span className="premium-subheading text-lg">Today's Goal</span>
+                  <p className="text-xs text-purple-400 font-bold tracking-wide mt-1">2/3 COMPLETE</p>
+                </div>
+              </div>
             </div>
-            <Progress value={dailyGoalProgress} className="h-3 rounded-full" />
-            <div className="grid grid-cols-3 gap-2 mt-4">
-              <div className="bg-white/10 rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors duration-200">
-                <span className="text-xs text-white/80 font-medium">Posts</span>
-                <p className="text-base font-bold mt-1">1/1</p>
+            <Progress value={dailyGoalProgress} className="h-3 rounded-full bg-slate-800/50 shadow-inner" />
+            <div className="grid grid-cols-3 gap-3 mt-4">
+              <div className="glass-card rounded-xl p-4 text-center hover:bg-white/[0.06] transition-all duration-300 border border-white/5">
+                <span className="premium-caption block mb-2">Posts</span>
+                <p className="premium-stats text-lg">1/1</p>
               </div>
-              <div className="bg-white/10 rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors duration-200">
-                <span className="text-xs text-white/80 font-medium">Videos</span>
-                <p className="text-base font-bold mt-1">1/1</p>
+              <div className="glass-card rounded-xl p-4 text-center hover:bg-white/[0.06] transition-all duration-300 border border-white/5">
+                <span className="premium-caption block mb-2">Videos</span>
+                <p className="premium-stats text-lg">1/1</p>
               </div>
-              <div className="bg-white/10 rounded-xl p-3 text-center border border-white/10 hover:bg-white/15 transition-colors duration-200">
-                <span className="text-xs text-white/80 font-medium">Images</span>
-                <p className="text-base font-bold mt-1">0/1</p>
+              <div className="glass-card rounded-xl p-4 text-center hover:bg-white/[0.06] transition-all duration-300 border border-white/5">
+                <span className="premium-caption block mb-2">Images</span>
+                <p className="text-lg font-bold text-white/60">0/1</p>
               </div>
             </div>
           </div>
           
-          {/* Right: Tokens */}
+          {/* Tokens */}
           <div>
             <div className={cn(
-              "flex flex-col space-y-4",
-              isMobile && "mt-4"
+              "flex flex-col space-y-6",
+              isMobile && "mt-6"
             )}>
               <div className="flex justify-between items-center">
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Sparkles className={cn(
-                      "h-5 w-5",
-                      isLowTokens ? "text-blue-500" : "text-blue-600"
-                    )} />
-                    <p className="text-sm text-muted-foreground font-medium">Available Credits</p>
+                <div className="space-y-2">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-amber-500/20 to-orange-500/20 flex items-center justify-center border border-amber-500/20">
+                      <Sparkles className="h-4 w-4 text-amber-400 animate-pulse" />
+                    </div>
+                    <p className="premium-caption">Available Credits</p>
                   </div>
-                  <p className={cn(
-                    "text-2xl font-black bg-gradient-to-r bg-clip-text text-transparent leading-tight",
-                    isLowTokens ? "from-blue-500 to-blue-600" : "from-blue-600 to-blue-700"
-                  )}>
-                    {tokenCount} tokens
+                  <p className="premium-stats text-3xl leading-tight">
+                    {tokenCount.toLocaleString()} tokens
                   </p>
                 </div>
                 <Button 
                   size="sm" 
-                  className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 border border-white/20 hover:border-white/30 hover:shadow-lg shadow-md transition-all duration-300 transform hover:scale-105"
+                  className="premium-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:shadow-purple-500/25 border border-purple-500/20 hover:border-purple-400/40 micro-bounce text-sm font-semibold px-6 py-3 h-auto"
                   onClick={() => navigate("/content")}
                 >
                   <Sparkles className="h-4 w-4 mr-2" />
@@ -101,10 +100,14 @@ export const PersonalizedGreeting = () => {
                 </Button>
               </div>
               {isTopCreator && (
-                <p className="text-sm text-blue-400 flex items-center gap-2 animate-fadeIn font-medium leading-relaxed">
-                  <TrendingUp className="h-4 w-4" />
-                  You're in the top 10% of active creators this week! 🏆
-                </p>
+                <div className="premium-card rounded-xl p-4 border border-emerald-500/20 bg-gradient-to-r from-emerald-500/10 to-green-500/5">
+                  <p className="premium-body text-sm flex items-center gap-3 text-emerald-300">
+                    <div className="h-6 w-6 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                      <TrendingUp className="h-3 w-3 text-emerald-400" />
+                    </div>
+                    You're in the top 10% of active creators this week! 🏆
+                  </p>
+                </div>
               )}
             </div>
           </div>

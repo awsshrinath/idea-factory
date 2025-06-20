@@ -26,7 +26,7 @@ export type Database = {
           created_at?: string | null
           description: string
           generated_content?: string | null
-          id: string
+          id?: string
           platforms: string[]
           status?: string
           title: string
@@ -46,6 +46,7 @@ export type Database = {
           updated_at?: string | null
           user_id?: string
         }
+
         Relationships: [
           {
             foreignKeyName: "content_user_id_fkey"
@@ -55,6 +56,9 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+
+        Relationships: []
+
       }
       content_versions: {
         Row: {

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ContentForm } from "@/components/content/ContentForm";
@@ -5,6 +6,7 @@ import { TrendingTopics } from "@/components/content/TrendingTopics";
 import { RecentContent } from "@/components/content/RecentContent";
 import { ContentPreview } from "@/components/content/ContentPreview";
 import { PromptTemplates } from "@/components/content/PromptTemplates";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { HelpCircle } from "lucide-react";
 import {
   Tooltip,
@@ -50,19 +52,19 @@ export function Content() {
   };
 
   return (
-    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
+      <MultimediaPremiumBackground />
       <Sidebar />
       <main className={cn(
-        "flex-1 animate-fade-in w-full max-w-full",
-        "p-3 md:p-4 lg:p-5",
-        isMobile ? "ml-0 pt-16" : "ml-64"
+        "flex-1 animate-fade-in w-full max-w-full relative z-10",
+        "p-6 md:p-8 lg:p-10",
+        isMobile ? "ml-0 pt-20" : "ml-64 pl-8"
       )}>
         <div className={cn(
-          "mx-auto space-y-4 w-full",
-          "max-w-[95%] xl:max-w-[90%]"
+          "max-w-7xl mx-auto space-y-6 w-full"
         )}>
           {/* Header Section */}
-          <div className="mb-2 animate-slide-in-right">
+          <div className="mb-6 animate-slide-in-right">
             <div className="flex items-center gap-2 justify-between">
               <h1 className={cn(
                 "font-bold font-heading bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent",
@@ -102,13 +104,13 @@ export function Content() {
 
           {/* Main Content Layout */}
           <div className={cn(
-            "grid gap-4",
+            "grid gap-6",
             isMobile ? 
               "grid-cols-1" : 
               "grid-cols-1 xl:grid-cols-[1fr,400px]"
           )}>
             {/* Content Form Column */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <ContentForm
                 formData={formData}
                 onChange={setFormData}
@@ -141,7 +143,7 @@ export function Content() {
             </div>
 
             {/* Preview and Sidebar Column */}
-            <div className="space-y-4">
+            <div className="space-y-6">
               <ContentPreview
                 formData={formData}
                 onContentChange={(content) => {
