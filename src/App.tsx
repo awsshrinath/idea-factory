@@ -11,7 +11,7 @@ import { Videos } from "./pages/Videos";
 import { Schedule } from "./pages/Schedule";
 import { Settings } from "./pages/Settings";
 import { Auth } from "./pages/Auth";
-import ErrorBoundary from './components/system/ErrorBoundary';
+import { ErrorBoundary } from './components/system/ErrorBoundary';
 import { OfflineIndicator } from './components/system/OfflineIndicator';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { supabase } from './integrations/supabase/client';
@@ -52,7 +52,6 @@ const App = () => {
                   <Route path="/schedule" element={<Schedule />} />
                   <Route path="/settings" element={<Settings />} />
                 </Route>
-                {/* Add a catch-all route that redirects to the index page */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </BrowserRouter>

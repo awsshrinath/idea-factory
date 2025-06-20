@@ -1,12 +1,18 @@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Sparkles, ArrowRight, Zap, Target, Rocket } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
+import { 
+  ArrowRight, 
+  Play, 
+  Star, 
+  Zap 
+} from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 const features = [
   { icon: Zap, text: "Lightning Fast AI" },
-  { icon: Target, text: "Precision Results" },
-  { icon: Rocket, text: "Enterprise Ready" }
+  { icon: Star, text: "Precision Results" },
+  { icon: Play, text: "Enterprise Ready" }
 ];
 
 const benefits = [

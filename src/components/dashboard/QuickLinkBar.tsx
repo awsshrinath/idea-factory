@@ -1,15 +1,12 @@
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { 
   ImageIcon, 
   Video, 
   FileText, 
   Calendar,
-  Sparkles,
-  ArrowRight,
-  Zap
+  Sparkles
 } from 'lucide-react';
 
 const quickLinks = [

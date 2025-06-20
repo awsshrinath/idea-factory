@@ -1,4 +1,4 @@
-import { useState } from 'react';
+
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -12,13 +12,11 @@ interface CalendarViewProps {
 }
 
 export function CalendarView({ events, onDateSelect, onEventClick }: CalendarViewProps) {
-  const [currentView, setCurrentView] = useState('dayGridMonth');
-
   return (
     <Card className="p-6 premium-card border border-white/10 shadow-lg backdrop-blur-sm">
       <FullCalendar
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
-        initialView={currentView}
+        initialView="dayGridMonth"
         headerToolbar={{
           left: 'prev,next today',
           center: 'title',

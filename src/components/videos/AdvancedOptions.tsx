@@ -3,7 +3,7 @@ import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Separator } from '@/components/ui/separator';
-import { Settings, Sliders } from 'lucide-react';
+import { Settings } from 'lucide-react';
 
 interface AdvancedOptionsProps {
   options: {

@@ -123,6 +123,10 @@ export function ImageGenerationForm({ onImageGenerated }: ImageGenerationFormPro
     }
   };
 
+  const handleStyleSelect = (selectedStyle: string) => {
+    setStyle(selectedStyle);
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto space-y-6">
       {/* Header */}
@@ -319,7 +323,7 @@ export function ImageGenerationForm({ onImageGenerated }: ImageGenerationFormPro
             {/* Style Quick Switch */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Quick Style Switch</Label>
-              <StyleQuickSwitch onMoodSelect={setStyle} />
+              <StyleQuickSwitch onMoodSelect={handleStyleSelect} />
             </div>
 
             {/* Selected Settings Display */}

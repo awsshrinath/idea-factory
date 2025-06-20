@@ -1,10 +1,8 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { Badge } from '@/components/ui/badge';
 import { 
   Select,
   SelectContent,
@@ -12,19 +10,12 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { WorkflowSelection } from '../WorkflowSelection';
 import { AspectRatioSelector } from '../AspectRatioSelector';
-import { AdvancedOptions } from '../AdvancedOptions';
 import { 
-  Video, 
-  Wand2, 
-  Sparkles, 
-  Settings, 
   Play,
-  Download,
-  RefreshCw
+  Loader
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -156,8 +147,7 @@ export function MainForm({ initialData, onSubmit }: MainFormProps) {
       <Separator className="bg-white/10" />
 
       <WorkflowSelection 
-        selectedWorkflow={formData.workflow}
-        onWorkflowChange={(workflow) => setFormData({ ...formData, workflow: workflow })}
+        onSelect={(workflow) => setFormData({ ...formData, workflow: workflow })}
       />
 
       <Separator className="bg-white/10" />

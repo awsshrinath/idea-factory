@@ -1,81 +1,61 @@
 
-import { Sidebar } from "@/components/Sidebar";
-import { ScheduleHeader } from "@/components/schedule/ScheduleHeader";
-import { QuickStats } from "@/components/schedule/QuickStats";
-import { FilterSection } from "@/components/schedule/FilterSection";
-import { CalendarView } from "@/components/schedule/CalendarView";
-import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
-import { Calendar, Sparkles, BarChart3 } from "lucide-react";
+import { useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { CalendarView } from '@/components/schedule/CalendarView';
+import { QuickStats } from '@/components/schedule/QuickStats';
+import { AddPostModal } from '@/components/schedule/AddPostModal';
+import { FilterSection } from '@/components/schedule/FilterSection';
+import { ScheduleHeader } from '@/components/schedule/ScheduleHeader';
 
 export function Schedule() {
-  const isMobile = useIsMobile();
-  
+  const [events, setEvents] = useState([
+    {
+      id: '1',
+      title: 'Instagram Post',
+      start: '2024-03-20T10:00:00',
+      backgroundColor: '#8B5CF6'
+    },
+    {
+      id: '2', 
+      title: 'LinkedIn Article',
+      start: '2024-03-21T14:00:00',
+      backgroundColor: '#06B6D4'
+    }
+  ]);
+
+  const handleDateSelect = (selectInfo: any) => {
+    console.log('Date selected:', selectInfo);
+  };
+
+  const handleEventClick = (clickInfo: any) => {
+    console.log('Event clicked:', clickInfo);
+  };
+
   return (
-    <div className={cn(
-      "min-h-screen flex overflow-x-hidden relative",
-      "bg-gradient-to-br from-[#181818] via-[#1E1E2F] to-[#101018]"
-    )}>
-      <MultimediaPremiumBackground />
-      <Sidebar />
-      <main className={cn(
-        "flex-1 py-6 lg:py-8 relative z-10 animate-fadeIn",
-        "w-full max-w-full",
-        isMobile ? "ml-0 pt-20 px-4" : "ml-64 pl-8 pr-8"
-      )}>
-        <div className="max-w-7xl mx-auto space-y-8">
-          {/* Enhanced Header */}
-          <div className="mb-8">
-            <div className="space-y-3">
-              <h1 className={cn(
-                "enterprise-heading",
-                isMobile ? "text-3xl" : "text-4xl"
-              )}>
-                Content Scheduler
-              </h1>
-              <p className="premium-body text-lg max-w-2xl">
-                Plan and automate your content calendar strategically
-              </p>
-            </div>
-          </div>
-
-          <ScheduleHeader />
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+      <div className="container mx-auto px-4 py-8">
+        <ScheduleHeader />
+        
+        <div className="space-y-6">
+          <QuickStats />
           
-          {/* Enhanced Main Content Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-[350px,1fr] gap-8">
-            {/* Enhanced Left Sidebar */}
-            <div className="space-y-8">
-              <section>
-                <div className="flex items-center gap-3 mb-4">
-                  <h2 className="premium-heading text-lg">Quick Stats</h2>
-                  <BarChart3 className="h-4 w-4 text-purple-400 animate-pulse" />
-                </div>
-                <QuickStats />
-              </section>
-              
-              <section>
-                <div className="flex items-center gap-3 mb-4">
-                  <h2 className="premium-heading text-lg">Filters</h2>
-                  <Sparkles className="h-4 w-4 text-purple-400 animate-pulse" />
-                </div>
-                <FilterSection />
-              </section>
+          <div className="grid lg:grid-cols-4 gap-6">
+            <div className="lg:col-span-1">
+              <FilterSection />
             </div>
-
-            {/* Enhanced Calendar Section */}
-            <section>
-              <div className="flex items-center gap-3 mb-6">
-                <h2 className="premium-heading text-2xl">Schedule Calendar</h2>
-                <Calendar className="h-5 w-5 text-purple-400 animate-pulse" />
-              </div>
-              <div className="premium-card premium-card-hover rounded-2xl backdrop-blur-sm border border-white/10">
-                <CalendarView />
-              </div>
-            </section>
+            
+            <div className="lg:col-span-3">
+              <CalendarView 
+                events={events}
+                onDateSelect={handleDateSelect}
+                onEventClick={handleEventClick}
+              />
+            </div>
           </div>
         </div>
-      </main>
+
+        <AddPostModal />
+      </div>
     </div>
   );
 }
