@@ -1,8 +1,8 @@
+
 import { Sidebar } from "@/components/Sidebar";
 import { ImageGenerationForm } from "@/components/images/ImageGenerationForm";
 import { ImageGallery } from "@/components/images/ImageGallery";
 import { StyleTemplates } from "@/components/images/StyleTemplates";
-import { Card } from "@/components/ui/card";
 import { Wand2, Sparkles, BookImage, Grid, LayoutGrid, Rows, Heart, Clock, Filter, Image as ImageIcon, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -49,7 +49,7 @@ export function Images() {
     
     checkAuth();
     
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const authenticated = !!session;
       setIsAuthenticated(authenticated);
       

@@ -1,52 +1,32 @@
-import { useState } from 'react';
-import { useApi } from './useApi';
 
-interface FileUploadState {
-  progress: number;
-  isUploading: boolean;
-  error: Error | null;
-  data: string | null; // Assuming the response is the URL of the uploaded file
+import { useMutation } from '@tanstack/react-query';
+
+interface UploadPayload {
+  file: File;
+  bucket?: string;
+  path?: string;
 }
 
 export const useFileUpload = () => {
-  const [state, setState] = useState<FileUploadState>({
-    progress: 0,
-    isUploading: false,
-    error: null,
-    data: null,
+  const uploadMutation = useMutation({
+    mutationFn: async (payload: UploadPayload) => {
+      const formData = new FormData();
+      formData.append('file', payload.file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload file');
+      return response.json();
+    },
   });
 
-  const { state: apiState, execute } = useApi<string>();
-
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
-
-    setState((prev) => ({ ...prev, isUploading: true, progress: 0, error: null, data: null }));
-
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent: ProgressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setState((prev) => ({ ...prev, progress: percentCompleted }));
-      },
-    };
-
-    const response = await execute('POST', '/storage/upload', formData, config);
-    
-    if (response) {
-      setState((prev) => ({...prev, isUploading: false, data: response}));
-    } else {
-        setState((prev) => ({...prev, isUploading: false, error: apiState.error as Error | null}));
-    }
-  };
-
   return {
-    ...state,
-    uploadFile,
+    data: uploadMutation.data,
+    error: uploadMutation.error,
+    isLoading: uploadMutation.isPending,
+    upload: uploadMutation.mutate,
   };
-}; 
+};

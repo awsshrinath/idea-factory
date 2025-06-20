@@ -20,7 +20,30 @@ import { ImageCard } from "./gallery/ImageCard";
 import { PlaceholderCards } from "./gallery/PlaceholderCards";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
-import { GeneratedImage, ImageGalleryProps, SortOption, ViewMode } from "./gallery/types";
+
+// Use a single unified GeneratedImage type
+interface GeneratedImage {
+  id: string;
+  user_id: string;
+  prompt: string;
+  style: string;
+  aspect_ratio: string;
+  image_path: string;
+  created_at: string | null;
+  updated_at?: string | null;
+  title?: string | null;
+  is_favorite?: boolean | null;
+}
+
+type SortOption = "recent" | "oldest" | "favorites";
+type ViewMode = "grid" | "carousel";
+
+interface ImageGalleryProps {
+  previewMode?: boolean;
+  fullGallery?: boolean;
+  viewMode?: ViewMode;
+  filter?: "all" | "favorites" | "recent";
+}
 
 export function ImageGallery({ 
   previewMode = false, 
@@ -42,7 +65,7 @@ export function ImageGallery({
   useEffect(() => {
     const checkAuth = async () => {
       const session = await supabase.auth.getSession();
-      const authenticated = !!session.data.session;
+      const authenticated = !!session.session;
       setIsAuthenticated(authenticated);
       if (authenticated) {
         fetchImages();
