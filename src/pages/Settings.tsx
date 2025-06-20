@@ -1,13 +1,4 @@
 
-import { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/components/ui/use-toast';
-=======
-
 import { Sidebar } from "@/components/Sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ChangelogSection } from "@/components/settings/ChangelogSection";
@@ -15,29 +6,12 @@ import { RoadmapSection } from "@/components/settings/RoadmapSection";
 import { WorkflowsSection } from "@/components/settings/WorkflowsSection";
 import { TechStackSection } from "@/components/settings/TechStackSection";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
-import { Button } from "@/components/ui/button";
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/integrations/supabase/client";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
-
+import { Settings as SettingsIcon, Sparkles } from "lucide-react";
 
 export function Settings() {
-  const { profile, loading, error, updateProfile } = useProfile();
-  const { toast } = useToast();
-  const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
-
-  useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name || '');
-      setUsername(profile.username || '');
-    }
-
-  }, [profile]);
-
-  };
+  const isMobile = useIsMobile();
 
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
@@ -48,120 +22,107 @@ export function Settings() {
         "p-6 md:p-8 lg:p-10",
         isMobile ? "ml-0 pt-20" : "ml-64 pl-8", 
       )}>
-        <div className="max-w-5xl mx-auto">
-          <h1 className={cn(
-            "text-4xl font-bold text-foreground mb-6 bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent",
-            isMobile && "text-2xl text-center"
-          )}>
-            Settings & Documentation
-          </h1>
+        <div className="max-w-6xl mx-auto space-y-8">
+          {/* Enhanced Header */}
+          <div className="mb-8 space-y-3">
+            <div className="flex items-center gap-3">
+              <h1 className={cn(
+                "enterprise-heading",
+                isMobile ? "text-3xl" : "text-4xl"
+              )}>
+                Settings & Documentation
+              </h1>
+              <SettingsIcon className="h-6 w-6 text-purple-400 animate-pulse" />
+            </div>
+            <p className="premium-body text-lg max-w-2xl">
+              Configure your workspace and explore platform documentation
+            </p>
+          </div>
           
-          <Tabs defaultValue="changelog" className="w-full">
-            <TabsList className={cn(
-              "mb-4 bg-card border border-white/10",
-              isMobile && "flex flex-wrap overflow-x-auto max-w-full"
-            )}>
-              <TabsTrigger 
-                value="changelog"
-                className={cn(
-                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                  isMobile && "flex-1 min-w-[32%] py-3"
-                )}
-              >
-                Changelog
-              </TabsTrigger>
-              <TabsTrigger 
-                value="roadmap"
-                className={cn(
-                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                  isMobile && "flex-1 min-w-[32%] py-3"
-                )}
-              >
-                Roadmap
-              </TabsTrigger>
-              <TabsTrigger 
-                value="workflows"
-                className={cn(
-                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                  isMobile && "flex-1 min-w-[32%] py-3"
-                )}
-              >
-                Workflows
-              </TabsTrigger>
-              <TabsTrigger 
-                value="tech"
-                className={cn(
-                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                  isMobile && "flex-1 min-w-[32%] py-3"
-                )}
-              >
-                Tech
-              </TabsTrigger>
-              <TabsTrigger 
-                value="integrations"
-                className={cn(
-                  "data-[state=active]:bg-primary data-[state=active]:text-primary-foreground",
-                  isMobile && "flex-1 min-w-[32%] py-3"
-                )}
-              >
-                API
-              </TabsTrigger>
-            </TabsList>
+          <div className="premium-card premium-card-hover rounded-2xl backdrop-blur-sm border border-white/10 p-2">
+            <Tabs defaultValue="changelog" className="w-full">
+              <TabsList className={cn(
+                "mb-6 premium-card border border-white/10 bg-gradient-to-r from-slate-900/80 to-slate-800/60 p-1 rounded-xl",
+                isMobile && "flex flex-wrap overflow-x-auto max-w-full gap-1"
+              )}>
+                <TabsTrigger 
+                  value="changelog"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg",
+                    isMobile && "flex-1 min-w-[30%] py-3"
+                  )}
+                >
+                  <Sparkles className="h-3 w-3 mr-2" />
+                  Changelog
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="roadmap"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg",
+                    isMobile && "flex-1 min-w-[30%] py-3"
+                  )}
+                >
+                  Roadmap
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="workflows"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg",
+                    isMobile && "flex-1 min-w-[30%] py-3"
+                  )}
+                >
+                  Workflows
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="tech"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg",
+                    isMobile && "flex-1 min-w-[30%] py-3"
+                  )}
+                >
+                  Tech
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="integrations"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg",
+                    isMobile && "flex-1 min-w-[30%] py-3"
+                  )}
+                >
+                  API
+                </TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="changelog">
-              <ChangelogSection />
-            </TabsContent>
+              <div className="p-6">
+                <TabsContent value="changelog" className="mt-0">
+                  <ChangelogSection />
+                </TabsContent>
 
+                <TabsContent value="roadmap" className="mt-0">
+                  <RoadmapSection />
+                </TabsContent>
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateProfile({ full_name: fullName, username });
-    toast({
-      title: 'Profile updated',
-      description: 'Your profile has been updated successfully.',
-    });
-  };
+                <TabsContent value="workflows" className="mt-0">
+                  <WorkflowsSection />
+                </TabsContent>
 
-  if (loading) {
-    return <div>Loading...</div>;
-  }
+                <TabsContent value="tech" className="mt-0">
+                  <TechStackSection />
+                </TabsContent>
 
-  if (error) {
-    return <div>Error loading profile: {(error as Error).message}</div>;
-  }
-
-  return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Manage your profile settings.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+                <TabsContent value="integrations" className="mt-0">
+                  <div className="premium-card rounded-xl p-6 border border-white/10 bg-gradient-to-br from-white/[0.02] to-white/[0.01]">
+                    <h3 className="premium-heading text-xl mb-4">API Integration</h3>
+                    <p className="premium-body">
+                      Integration documentation and API endpoints will be available here.
+                    </p>
+                  </div>
+                </TabsContent>
+              </div>
+            </Tabs>
+          </div>
+        </div>
+      </main>
     </div>
   );
 }
