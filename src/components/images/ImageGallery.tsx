@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -10,20 +11,18 @@ import { ImageDetailModal } from './gallery/ImageDetailModal';
 import { GeneratedImage, SortOption, ViewMode } from './gallery/types';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { Grid, List, Filter, SortAsc, SortDesc, Heart, Calendar, Sparkles, Download, Share2 } from 'lucide-react';
+import { Grid, List, Filter, SortAsc, SortDesc, Heart, Calendar, Sparkles } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
 
 interface ImageGalleryProps {
   previewMode?: boolean;
-  fullGallery?: boolean;
   viewMode?: ViewMode;
   filter?: "all" | "favorites" | "recent";
 }
 
 export function ImageGallery({ 
   previewMode = false, 
-  fullGallery = false,
   viewMode: initialViewMode = "grid",
   filter: initialFilter = "all"
 }: ImageGalleryProps) {
@@ -150,20 +149,20 @@ export function ImageGallery({
     }
   };
 
-  const handleRegenerate = async (image: GeneratedImage) => {
+  const handleRegenerate = async () => {
     toast.info('Regeneration feature coming soon');
   };
 
-  const handleDelete = async (image: GeneratedImage) => {
+  const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
         .from('generated_images')
         .delete()
-        .eq('id', image.id);
+        .eq('id', id);
 
       if (error) throw error;
 
-      setImages(prev => prev.filter(img => img.id !== image.id));
+      setImages(prev => prev.filter(img => img.id !== id));
       toast.success('Image deleted successfully');
     } catch (error) {
       console.error('Error deleting image:', error);
@@ -320,7 +319,7 @@ export function ImageGallery({
     const commonProps = {
       images: filteredImages,
       onImageClick: handleImageClick,
-      onFavoriteToggle: handleFavoriteToggle,
+      onToggleFavorite: handleFavoriteToggle,
       onDownload: handleDownload,
       onRegenerate: handleRegenerate,
       onDelete: handleDelete,
@@ -346,7 +345,7 @@ export function ImageGallery({
           onFavoriteToggle={handleFavoriteToggle}
           onDownload={handleDownload}
           onRegenerate={handleRegenerate}
-          onDelete={handleDelete}
+          onDelete={(image) => handleDelete(image.id)}
           onShare={handleShare}
         />
       </div>
@@ -374,7 +373,7 @@ export function ImageGallery({
           onFavoriteToggle={handleFavoriteToggle}
           onDownload={handleDownload}
           onRegenerate={handleRegenerate}
-          onDelete={handleDelete}
+          onDelete={(image) => handleDelete(image.id)}
           onShare={handleShare}
         />
       </CardContent>
