@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -9,7 +10,7 @@ import { Images } from "./pages/Images";
 import { Videos } from "./pages/Videos";
 import { Schedule } from "./pages/Schedule";
 import { Settings } from "./pages/Settings";
-import Auth from './pages/Auth';
+import { Auth } from "./pages/Auth";
 import ErrorBoundary from './components/system/ErrorBoundary';
 import { OfflineIndicator } from './components/system/OfflineIndicator';
 import { SessionContextProvider } from '@supabase/auth-helpers-react';
