@@ -1,3 +1,4 @@
+
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Copy, Download, Edit, Heart } from 'lucide-react';
@@ -7,7 +8,6 @@ import { useState } from 'react';
 interface PreviewActionsProps {
   content: string;
   onEdit: () => void;
-  onSave?: () => void;
   wordCount: number;
   characterCount: number;
 }
@@ -15,7 +15,6 @@ interface PreviewActionsProps {
 export function PreviewActions({ 
   content, 
   onEdit, 
-  onSave, 
   wordCount, 
   characterCount 
 }: PreviewActionsProps) {

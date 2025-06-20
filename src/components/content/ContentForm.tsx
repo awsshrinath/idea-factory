@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -21,7 +22,7 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([]);
   const [tone, setTone] = useState('professional');
   const [language, setLanguage] = useState('English');
-  const [model, setModel] = useState('ChatGPT');
+  const [model, setModel] = useState('chatgpt');
   
   const { submit, status, data, error } = useContentJob();
   const { toast } = useToast();
@@ -61,9 +62,9 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
       const fullPrompt = `Create ${tone} content for ${selectedPlatforms.join(', ')} about: ${prompt}. Use ${language} language.`;
       await submit(fullPrompt, selectedPlatforms[0]);
       
-    } catch (error: unknown) {
-      console.error('Content generation error:', error);
-      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+    } catch (err: unknown) {
+      console.error('Content generation error:', err);
+      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
       toast({
         variant: "destructive",
         title: "Generation failed",
@@ -129,12 +130,15 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
           />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ToneSelector value={tone} onChange={setTone} />
+            <ToneSelector
+              selectedTone={tone as any}
+              onToneSelect={setTone as any}
+            />
             <ModelLanguageSelector
-              language={language}
-              model={model}
-              onLanguageChange={setLanguage}
-              onModelChange={setModel}
+              selectedModel={model as any}
+              selectedLanguage={language as any}
+              onModelSelect={setModel as any}
+              onLanguageSelect={setLanguage}
             />
           </div>
 

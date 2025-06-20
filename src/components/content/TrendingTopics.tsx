@@ -9,7 +9,7 @@ interface Topic {
   id: string;
   title: string;
   description: string;
-  created_at: string;
+  created_at: string | null;
 }
 
 interface TrendingTopicsProps {
@@ -32,7 +32,16 @@ export function TrendingTopics({ onTopicSelect }: TrendingTopicsProps) {
         .limit(6);
 
       if (error) throw error;
-      if (data) setTopics(data);
+      if (data) {
+        // Map the data to ensure proper typing
+        const mappedTopics: Topic[] = data.map(topic => ({
+          id: topic.id,
+          title: topic.title,
+          description: topic.description,
+          created_at: topic.created_at
+        }));
+        setTopics(mappedTopics);
+      }
     } catch (error) {
       console.error('Error fetching trending topics:', error);
     }

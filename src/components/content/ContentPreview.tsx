@@ -1,10 +1,9 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Eye, Copy, Download, Edit } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
-import { useToast } from '@/hooks/use-toast';
 import { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -18,39 +17,6 @@ interface ContentPreviewProps {
 export function ContentPreview({ content, platform, tone, onContentUpdate }: ContentPreviewProps) {
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
-  const { toast } = useToast();
-
-  const handleCopyContent = () => {
-    navigator.clipboard.writeText(content);
-    toast({
-      title: "Content copied",
-      description: "The content has been copied to your clipboard.",
-    });
-  };
-
-  const handleDownloadContent = () => {
-    const blob = new Blob([content], { type: 'text/plain' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'generated-content.txt';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
-    toast({
-      title: "Content downloaded",
-      description: "The content has been downloaded as a text file.",
-    });
-  };
-
-  const handleEditToggle = () => {
-    setIsEditing(!isEditing);
-    if (isEditing) {
-      onContentUpdate?.(editedContent);
-    }
-  };
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setEditedContent(e.target.value);

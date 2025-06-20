@@ -53,17 +53,15 @@ export function ImageGallery({
 
     checkAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
-      const { data } = supabase.auth.getSession();
-      data.then(({ data }) => {
-        setIsAuthenticated(!!data.session);
-        if (data.session) {
-          fetchImages();
-        } else {
-          setImages([]);
-          setIsLoading(false);
-        }
-      });
+    const { data: authListener } = supabase.auth.onAuthStateChange(async () => {
+      const { data } = await supabase.auth.getSession();
+      setIsAuthenticated(!!data.session);
+      if (data.session) {
+        fetchImages();
+      } else {
+        setImages([]);
+        setIsLoading(false);
+      }
     });
 
     return () => {
