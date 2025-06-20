@@ -19,6 +19,14 @@ export default {
       },
     },
     extend: {
+      screens: {
+        'xs': '375px',
+        'sm': '640px',
+        'md': '768px',
+        'lg': '1024px',
+        'xl': '1280px',
+        '2xl': '1536px',
+      },
       colors: {
         border: "#334155",
         input: "#334155",
@@ -72,6 +80,17 @@ export default {
       spacing: {
         "18": "72px",
         "22": "88px",
+        "safe-top": "env(safe-area-inset-top)",
+        "safe-bottom": "env(safe-area-inset-bottom)",
+        "safe-left": "env(safe-area-inset-left)",
+        "safe-right": "env(safe-area-inset-right)",
+      },
+      minHeight: {
+        'touch': '48px',
+        'screen-safe': '100vh',
+      },
+      minWidth: {
+        'touch': '48px',
       },
       boxShadow: {
         card: "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
@@ -80,6 +99,8 @@ export default {
         "3xl": "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
         soft: "0 2px 8px rgba(0, 0, 0, 0.1)",
         premium: "0 8px 32px rgba(0, 0, 0, 0.12)",
+        "mobile-card": "0 2px 8px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.06)",
+        "mobile-button": "0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24)",
       },
       keyframes: {
         "accordion-down": {
@@ -127,7 +148,20 @@ export default {
             'background-size': '200% 200%',
             'background-position': 'right center'
           }
-        }
+        },
+        "mobile-slide-up": {
+          "0%": { opacity: "0", transform: "translateY(20px)" },
+          "100%": { opacity: "1", transform: "translateY(0)" },
+        },
+        "mobile-fade-in": {
+          "0%": { opacity: "0" },
+          "100%": { opacity: "1" },
+        },
+        "micro-scale": {
+          "0%": { transform: "scale(1)" },
+          "50%": { transform: "scale(1.02)" },
+          "100%": { transform: "scale(1)" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -141,6 +175,9 @@ export default {
         subtleGlow: "subtleGlow 2s ease-in-out infinite",
         "template-glow": "subtleGlow 2s ease-in-out infinite",
         'gradient': 'gradient 8s ease infinite',
+        "mobile-slide-up": "mobile-slide-up 0.3s ease-out",
+        "mobile-fade-in": "mobile-fade-in 0.2s ease-out",
+        "micro-scale": "micro-scale 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)",
       },
       backgroundImage: {
         "gradient-primary": "linear-gradient(145deg, #1e2124, #2a2d3a)",
@@ -154,6 +191,14 @@ export default {
       },
       backdropBlur: {
         xs: '2px',
+      },
+      transitionDuration: {
+        '400': '400ms',
+        '600': '600ms',
+      },
+      transitionTimingFunction: {
+        'bounce-in': 'cubic-bezier(0.68, -0.55, 0.265, 1.55)',
+        'smooth': 'cubic-bezier(0.4, 0, 0.2, 1)',
       },
     },
   },
