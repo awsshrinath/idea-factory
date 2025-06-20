@@ -6,7 +6,7 @@ export interface GeneratedImage {
   style: string;
   aspect_ratio: string;
   image_path: string;
-  created_at: string | null;
+  created_at: string;
   updated_at?: string | null;
   title?: string | null;
   is_favorite?: boolean | null;
