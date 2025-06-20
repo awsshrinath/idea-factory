@@ -6,11 +6,9 @@ import { ContentPreview } from '@/components/content/ContentPreview';
 import { RecentContent } from '@/components/content/RecentContent';
 import { TrendingTopics } from '@/components/content/TrendingTopics';
 import { PromptTemplates } from '@/components/content/PromptTemplates';
-import { useToast } from '@/hooks/use-toast';
 
 export function Content() {
   const [generatedContent, setGeneratedContent] = useState<string>('');
-  const { toast } = useToast();
 
   const handleContentGenerated = (content: string) => {
     setGeneratedContent(content);
