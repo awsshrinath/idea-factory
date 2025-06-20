@@ -1,5 +1,4 @@
 
-
 export interface GeneratedImage {
   id: string;
   user_id: string;
@@ -7,7 +6,7 @@ export interface GeneratedImage {
   style: string;
   aspect_ratio: string;
   image_path: string;
-  created_at: string;
+  created_at: string | null;
   updated_at?: string | null;
   title?: string | null;
   is_favorite?: boolean | null;
