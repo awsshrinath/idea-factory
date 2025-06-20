@@ -1,60 +1,64 @@
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Monitor, Smartphone, Square, Film } from 'lucide-react';
 
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
-import { Video, Instagram, Youtube } from "lucide-react";
-
-type AspectRatioOption = {
-  id: string;
-  label: string;
-  ratio: string;
-  icon: React.ReactNode;
-};
+const aspectRatios = [
+  {
+    ratio: "16:9",
+    label: "Landscape",
+    icon: Monitor,
+    description: "Perfect for YouTube, presentations"
+  },
+  {
+    ratio: "9:16",
+    label: "Portrait",
+    icon: Smartphone,
+    description: "Ideal for TikTok, Instagram Stories"
+  },
+  {
+    ratio: "1:1",
+    label: "Square",
+    icon: Square,
+    description: "Great for Instagram posts"
+  },
+  {
+    ratio: "4:3",
+    label: "Classic",
+    icon: Film,
+    description: "Traditional film and video format"
+  }
+];
 
 interface AspectRatioSelectorProps {
-  value: string;
-  onChange: (value: string) => void;
+  selectedRatio: string;
+  onRatioChange: (ratio: string) => void;
 }
 
-export function AspectRatioSelector({ value, onChange }: AspectRatioSelectorProps) {
-  const options: AspectRatioOption[] = [
-    {
-      id: "16:9",
-      label: "YouTube (16:9)",
-      ratio: "16:9",
-      icon: <Youtube className="w-4 h-4" />,
-    },
-    {
-      id: "9:16",
-      label: "Reels (9:16)",
-      ratio: "9:16",
-      icon: <Instagram className="w-4 h-4" />,
-    },
-    {
-      id: "1:1",
-      label: "Square (1:1)",
-      ratio: "1:1",
-      icon: <Video className="w-4 h-4" />,
-    },
-  ];
-
+export function AspectRatioSelector({ selectedRatio, onRatioChange }: AspectRatioSelectorProps) {
   return (
-    <div className="flex gap-2 flex-wrap">
-      {options.map((option) => (
-        <Button
-          key={option.id}
-          variant={value === option.id ? "default" : "outline"}
-          size="sm"
-          onClick={() => onChange(option.id)}
-          className={cn(
-            "flex items-center gap-2 transition-all",
-            value === option.id ? "bg-primary text-primary-foreground" : "text-muted-foreground"
-          )}
-        >
-          {option.icon}
-          <span>{option.label}</span>
-        </Button>
-      ))}
-    </div>
+    <Card className="premium-card border border-white/10 shadow-lg">
+      <CardHeader>
+        <CardTitle className="premium-heading text-xl">Aspect Ratio</CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="grid grid-cols-2 gap-4">
+          {aspectRatios.map((ratio) => (
+            <Button
+              key={ratio.ratio}
+              variant={selectedRatio === ratio.ratio ? "secondary" : "outline"}
+              className="premium-button justify-start text-sm"
+              onClick={() => onRatioChange(ratio.ratio)}
+            >
+              <ratio.icon className="h-4 w-4 mr-2" />
+              {ratio.label}
+            </Button>
+          ))}
+        </div>
+        <Badge variant="outline">
+          Selected: {selectedRatio}
+        </Badge>
+      </CardContent>
+    </Card>
   );
 }

@@ -20,20 +20,10 @@ import { ImageCard } from "./gallery/ImageCard";
 import { PlaceholderCards } from "./gallery/PlaceholderCards";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { GeneratedImage as ImportedGeneratedImage } from "./gallery/types";
 
-// Use a single unified GeneratedImage type
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string | null;
-  updated_at?: string | null;
-  title?: string | null;
-  is_favorite?: boolean | null;
-}
+// Use the imported type to avoid conflicts
+type GeneratedImage = ImportedGeneratedImage;
 
 type SortOption = "recent" | "oldest" | "favorites";
 type ViewMode = "grid" | "carousel";
@@ -64,8 +54,8 @@ export function ImageGallery({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const session = await supabase.auth.getSession();
-      const authenticated = !!session.session;
+      const { data } = await supabase.auth.getSession();
+      const authenticated = !!data.session;
       setIsAuthenticated(authenticated);
       if (authenticated) {
         fetchImages();

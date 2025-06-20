@@ -1,300 +1,184 @@
+import { useState } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import { Badge } from '@/components/ui/badge';
+import { 
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { WorkflowSelection } from '../WorkflowSelection';
+import { AspectRatioSelector } from '../AspectRatioSelector';
+import { AdvancedOptions } from '../AdvancedOptions';
+import { 
+  Video, 
+  Wand2, 
+  Sparkles, 
+  Settings, 
+  Play,
+  Download,
+  RefreshCw
+} from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
-import { useState } from "react";
-import { VideoTemplates } from "../VideoTemplates";
-import { VideoStyleCard } from "../VideoStyleCard";
-import { AspectRatioSelector } from "../AspectRatioSelector";
-import { AdvancedOptions, type AdvancedVideoOptions } from "../AdvancedOptions";
-import { VideoError } from "../feedback/VideoError";
-import { VideoSuccess } from "../feedback/VideoSuccess";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { CircleX, Loader2, Wand2, Film, Sparkles, PenLine, School, Presentation, TextQuote } from "lucide-react";
-
-// Define the video styles that were missing
-const videoStyles = [
-  {
-    id: "cinematic",
-    title: "Cinematic",
-    description: "Professional, movie-like videos with high production value",
-    icon: Film,
-    imageUrl: "https://images.unsplash.com/photo-1585951237318-9ea5e175b891?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-  },
-  {
-    id: "animated",
-    title: "Animated",
-    description: "Engaging cartoon and motion graphics style videos",
-    icon: Sparkles,
-    imageUrl: "https://images.unsplash.com/photo-1632776350300-894bbdcf0e12?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-  },
-  {
-    id: "socialReel",
-    title: "Social Reel",
-    description: "Trendy, attention-grabbing videos for social media",
-    icon: PenLine,
-    imageUrl: "https://images.unsplash.com/photo-1611162618071-b39a2ec055fb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-  },
-  {
-    id: "explainer",
-    title: "Explainer",
-    description: "Clear, educational videos that break down complex topics",
-    icon: School,
-    imageUrl: "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-  },
-  {
-    id: "whiteboard",
-    title: "Whiteboard",
-    description: "Hand-drawn style visuals with step-by-step explanations",
-    icon: Presentation,
-    imageUrl: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-  },
-  {
-    id: "typography",
-    title: "Typography",
-    description: "Text-focused videos with dynamic typography animations",
-    icon: TextQuote,
-    imageUrl: "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3"
-  }
-];
-
-type VideoStyle = "cinematic" | "animated" | "socialReel" | "explainer" | "whiteboard" | "typography";
-
-interface MainFormProps {
-  onGenerateVideo: () => void;
+interface VideoFormData {
+  prompt: string;
+  style: string;
+  duration: number;
+  aspectRatio: string;
+  workflow: string;
+  advanced: {
+    seed?: number;
+    steps?: number;
+    guidance?: number;
+    temperature?: number;
+  };
 }
 
-export function MainForm({ onGenerateVideo }: MainFormProps) {
-  const [videoIdea, setVideoIdea] = useState("");
-  const [selectedStyle, setSelectedStyle] = useState<VideoStyle | null>(null);
-  const [aspectRatio, setAspectRatio] = useState("16:9");
-  const [duration, setDuration] = useState("30");
-  const [language, setLanguage] = useState("en");
-  const [advancedOptions, setAdvancedOptions] = useState<AdvancedVideoOptions>({
-    voiceoverType: "female",
-    backgroundMusic: "none",
-    playbackSpeed: "normal",
+const styles = [
+  "Cinematic",
+  "Documentary", 
+  "Animation",
+  "Corporate",
+  "Social Media",
+  "Educational"
+];
+
+const durations = [
+  { value: 5, label: "5 seconds" },
+  { value: 10, label: "10 seconds" },
+  { value: 15, label: "15 seconds" },
+  { value: 30, label: "30 seconds" }
+];
+
+interface MainFormProps {
+  initialData?: Partial<VideoFormData>;
+  onSubmit?: (data: VideoFormData) => void;
+}
+
+export function MainForm({ initialData, onSubmit }: MainFormProps) {
+  const [formData, setFormData] = useState<VideoFormData>({
+    prompt: initialData?.prompt || "",
+    style: initialData?.style || "Cinematic",
+    duration: initialData?.duration || 10,
+    aspectRatio: initialData?.aspectRatio || "16:9",
+    workflow: initialData?.workflow || "standard",
+    advanced: initialData?.advanced || {}
   });
+  
   const [isGenerating, setIsGenerating] = useState(false);
-  const [generationState, setGenerationState] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const { toast } = useToast();
 
-  // Add the missing resetForm function
-  const resetForm = () => {
-    setVideoIdea("");
-    setSelectedStyle(null);
-    setAspectRatio("16:9");
-    setDuration("30");
-    setLanguage("en");
-    setAdvancedOptions({
-      voiceoverType: "female",
-      backgroundMusic: "none",
-      playbackSpeed: "normal",
-    });
-    setGenerationState('idle');
-  };
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.prompt.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a video description"
+      });
+      return;
+    }
 
-  const handleGenerate = () => {
     setIsGenerating(true);
-    setGenerationState('loading');
-
-    // Simulate random success/error (90% success rate)
-    const willSucceed = Math.random() > 0.1;
-
+    onSubmit?.(formData);
+    
+    // Simulate generation time
     setTimeout(() => {
       setIsGenerating(false);
-      setGenerationState(willSucceed ? 'success' : 'error');
+      toast({
+        title: "Video Generated!",
+        description: "Your video has been created successfully"
+      });
     }, 3000);
   };
 
-  const handleRetry = () => {
-    setGenerationState('idle');
-    setIsGenerating(false);
-  };
-
-  const handleWatch = () => {
-    window.open('https://www.youtube.com/watch?v=dQw4w9WgXcQ', '_blank'); // Placeholder video
-  };
-
-  const handleDownload = () => {
-    const link = document.createElement('a');
-    link.href = 'https://www.w3schools.com/html/mov_bbb.mp4'; // Placeholder video
-    link.download = 'your-video.mp4';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handleSchedule = () => {
-    // We'll implement this in the next iteration
-    console.log('Schedule clicked');
-  };
-
-  if (generationState === 'loading') {
-    return (
-      <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
-        <CardContent className="flex flex-col items-center justify-center min-h-[400px] space-y-4">
-          <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          </div>
-          <h3 className="text-xl font-semibold text-white">✨ Generating your video magic...</h3>
-          <p className="text-muted-foreground">Please wait while we craft something special.</p>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (generationState === 'error') {
-    return (
-      <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
-        <CardContent className="p-0">
-          <VideoError onRetry={handleRetry} onEdit={() => setGenerationState('idle')} />
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (generationState === 'success') {
-    return (
-      <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
-        <CardContent className="p-0">
-          <VideoSuccess 
-            onWatch={handleWatch}
-            onDownload={handleDownload}
-            onSchedule={handleSchedule}
-          />
-        </CardContent>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="border border-white/10 bg-card/70 backdrop-blur-sm shadow-md">
-      <CardHeader>
-        <CardTitle className="text-2xl">Tell Us Your Vision</CardTitle>
-        <CardDescription className="text-base">
-          Describe what you'd like to create and we'll bring it to life
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <VideoTemplates onSelect={setVideoIdea} />
-        
+    <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-4">
+        <Label htmlFor="prompt" className="text-sm font-medium">
+          Video Description
+        </Label>
+        <Textarea
+          id="prompt"
+          placeholder="A futuristic city skyline at night with neon lights..."
+          value={formData.prompt}
+          onChange={(e) => setFormData({ ...formData, prompt: e.target.value })}
+          className="min-h-[100px] resize-none bg-background/50 border-white/10 focus:border-purple-400 transition-colors"
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="video-idea" className="text-foreground">
-            Describe Your Video
-          </Label>
-          <Textarea
-            id="video-idea"
-            placeholder="Write about teamwork and collaboration in the workplace..."
-            value={videoIdea}
-            onChange={(e) => setVideoIdea(e.target.value)}
-            className="min-h-[120px] bg-background border-accent/20 focus:border-primary transition-colors"
-          />
+          <Label htmlFor="style" className="text-sm font-medium">Style</Label>
+          <Select value={formData.style} onValueChange={(value) => setFormData({ ...formData, style: value })}>
+            <SelectTrigger className="bg-background/50 border-white/10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {styles.map((s) => (
+                <SelectItem key={s} value={s}>{s}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
-        <div className="space-y-3">
-          <Label className="text-foreground">Select Video Style</Label>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-            {videoStyles.map((style) => (
-              <VideoStyleCard 
-                key={style.id}
-                title={style.title}
-                icon={style.icon}
-                description={style.description}
-                imageUrl={style.imageUrl}
-                isSelected={selectedStyle === style.id}
-                onClick={() => setSelectedStyle(style.id as VideoStyle)}
-              />
-            ))}
-          </div>
+        <div className="space-y-2">
+          <Label htmlFor="duration" className="text-sm font-medium">Duration</Label>
+          <Select value={String(formData.duration)} onValueChange={(value) => setFormData({ ...formData, duration: Number(value) })}>
+            <SelectTrigger className="bg-background/50 border-white/10">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {durations.map((d) => (
+                <SelectItem key={d.value} value={String(d.value)}>{d.label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
+      </div>
 
-        <div className="space-y-6">
-          <Separator className="border-white/10" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div className="space-y-2">
-              <Label className="text-foreground">Aspect Ratio</Label>
-              <AspectRatioSelector 
-                value={aspectRatio} 
-                onChange={setAspectRatio} 
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="duration" className="text-foreground">
-                Video Duration
-              </Label>
-              <Select value={duration} onValueChange={setDuration}>
-                <SelectTrigger id="duration" className="bg-background border-accent/20">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border-accent/20">
-                  <SelectItem value="15">15 seconds</SelectItem>
-                  <SelectItem value="30">30 seconds</SelectItem>
-                  <SelectItem value="60">60 seconds</SelectItem>
-                  <SelectItem value="120">2 minutes</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+      <Separator className="bg-white/10" />
 
-            <div className="space-y-2">
-              <Label htmlFor="language" className="text-foreground">
-                Language
-              </Label>
-              <Select value={language} onValueChange={setLanguage}>
-                <SelectTrigger id="language" className="bg-background border-accent/20">
-                  <SelectValue placeholder="Select language" />
-                </SelectTrigger>
-                <SelectContent className="bg-background border-accent/20">
-                  <SelectItem value="en">English</SelectItem>
-                  <SelectItem value="es">Spanish</SelectItem>
-                  <SelectItem value="fr">French</SelectItem>
-                  <SelectItem value="de">German</SelectItem>
-                  <SelectItem value="ja">Japanese</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </div>
+      <AspectRatioSelector 
+        selectedRatio={formData.aspectRatio}
+        onRatioChange={(ratio) => setFormData({ ...formData, aspectRatio: ratio })}
+      />
 
-        <AdvancedOptions onOptionsChange={setAdvancedOptions} />
+      <Separator className="bg-white/10" />
 
-        <div className="flex items-center justify-center gap-4 pt-4">
-          <Button
-            onClick={resetForm}
-            variant="outline"
-            className="border-white/10 bg-background hover:bg-background/80"
-          >
-            <CircleX className="w-4 h-4 mr-2" />
-            Reset
-          </Button>
+      <WorkflowSelection 
+        selectedWorkflow={formData.workflow}
+        onWorkflowChange={(workflow) => setFormData({ ...formData, workflow: workflow })}
+      />
 
-          <Button
-            onClick={handleGenerate}
-            disabled={isGenerating || !videoIdea || !selectedStyle}
-            className={`min-w-[180px] bg-gradient-primary hover:bg-primary/90 text-white group relative ${
-              isGenerating ? 'animate-pulse' : ''
-            }`}
-          >
-            {isGenerating ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Generating...
-                <div className="absolute inset-0 w-full h-full overflow-hidden">
-                  <div className="absolute inset-0 translate-x-[-100%] animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
-                </div>
-              </>
-            ) : (
-              <>
-                <Wand2 className="mr-2 h-4 w-4 group-hover:rotate-12 transition-transform" />
-                Generate Video
-              </>
-            )}
-          </Button>
-        </div>
-      </CardContent>
-    </Card>
+      <Separator className="bg-white/10" />
+
+      <Button 
+        type="submit" 
+        disabled={isGenerating || !formData.prompt.trim()}
+        className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
+      >
+        {isGenerating ? (
+          <>
+            <Loader className="h-5 w-5 mr-2 animate-spin" />
+            Generating...
+          </>
+        ) : (
+          <>
+            <Play className="h-5 w-5 mr-2" />
+            Generate Video
+          </>
+        )}
+      </Button>
+    </form>
   );
 }
-

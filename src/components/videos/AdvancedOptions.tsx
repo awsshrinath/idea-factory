@@ -1,152 +1,90 @@
-import { useState } from "react";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { Label } from "@/components/ui/label";
-import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Button } from "@/components/ui/button";
-import { Mic, Music, Gauge } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { Separator } from '@/components/ui/separator';
+import { Settings, Sliders } from 'lucide-react';
 
 interface AdvancedOptionsProps {
-  onOptionsChange: (options: AdvancedVideoOptions) => void;
-}
-
-export interface AdvancedVideoOptions {
-  voiceoverType: string;
-  voiceFile?: File;
-  backgroundMusic: string;
-  playbackSpeed: string;
-}
-
-export function AdvancedOptions({ onOptionsChange }: AdvancedOptionsProps) {
-  const [options, setOptions] = useState<AdvancedVideoOptions>({
-    voiceoverType: "female",
-    backgroundMusic: "none",
-    playbackSpeed: "normal",
-  });
-  const [voiceFile, setVoiceFile] = useState<File | null>(null);
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  const updateOption = <K extends keyof AdvancedVideoOptions>(
-    key: K,
-    value: AdvancedVideoOptions[K]
-  ) => {
-    const newOptions = { ...options, [key]: value };
-    setOptions(newOptions);
-    onOptionsChange(newOptions);
+  options: {
+    seed?: number;
+    steps?: number;
+    guidance?: number;
+    temperature?: number;
   };
+  onChange: (options: any) => void;
+}
 
+export function AdvancedOptions({ options, onChange }: AdvancedOptionsProps) {
   return (
-    <Accordion 
-      type="single" 
-      collapsible 
-      className="w-full"
-      onValueChange={(value) => setIsExpanded(!!value)}
-    >
-      <AccordionItem value="advanced-options" className="border-white/10">
-        <AccordionTrigger className="text-foreground hover:text-primary transition-colors">
-          Advanced Options
-          {!isExpanded && (
-            <div className="text-xs text-muted-foreground ml-2">
-              Voice Over, Music, Speed 🔓
-            </div>
-          )}
-        </AccordionTrigger>
-        <AccordionContent>
-          <div className="space-y-6 p-2">
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Mic className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-foreground">Voice Over</Label>
-              </div>
-              <Select
-                value={options.voiceoverType}
-                onValueChange={(value) => updateOption("voiceoverType", value)}
-              >
-                <SelectTrigger className="bg-background border-accent/20">
-                  <SelectValue placeholder="Select voice type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="female">AI Female Voice</SelectItem>
-                  <SelectItem value="male">AI Male Voice</SelectItem>
-                  <SelectItem value="upload">Upload Voice</SelectItem>
-                  <SelectItem value="none">No Voice Over</SelectItem>
-                </SelectContent>
-              </Select>
-              {options.voiceoverType === "upload" && (
-                <div className="mt-2">
-                  <Button
-                    variant="outline"
-                    onClick={() => document.getElementById("voice-file")?.click()}
-                    className="w-full border-accent/20"
-                  >
-                    {voiceFile ? voiceFile.name : "Upload Voice File"}
-                  </Button>
-                  <input
-                    id="voice-file"
-                    type="file"
-                    accept="audio/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      const file = e.target.files?.[0];
-                      if (file) {
-                        setVoiceFile(file);
-                        updateOption("voiceFile", file);
-                      }
-                    }}
-                  />
-                </div>
-              )}
-            </div>
+    <Card className="premium-card border border-white/10 shadow-lg">
+      <CardHeader className="space-y-2">
+        <div className="flex items-center">
+          <Settings className="h-4 w-4 mr-2 text-muted-foreground" />
+          <CardTitle className="text-sm font-medium">Advanced Options</CardTitle>
+        </div>
+        <CardTitle className="text-xs text-muted-foreground">
+          Fine-tune your video generation
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="seed" className="text-xs">Seed (optional)</Label>
+          <Input
+            type="number"
+            id="seed"
+            placeholder="Random seed for reproducible results"
+            value={options.seed || ""}
+            onChange={(e) => onChange({ ...options, seed: Number(e.target.value) })}
+            className="bg-white/5 border-white/10 text-xs"
+          />
+        </div>
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Music className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-foreground">Background Music</Label>
-              </div>
-              <Select
-                value={options.backgroundMusic}
-                onValueChange={(value) => updateOption("backgroundMusic", value)}
-              >
-                <SelectTrigger className="bg-background border-accent/20">
-                  <SelectValue placeholder="Select music style" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="happy">Happy & Upbeat</SelectItem>
-                  <SelectItem value="corporate">Corporate & Professional</SelectItem>
-                  <SelectItem value="dramatic">Dramatic & Intense</SelectItem>
-                  <SelectItem value="epic">Epic & Inspiring</SelectItem>
-                  <SelectItem value="none">No Background Music</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+        <Separator className="bg-white/10" />
 
-            <div className="space-y-4">
-              <div className="flex items-center gap-2">
-                <Gauge className="h-4 w-4 text-muted-foreground" />
-                <Label className="text-foreground">Playback Speed</Label>
-              </div>
-              <Select
-                value={options.playbackSpeed}
-                onValueChange={(value) => updateOption("playbackSpeed", value)}
-              >
-                <SelectTrigger className="bg-background border-accent/20">
-                  <SelectValue placeholder="Select playback speed" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="slow">Slow</SelectItem>
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="fast">Fast</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-        </AccordionContent>
-      </AccordionItem>
-    </Accordion>
+        <div className="space-y-2">
+          <Label htmlFor="steps" className="text-xs">Steps: {options.steps || 20}</Label>
+          <Slider
+            id="steps"
+            defaultValue={[options.steps || 20]}
+            min={10}
+            max={50}
+            step={1}
+            onValueChange={(value) => onChange({ ...options, steps: value[0] })}
+            className="bg-white/5 border-white/10"
+          />
+        </div>
+
+        <Separator className="bg-white/10" />
+
+        <div className="space-y-2">
+          <Label htmlFor="guidance" className="text-xs">Guidance Scale: {options.guidance || 7.5}</Label>
+          <Slider
+            id="guidance"
+            defaultValue={[options.guidance || 7.5]}
+            min={1}
+            max={20}
+            step={0.5}
+            onValueChange={(value) => onChange({ ...options, guidance: value[0] })}
+            className="bg-white/5 border-white/10"
+          />
+        </div>
+
+        <Separator className="bg-white/10" />
+
+        <div className="space-y-2">
+          <Label htmlFor="temperature" className="text-xs">Temperature: {options.temperature || 1.0}</Label>
+          <Slider
+            id="temperature"
+            defaultValue={[options.temperature || 1.0]}
+            min={0}
+            max={2}
+            step={0.1}
+            onValueChange={(value) => onChange({ ...options, temperature: value[0] })}
+            className="bg-white/5 border-white/10"
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

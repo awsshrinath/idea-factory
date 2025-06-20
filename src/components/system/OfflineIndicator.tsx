@@ -1,7 +1,10 @@
 import React from 'react';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useEffect, useState } from 'react';
+import { Card } from '@/components/ui/card';
+import { WifiOff, Wifi } from 'lucide-react';
 
-export const OfflineIndicator = () => {
+export function OfflineIndicator() {
   const isOnline = useOnlineStatus();
 
   if (isOnline) {
@@ -13,4 +16,4 @@ export const OfflineIndicator = () => {
       You are currently offline. Some features may not be available.
     </div>
   );
-}; 
+}
