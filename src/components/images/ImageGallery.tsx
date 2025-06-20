@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -33,6 +32,8 @@ export function ImageGallery({
   const [filter, setFilter] = useState<"all" | "favorites" | "recent">(initialFilter);
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
   const { user } = useAuth();
 
   // Fetch images from Supabase
@@ -207,6 +208,26 @@ export function ImageGallery({
     }
   };
 
+  const handleStartEditing = (image: GeneratedImage) => {
+    setEditingId(image.id);
+    setEditTitle(image.title || '');
+  };
+
+  const handleSaveTitleModal = (id: string) => {
+    handleSaveTitle(id, editTitle);
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const handleCancelEditing = () => {
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const handleEditChange = (title: string) => {
+    setEditTitle(title);
+  };
+
   const getFilteredAndSortedImages = () => {
     let filteredImages = [...images];
 
@@ -339,14 +360,19 @@ export function ImageGallery({
       <div className="space-y-4">
         {renderGallery()}
         <ImageDetailModal
-          image={selectedImage}
+          selectedImage={selectedImage}
           isOpen={showDetailModal}
-          onClose={() => setShowDetailModal(false)}
-          onFavoriteToggle={handleFavoriteToggle}
-          onDownload={handleDownload}
-          onRegenerate={handleRegenerate}
-          onDelete={(image) => handleDelete(image.id)}
-          onShare={handleShare}
+          onOpenChange={setShowDetailModal}
+          editingId={editingId}
+          editTitle={editTitle}
+          onEditChange={handleEditChange}
+          onStartEditing={handleStartEditing}
+          onSaveTitle={handleSaveTitleModal}
+          onCancelEditing={handleCancelEditing}
+          onToggleFavorite={handleFavoriteToggle}
+          onRegenerate={selectedImage ? () => handleRegenerate() : () => {}}
+          onDownload={selectedImage ? () => handleDownload(selectedImage) : () => {}}
+          onDelete={(id: string) => handleDelete(id)}
         />
       </div>
     );
@@ -367,14 +393,19 @@ export function ImageGallery({
         {renderControls()}
         {renderGallery()}
         <ImageDetailModal
-          image={selectedImage}
+          selectedImage={selectedImage}
           isOpen={showDetailModal}
-          onClose={() => setShowDetailModal(false)}
-          onFavoriteToggle={handleFavoriteToggle}
-          onDownload={handleDownload}
-          onRegenerate={handleRegenerate}
-          onDelete={(image) => handleDelete(image.id)}
-          onShare={handleShare}
+          onOpenChange={setShowDetailModal}
+          editingId={editingId}
+          editTitle={editTitle}
+          onEditChange={handleEditChange}
+          onStartEditing={handleStartEditing}
+          onSaveTitle={handleSaveTitleModal}
+          onCancelEditing={handleCancelEditing}
+          onToggleFavorite={handleFavoriteToggle}
+          onRegenerate={selectedImage ? () => handleRegenerate() : () => {}}
+          onDownload={selectedImage ? () => handleDownload(selectedImage) : () => {}}
+          onDelete={(id: string) => handleDelete(id)}
         />
       </CardContent>
     </Card>
