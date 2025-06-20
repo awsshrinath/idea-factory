@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,9 +41,10 @@ export function ImageGallery({
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: session } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session.data.session);
-      if (session.data.session) {
+      const session = await supabase.auth.getSession();
+      const authenticated = !!session.data.session;
+      setIsAuthenticated(authenticated);
+      if (authenticated) {
         fetchImages();
       } else {
         setIsLoading(false);
@@ -53,7 +53,7 @@ export function ImageGallery({
 
     checkAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (_, session) => {
       setIsAuthenticated(!!session);
       if (session) {
         fetchImages();

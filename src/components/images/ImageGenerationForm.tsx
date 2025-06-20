@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,7 +12,6 @@ import { StyleQuickSwitch } from "./StyleQuickSwitch";
 import { Loader, Download, Sparkles, ImageIcon, Palette, Sliders, Wand2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { cn } from "@/lib/utils";
 
 interface ImageGenerationFormProps {
   onImageGenerated?: (imageUrl: string) => void;
@@ -173,7 +173,7 @@ export function ImageGenerationForm({ onImageGenerated }: ImageGenerationFormPro
                 <Palette className="h-4 w-4" />
                 Style Templates
               </Label>
-              <StyleTemplates onStyleSelect={handleStyleSelect} />
+              <StyleTemplates />
             </div>
 
             {/* Quick Controls */}
@@ -323,7 +323,7 @@ export function ImageGenerationForm({ onImageGenerated }: ImageGenerationFormPro
             {/* Style Quick Switch */}
             <div className="space-y-2">
               <Label className="text-sm font-medium">Quick Style Switch</Label>
-              <StyleQuickSwitch currentStyle={style} onStyleChange={setStyle} />
+              <StyleQuickSwitch />
             </div>
 
             {/* Selected Settings Display */}

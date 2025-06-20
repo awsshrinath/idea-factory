@@ -14,7 +14,7 @@ interface ContentPreviewProps {
 }
 
 export function ContentPreview({ content, platform, tone }: ContentPreviewProps) {
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(content);
 
   const handleContentChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {

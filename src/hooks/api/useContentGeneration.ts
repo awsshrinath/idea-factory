@@ -1,4 +1,5 @@
-import { useApi } from './useApi';
+
+import { useMutation } from '@tanstack/react-query';
 
 interface TextGenerationPayload {
   prompt: string;
@@ -11,29 +12,42 @@ interface ImageGenerationPayload {
 }
 
 export const useContentGeneration = () => {
-  const { state: textState, execute: executeText } = useApi<string>();
-  const { state: imageState, execute: executeImage } = useApi<string>(); // Assuming image URL is a string
+  const textMutation = useMutation({
+    mutationFn: async (payload: TextGenerationPayload) => {
+      const response = await fetch('/ai/text', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Failed to generate text');
+      return response.json();
+    },
+  });
 
-  const generateText = async (payload: TextGenerationPayload) => {
-    return executeText('POST', '/ai/text', payload);
-  };
-
-  const generateImage = async (payload: ImageGenerationPayload) => {
-    return executeImage('POST', '/ai/image', payload);
-  };
+  const imageMutation = useMutation({
+    mutationFn: async (payload: ImageGenerationPayload) => {
+      const response = await fetch('/ai/image', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!response.ok) throw new Error('Failed to generate image');
+      return response.json();
+    },
+  });
 
   return {
     text: {
-      data: textState.data,
-      error: textState.error,
-      isLoading: textState.isLoading,
-      generate: generateText,
+      data: textMutation.data,
+      error: textMutation.error,
+      isLoading: textMutation.isPending,
+      generate: textMutation.mutate,
     },
     image: {
-      data: imageState.data,
-      error: imageState.error,
-      isLoading: imageState.isLoading,
-      generate: generateImage,
+      data: imageMutation.data,
+      error: imageMutation.error,
+      isLoading: imageMutation.isPending,
+      generate: imageMutation.mutate,
     },
   };
-}; 
+};

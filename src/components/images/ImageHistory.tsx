@@ -1,3 +1,4 @@
+
 import { Card } from "@/components/ui/card";
 import { Download, Trash2, RefreshCcw, Heart, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -7,13 +8,6 @@ import { useToast } from "@/hooks/use-toast";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Input } from "@/components/ui/input";
-import { 
-  Carousel,
-  CarouselContent,
-  CarouselItem,
-  CarouselNext,
-  CarouselPrevious
-} from "@/components/ui/carousel";
 import { GeneratedImage } from "./gallery/types";
 
 export function ImageHistory() {
@@ -23,13 +17,13 @@ export function ImageHistory() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editTitle, setEditTitle] = useState("");
   const { toast } = useToast();
-  const [viewMode, setViewMode] = useState<"grid" | "carousel">("grid");
 
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: session } = await supabase.auth.getSession();
-      setIsAuthenticated(!!session.data.session);
-      if (session.data.session) {
+      const session = await supabase.auth.getSession();
+      const authenticated = !!session.data.session;
+      setIsAuthenticated(authenticated);
+      if (authenticated) {
         fetchImages();
       } else {
         setIsLoading(false);
@@ -38,7 +32,7 @@ export function ImageHistory() {
 
     checkAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_, session) => {
       setIsAuthenticated(!!session);
       if (session) {
         fetchImages();
