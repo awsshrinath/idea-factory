@@ -12,8 +12,8 @@ import { supabase } from '@/integrations/supabase/client';
 
 export function Content() {
   const [formData, setFormData] = useState<ContentFormData>({
-    topic: '',
-    platform: 'instagram',
+    description: '',
+    platforms: ['instagram'],
     tone: 'professional',
     length: 'medium',
     language: 'English',
@@ -25,11 +25,11 @@ export function Content() {
   const { toast } = useToast();
 
   const handleGenerate = async () => {
-    if (!formData.topic?.trim()) {
+    if (!formData.description?.trim()) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please enter a topic for your content"
+        description: "Please enter a description for your content"
       });
       return;
     }
@@ -78,26 +78,25 @@ export function Content() {
         <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           <div className="space-y-6">
             <ContentForm 
-              onChange={setFormData}
               onGenerate={handleGenerate}
               isGenerating={isGenerating}
             />
             
             <Separator className="bg-white/10" />
             
-            <PromptTemplates onSelectTemplate={(template: string) => setFormData({...formData, topic: template})} />
+            <PromptTemplates onSelectTemplate={(template: string) => setFormData({...formData, description: template})} />
           </div>
 
           <div className="space-y-6">
             <ContentPreview 
               content={generatedContent}
-              platform={formData.platform}
+              platforms={formData.platforms}
               tone={formData.tone}
             />
             
             <Separator className="bg-white/10" />
             
-            <TrendingTopics onTopicSelect={(topic: string) => setFormData({...formData, topic})} />
+            <TrendingTopics onTopicSelect={(topic: string) => setFormData({...formData, description: topic})} />
           </div>
         </div>
 

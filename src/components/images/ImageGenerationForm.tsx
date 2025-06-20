@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
+
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { 
   Select,
@@ -20,6 +20,7 @@ import {
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useSessionContext } from '@supabase/auth-helpers-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ImageFormData {
   prompt: string;
@@ -53,10 +54,9 @@ const numInferenceStepsOptions = [
 
 interface ImageGenerationFormProps {
   initialData?: Partial<ImageFormData>;
-  onSubmit?: (data: ImageFormData) => void;
 }
 
-export function ImageGenerationForm({ initialData, onSubmit }: ImageGenerationFormProps) {
+export function ImageGenerationForm({ initialData }: ImageGenerationFormProps) {
   const [formData, setFormData] = useState<ImageFormData>({
     prompt: initialData?.prompt || "",
     style: initialData?.style || "Cinematic",
@@ -85,7 +85,7 @@ export function ImageGenerationForm({ initialData, onSubmit }: ImageGenerationFo
     setIsGenerating(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
+      const { error } = await supabase.functions.invoke('generate-image', {
         body: {
           ...formData,
           user_id: session?.user?.id || ''
@@ -178,11 +178,7 @@ export function ImageGenerationForm({ initialData, onSubmit }: ImageGenerationFo
 
       <Separator className="bg-white/10" />
 
-      
-
-        <StyleTemplates 
-          onStyleSelect={(selectedStyle: string) => setFormData({...formData, style: selectedStyle})}
-        />
+      <StyleTemplates />
 
       <Separator className="bg-white/10" />
 

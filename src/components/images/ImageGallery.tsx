@@ -125,7 +125,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
 
   const handleDownload = async (image: GeneratedImage) => {
     try {
-      const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
+      const imageUrl = supabase.storage.from('generated_images').getPublicUrl(image.image_path).data.publicUrl;
       
       const response = await fetch(imageUrl);
       const blob = await response.blob();

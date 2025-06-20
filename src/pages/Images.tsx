@@ -136,7 +136,7 @@ export function Images() {
                       </div>
                       Create New Image
                     </h2>
-                    <ImageGenerationForm onImageGenerated={handleImageGenerated} />
+                    <ImageGenerationForm />
                   </div>
                 </TabsContent>
                 
@@ -237,7 +237,7 @@ export function Images() {
                     </div>
                     Create New Image
                   </h2>
-                  <ImageGenerationForm onImageGenerated={handleImageGenerated} />
+                  <ImageGenerationForm />
                 </div>
 
                 {/* Right Column - Enhanced */}
@@ -315,7 +315,6 @@ export function Images() {
                 </div>
                 <ImageGallery 
                   key={`full-${galleryView}-${galleryFilter}-${refreshTrigger}`} 
-                  fullGallery={true}
                   viewMode={galleryView}
                   filter={galleryFilter}
                 />
