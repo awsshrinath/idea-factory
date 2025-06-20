@@ -7,19 +7,7 @@ import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { supabase } from "@/integrations/supabase/client";
 import { Heart, RefreshCcw, Download, Trash2, Edit2, Check, X } from "lucide-react";
-
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string;
-  updated_at?: string;
-  title?: string | null;
-  is_favorite?: boolean | null;
-}
+import { GeneratedImage } from "./types";
 
 interface ImageCardProps {
   image: GeneratedImage;

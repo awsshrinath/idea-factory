@@ -1,4 +1,3 @@
-
 import { Card } from "@/components/ui/card";
 import { Download, Trash2, RefreshCcw, Heart, Edit2, Check, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -62,7 +61,10 @@ export function ImageHistory() {
       // Process the data to ensure it matches our GeneratedImage type
       const processedImages: GeneratedImage[] = (data || []).map(img => ({
         ...img,
-        created_at: img.created_at || new Date().toISOString()
+        created_at: img.created_at || new Date().toISOString(),
+        updated_at: img.updated_at || undefined,
+        title: img.title || undefined,
+        is_favorite: img.is_favorite || false
       }));
       
       setImages(processedImages);

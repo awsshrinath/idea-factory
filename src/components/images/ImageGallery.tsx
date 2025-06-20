@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -75,7 +74,9 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
         const processedImages: GeneratedImage[] = data.map(img => ({
           ...img,
           created_at: img.created_at || new Date().toISOString(),
-          updated_at: img.updated_at || undefined
+          updated_at: img.updated_at || undefined,
+          title: img.title || undefined,
+          is_favorite: img.is_favorite || false
         }));
         setImages(processedImages);
       }

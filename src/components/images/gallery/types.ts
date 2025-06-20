@@ -7,9 +7,9 @@ export interface GeneratedImage {
   aspect_ratio: string;
   image_path: string;
   created_at: string;
-  updated_at?: string;
-  title?: string;
-  is_favorite?: boolean;
+  updated_at?: string | null;
+  title?: string | null;
+  is_favorite?: boolean | null;
 }
 
 export type SortOption = "recent" | "oldest" | "favorites";
