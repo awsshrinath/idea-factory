@@ -24,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 
 export function Images() {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"create" | "gallery">("create");
@@ -189,7 +188,7 @@ export function Images() {
                   </div>
                   
                   <ImageGallery 
-                    key={`${galleryView}-${galleryFilter}-${refreshTrigger}`} 
+                    key={`${galleryView}-${galleryFilter}`} 
                     viewMode={galleryView}
                     filter={galleryFilter}
                   />
@@ -243,7 +242,7 @@ export function Images() {
                       Your Latest Creation
                     </h2>
                     <ScrollArea className="h-[600px]">
-                      <ImageGallery key={`preview-${refreshTrigger}`} previewMode={true} />
+                      <ImageGallery key="preview" previewMode={true} />
                     </ScrollArea>
                   </div>
                 </div>
@@ -307,7 +306,7 @@ export function Images() {
                   </div>
                 </div>
                 <ImageGallery 
-                  key={`full-${galleryView}-${galleryFilter}-${refreshTrigger}`} 
+                  key={`full-${galleryView}-${galleryFilter}`} 
                   viewMode={galleryView}
                   filter={galleryFilter}
                 />

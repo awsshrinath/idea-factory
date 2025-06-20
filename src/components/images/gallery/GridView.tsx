@@ -24,10 +24,11 @@ export function GridView({
   return (
     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
       {images.map((image) => {
-        // Ensure created_at is a string for the ImageCard component
-        const processedImage = {
+        // Ensure required fields are properly typed
+        const processedImage: GeneratedImage = {
           ...image,
-          created_at: image.created_at || new Date().toISOString()
+          created_at: image.created_at || new Date().toISOString(),
+          updated_at: image.updated_at || undefined
         };
         
         return (
