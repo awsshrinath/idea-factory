@@ -1,6 +1,6 @@
+
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { 
   CheckCircle, 
   Clock, 
@@ -11,7 +11,10 @@ import {
   BarChart3, 
   Shield, 
   Palette, 
-  Brain
+  Brain,
+  FileText,
+  Video,
+  Smartphone
 } from 'lucide-react';
 
 const roadmapItems = [
@@ -117,7 +120,7 @@ export function RoadmapSection() {
             <div className="flex items-center justify-between">
               <h3 className="premium-subheading text-lg">{phase.phase}</h3>
               <Badge variant="secondary" className="flex items-center gap-1">
-                <statusIcons[phase.status as keyof typeof statusIcons] className="h-3 w-3" />
+                {React.createElement(statusIcons[phase.status as keyof typeof statusIcons], { className: "h-3 w-3" })}
                 {phase.status}
               </Badge>
             </div>
@@ -126,7 +129,7 @@ export function RoadmapSection() {
                 <div key={itemIndex} className="premium-card premium-card-hover border border-white/10 p-4 rounded-lg">
                   <div className="flex items-start gap-3">
                     <div className="h-6 w-6 rounded-md bg-gradient-to-br from-blue-600/20 to-indigo-600/20 flex items-center justify-center border border-blue-500/20">
-                      <item.icon className="h-3 w-3 text-blue-400" />
+                      {React.createElement(item.icon, { className: "h-3 w-3 text-blue-400" })}
                     </div>
                     <div className="space-y-1">
                       <h4 className="premium-subheading text-sm">{item.title}</h4>
