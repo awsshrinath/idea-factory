@@ -36,7 +36,7 @@ const App = () => {
 
   return (
     <SessionContextProvider supabaseClient={supabase}>
-      <ErrorBoundary fallback={<div>Something went wrong. Please refresh.</div>}>
+      <ErrorBoundary>
         <QueryClientProvider client={queryClient}>
           <TooltipProvider>
             <Toaster />

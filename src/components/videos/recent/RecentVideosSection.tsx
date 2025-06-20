@@ -1,12 +1,9 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { EmptyRecentVideos } from '../EmptyRecentVideos';
 import { RecentVideosGrid } from '../RecentVideosGrid';
 import { History, Plus } from 'lucide-react';
-
-interface RecentVideosSectionProps {
-  hasRecentVideos?: boolean;
-}
 
 export function RecentVideosSection() {
   const hasRecentVideos = false;
@@ -25,7 +22,12 @@ export function RecentVideosSection() {
       </CardHeader>
       <CardContent>
         {hasRecentVideos ? (
-          <RecentVideosGrid />
+          <RecentVideosGrid 
+            videos={[]}
+            onView={() => {}}
+            onRegenerate={() => {}}
+            onDelete={() => {}}
+          />
         ) : (
           <EmptyRecentVideos />
         )}

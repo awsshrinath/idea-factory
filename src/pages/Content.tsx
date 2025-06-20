@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { ContentForm } from '@/components/content/ContentForm';
 import { ContentPreview } from '@/components/content/ContentPreview';
@@ -13,11 +12,11 @@ import { supabase } from '@/integrations/supabase/client';
 
 export function Content() {
   const [formData, setFormData] = useState<ContentFormData>({
-    prompt: '',
+    topic: '',
     platform: 'instagram',
     tone: 'professional',
     length: 'medium',
-    language: 'english',
+    language: 'English',
     model: 'gpt-4'
   });
   
@@ -26,11 +25,11 @@ export function Content() {
   const { toast } = useToast();
 
   const handleGenerate = async () => {
-    if (!formData.prompt.trim()) {
+    if (!formData.topic?.trim()) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: "Please enter a prompt for your content"
+        description: "Please enter a topic for your content"
       });
       return;
     }
@@ -79,7 +78,6 @@ export function Content() {
         <div className="grid lg:grid-cols-2 gap-8 max-w-7xl mx-auto">
           <div className="space-y-6">
             <ContentForm 
-              formData={formData}
               onChange={setFormData}
               onGenerate={handleGenerate}
               isGenerating={isGenerating}
@@ -87,19 +85,19 @@ export function Content() {
             
             <Separator className="bg-white/10" />
             
-            <PromptTemplates onSelect={(template) => setFormData({...formData, prompt: template})} />
+            <PromptTemplates onSelectTemplate={(template: string) => setFormData({...formData, topic: template})} />
           </div>
 
           <div className="space-y-6">
             <ContentPreview 
               content={generatedContent}
-              formData={formData}
-              onContentChange={setGeneratedContent}
+              platform={formData.platform}
+              tone={formData.tone}
             />
             
             <Separator className="bg-white/10" />
             
-            <TrendingTopics onSelect={(topic) => setFormData({...formData, prompt: topic})} />
+            <TrendingTopics onTopicSelect={(topic: string) => setFormData({...formData, topic})} />
           </div>
         </div>
 

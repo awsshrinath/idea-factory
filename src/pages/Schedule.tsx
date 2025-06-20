@@ -1,6 +1,5 @@
 
 import { useState } from 'react';
-import { Card } from '@/components/ui/card';
 import { CalendarView } from '@/components/schedule/CalendarView';
 import { QuickStats } from '@/components/schedule/QuickStats';
 import { AddPostModal } from '@/components/schedule/AddPostModal';
@@ -8,7 +7,7 @@ import { FilterSection } from '@/components/schedule/FilterSection';
 import { ScheduleHeader } from '@/components/schedule/ScheduleHeader';
 
 export function Schedule() {
-  const [events, setEvents] = useState([
+  const [events] = useState([
     {
       id: '1',
       title: 'Instagram Post',
