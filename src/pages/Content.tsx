@@ -14,8 +14,11 @@ import {
 } from "@/components/ui/tooltip";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { cn } from "@/lib/utils";
+import { useContentJob } from "@/hooks/api/useContentJob";
+import { Loader2 } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
-export type Platform = "linkedin" | "twitter" | "facebook";
+export type Platform = "linkedin" | "twitter" | "facebook" | "instagram" | "youtube";
 export type Tone = "professional" | "friendly" | "casual" | "creative";
 export type AIModel = "chatgpt" | "deepseek";
 export type Language = "English" | "Spanish" | "French" | "German" | "Chinese";
@@ -37,6 +40,14 @@ export function Content() {
     language: "English",
   });
   const isMobile = useIsMobile();
+  const { jobId, status, data, error, submit } = useContentJob();
+
+  const handleSubmit = () => {
+    // For now, we'll just use the first selected platform.
+    // This can be expanded to generate content for multiple platforms.
+    const platform = formData.platforms[0] || 'linkedin';
+    submit(formData.description, platform);
+  };
 
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
@@ -102,6 +113,31 @@ export function Content() {
                 formData={formData}
                 onChange={setFormData}
               />
+              <Button onClick={handleSubmit} disabled={status === 'submitting' || status === 'processing'} className="w-full">
+                {status === 'submitting' || status === 'processing' ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  "Generate Content"
+                )}
+              </Button>
+              
+              {status === 'processing' && (
+                <div className="flex items-center space-x-2 text-muted-foreground">
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                  <span>Generating content... (Job ID: {jobId})</span>
+                </div>
+              )}
+
+              {status === 'failed' && (
+                <div className="text-destructive">
+                  <p>Generation failed:</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+
             </div>
 
             {/* Preview and Sidebar Column */}

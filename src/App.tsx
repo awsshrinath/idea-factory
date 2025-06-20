@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,7 +9,13 @@ import { Images } from "./pages/Images";
 import { Videos } from "./pages/Videos";
 import { Schedule } from "./pages/Schedule";
 import { Settings } from "./pages/Settings";
-import { Auth } from "./pages/Auth";
+import Auth from './pages/Auth';
+import ErrorBoundary from './components/system/ErrorBoundary';
+import { OfflineIndicator } from './components/system/OfflineIndicator';
+import { SessionContextProvider } from '@supabase/auth-helpers-react';
+import { supabase } from './integrations/supabase/client';
+import { ProtectedRoute } from './components/system/ProtectedRoute';
+import { useIdleTimeout } from './hooks/useIdleTimeout';
 
 const App = () => {
   const [queryClient] = useState(
@@ -25,25 +30,35 @@ const App = () => {
       })
   );
 
+  // Set idle timeout to 15 minutes (900000 ms)
+  useIdleTimeout(900000);
+
   return (
-    <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <Toaster />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/auth" element={<Auth />} />
-            <Route path="/content" element={<Content />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/settings" element={<Settings />} />
-            {/* Add a catch-all route that redirects to the index page */}
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </QueryClientProvider>
+    <SessionContextProvider supabaseClient={supabase}>
+      <ErrorBoundary fallback={<div>Something went wrong. Please refresh.</div>}>
+        <QueryClientProvider client={queryClient}>
+          <TooltipProvider>
+            <Toaster />
+            <OfflineIndicator />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="/auth" element={<Auth />} />
+                <Route element={<ProtectedRoute />}>
+                  <Route path="/content" element={<Content />} />
+                  <Route path="/images" element={<Images />} />
+                  <Route path="/videos" element={<Videos />} />
+                  <Route path="/schedule" element={<Schedule />} />
+                  <Route path="/settings" element={<Settings />} />
+                </Route>
+                {/* Add a catch-all route that redirects to the index page */}
+                <Route path="*" element={<Navigate to="/" replace />} />
+              </Routes>
+            </BrowserRouter>
+          </TooltipProvider>
+        </QueryClientProvider>
+      </ErrorBoundary>
+    </SessionContextProvider>
   );
 };
 

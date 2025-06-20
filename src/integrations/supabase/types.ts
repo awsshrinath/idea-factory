@@ -55,7 +55,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-        Relationships: []
       }
       content_versions: {
         Row: {
@@ -187,6 +186,38 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      profiles: {
+        Row: {
+          id: string
+          username: string | null
+          full_name: string | null
+          avatar_url: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          id: string
+          username?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          id?: string
+          username?: string | null
+          full_name?: string | null
+          avatar_url?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_id_fkey"
+            columns: ["id"]
+            isOneToOne: true
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       recent_activity: {
         Row: {
