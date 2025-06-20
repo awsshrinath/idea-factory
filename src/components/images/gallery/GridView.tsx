@@ -28,7 +28,7 @@ export function GridView({
         const processedImage: GeneratedImage = {
           ...image,
           created_at: image.created_at || new Date().toISOString(),
-          updated_at: image.updated_at === null ? undefined : image.updated_at
+          updated_at: image.updated_at || undefined
         };
         
         return (

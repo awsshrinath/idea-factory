@@ -58,7 +58,14 @@ export function ImageHistory() {
       if (error) throw error;
 
       console.log("Fetched images:", data);
-      setImages(data || []);
+      
+      // Process the data to ensure it matches our GeneratedImage type
+      const processedImages: GeneratedImage[] = (data || []).map(img => ({
+        ...img,
+        created_at: img.created_at || new Date().toISOString()
+      }));
+      
+      setImages(processedImages);
     } catch (error: any) {
       console.error('Error fetching images:', error);
       toast({
