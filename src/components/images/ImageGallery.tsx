@@ -1,10 +1,9 @@
 
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Clock, Filter, Heart } from "lucide-react";
 import { 
   DropdownMenu,
@@ -40,7 +39,6 @@ export function ImageGallery({
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
   const { toast } = useToast();
-  const isMobile = useIsMobile();
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -55,14 +53,17 @@ export function ImageGallery({
 
     checkAuth();
 
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-      if (session) {
-        fetchImages();
-      } else {
-        setImages([]);
-        setIsLoading(false);
-      }
+    const { data: authListener } = supabase.auth.onAuthStateChange(() => {
+      const { data } = supabase.auth.getSession();
+      data.then(({ data }) => {
+        setIsAuthenticated(!!data.session);
+        if (data.session) {
+          fetchImages();
+        } else {
+          setImages([]);
+          setIsLoading(false);
+        }
+      });
     });
 
     return () => {
@@ -116,15 +117,25 @@ export function ImageGallery({
     
     switch (option) {
       case "recent":
-        sortedImages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+        sortedImages.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateB - dateA;
+        });
         break;
       case "oldest":
-        sortedImages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+        sortedImages.sort((a, b) => {
+          const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+          const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+          return dateA - dateB;
+        });
         break;
       case "favorites":
         sortedImages.sort((a, b) => {
           if (a.is_favorite === b.is_favorite) {
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+            const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+            const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+            return dateB - dateA;
           }
           return a.is_favorite ? -1 : 1;
         });
@@ -485,25 +496,22 @@ export function ImageGallery({
         "max-h-[calc(100vh-170px)]"
       )}>
         <div className="p-2 space-y-3">
-          {images.map((image) => {
-            const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
-            return (
-              <div key={image.id} onClick={() => showImageDetails(image)}>
-                <ImageCard
-                  image={image}
-                  onImageClick={showImageDetails}
-                  onRegenerate={handleRegenerate}
-                  onDownload={handleDownload}
-                  onDelete={handleDelete}
-                  onToggleFavorite={toggleFavorite}
-                  onSaveTitle={(id, title) => {
-                    setEditTitle(title);
-                    saveTitle(id);
-                  }}
-                />
-              </div>
-            );
-          })}
+          {images.map((image) => (
+            <div key={image.id} onClick={() => showImageDetails(image)}>
+              <ImageCard
+                image={image}
+                onImageClick={showImageDetails}
+                onRegenerate={handleRegenerate}
+                onDownload={handleDownload}
+                onDelete={handleDelete}
+                onToggleFavorite={toggleFavorite}
+                onSaveTitle={(id, title) => {
+                  setEditTitle(title);
+                  saveTitle(id);
+                }}
+              />
+            </div>
+          ))}
         </div>
       </ScrollArea>
       

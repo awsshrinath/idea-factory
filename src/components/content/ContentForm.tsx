@@ -1,222 +1,175 @@
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { ContentFormData, Platform, Tone, AIModel, Language } from "@/types/content";
-import { Sparkles, Wand2, AlertCircle, CheckCircle, RefreshCw, Info, FileText } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { useToast } from "@/hooks/use-toast";
-import { PlatformSelector } from "./PlatformSelector";
-import { ToneSelector } from "./ToneSelector";
-import { ModelLanguageSelector } from "./ModelLanguageSelector";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { supabase } from "@/integrations/supabase/client";
-import { useIsMobile } from "@/hooks/use-mobile";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Platform } from '@/types/content';
+import { Wand2, Send } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Textarea } from '@/components/ui/textarea';
+import { PlatformSelector } from './PlatformSelector';
+import { ToneSelector } from './ToneSelector';
+import { ModelLanguageSelector } from './ModelLanguageSelector';
+import { useContentJob } from '@/hooks/api/useContentJob';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ContentFormProps {
-  formData: ContentFormData;
-  onChange: (data: ContentFormData) => void;
+  onContentGenerated: (content: string) => void;
 }
 
-const MAX_CHARS = 500;
-const PLACEHOLDER_TEXT = "Write a professional LinkedIn post about AI in healthcare...\n\nOr try:\n- Share 5 tips for effective social media marketing\n- Announce a new product launch\n- Create an engaging Twitter thread about industry trends";
-
-export function ContentForm({ formData, onChange }: ContentFormProps) {
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [isRegenerating, setIsRegenerating] = useState(false);
-  const [charCount, setCharCount] = useState(0);
-  const [showError, setShowError] = useState(false);
+export function ContentForm({ onContentGenerated }: ContentFormProps) {
+  const [prompt, setPrompt] = useState('');
+  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([]);
+  const [tone, setTone] = useState('professional');
+  const [language, setLanguage] = useState('English');
+  const [model, setModel] = useState('ChatGPT');
+  
+  const { submit, status, data, error } = useContentJob();
   const { toast } = useToast();
-  const isMobile = useIsMobile();
-
-  useEffect(() => {
-    setCharCount(formData.description.length);
-  }, [formData.description]);
-
-  const handlePlatformToggle = (platform: Platform) => {
-    onChange({
-      ...formData,
-      platforms: formData.platforms.includes(platform)
-        ? formData.platforms.filter((p) => p !== platform)
-        : [...formData.platforms, platform],
-    });
-  };
-
-  const generateContent = async (isRegenerateAction = false) => {
-    const actionType = isRegenerateAction ? setIsRegenerating : setIsGenerating;
-    actionType(true);
-    setShowError(false);
-    console.log("Generating content with data:", formData);
-
-    try {
-      const { data, error } = await supabase.functions.invoke('generate-content', {
-        body: {
-          description: formData.description,
-          platform: formData.platforms[0],
-          tone: formData.tone,
-          language: formData.language,
-          aiModel: formData.aiModel,
-        },
-      });
-
-      if (error) throw error;
-
-      if (data?.content) {
-        onChange({
-          ...formData,
-          description: data.content,
-        });
-
-        toast({
-          title: isRegenerateAction ? "Regenerated" : "Success",
-          description: isRegenerateAction ? "Content regenerated successfully!" : "Content generated successfully!",
-          variant: "default",
-          action: (
-            <div className="flex items-center">
-              <CheckCircle className="w-4 h-4 mr-1 text-accent" />
-            </div>
-          ),
-        });
-      } else {
-        throw new Error(data?.error || 'Failed to generate content');
-      }
-    } catch (error) {
-      console.error('Error generating content:', error);
-      toast({
-        variant: "destructive",
-        title: isRegenerateAction ? "Error regenerating content" : "Error generating content",
-        description: error.message || "An unexpected error occurred",
-      });
-    } finally {
-      actionType(false);
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (charCount > MAX_CHARS) {
-      setShowError(true);
+    
+    if (!prompt.trim()) {
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Please enter a prompt to generate content.",
+      });
       return;
     }
-    
-    await generateContent(false);
+
+    if (selectedPlatforms.length === 0) {
+      toast({
+        variant: "destructive",
+        title: "Error", 
+        description: "Please select at least one platform.",
+      });
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) {
+        toast({
+          variant: "destructive",
+          title: "Authentication required",
+          description: "Please log in to generate content.",
+        });
+        return;
+      }
+
+      const fullPrompt = `Create ${tone} content for ${selectedPlatforms.join(', ')} about: ${prompt}. Use ${language} language.`;
+      await submit(fullPrompt, selectedPlatforms[0]);
+      
+    } catch (error: unknown) {
+      console.error('Content generation error:', error);
+      const errorMessage = error instanceof Error ? error.message : 'An unexpected error occurred';
+      toast({
+        variant: "destructive",
+        title: "Generation failed",
+        description: errorMessage,
+      });
+    }
   };
 
-  const handleRegenerate = async (e: React.MouseEvent) => {
-    e.preventDefault();
-    if (charCount > MAX_CHARS) {
-      setShowError(true);
-      return;
+  useEffect(() => {
+    if (status === 'completed' && data?.generated_text) {
+      onContentGenerated(data.generated_text);
+      toast({
+        title: "Content generated",
+        description: "Your content is ready to use!",
+      });
+    } else if (status === 'failed' && error) {
+      toast({
+        variant: "destructive",
+        title: "Content generation failed",
+        description: error,
+      });
     }
-    
-    await generateContent(true);
-  };
+  }, [status, data, error, onContentGenerated, toast]);
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div className="space-y-4 bg-gradient-to-br from-[#121212] to-[#1a1a1a] p-4 rounded-xl shadow-[0_12px_12px_rgba(0,0,0,0.2)] border border-[rgba(255,255,255,0.05)]">
-        <div className="space-y-2">
-          <div className="flex justify-between items-center">
-            <label className="text-sm font-medium text-[#E0E0E0] italic flex items-center gap-2 text-[14px] font-[500]">
-              Describe your idea or post topic
-              <Tooltip>
-                <TooltipTrigger>
-                  <Info className="w-4 h-4 text-primary/60" />
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p className="max-w-xs">Describe your content idea in detail. Be specific about your goals and audience.</p>
-                </TooltipContent>
-              </Tooltip>
-            </label>
+    <Card className="premium-card premium-card-hover border border-white/10 shadow-lg backdrop-blur-sm">
+      <CardHeader className="space-y-4">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-600/20 to-indigo-600/20 flex items-center justify-center border border-purple-500/20">
+            <Wand2 className="h-4 w-4 text-purple-400" />
           </div>
-          
-          <Textarea
-            placeholder={PLACEHOLDER_TEXT}
-            value={formData.description}
-            onChange={(e) => {
-              onChange({ ...formData, description: e.target.value });
-              setCharCount(e.target.value.length);
-            }}
-            className={cn(
-              "h-28 bg-background/50 text-foreground border-accent/20 focus:border-primary transition-all duration-300 rounded-lg resize-none hover:border-primary/50 placeholder:text-[#B0B0B0]",
-              showError && "border-red-500 focus:border-red-500"
-            )}
+          <div>
+            <CardTitle className="premium-heading text-xl">Content Generator</CardTitle>
+            <CardDescription className="premium-body">
+              Describe what you want to create and we'll generate engaging content
+            </CardDescription>
+          </div>
+        </div>
+      </CardHeader>
+      
+      <CardContent className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          <div className="space-y-3">
+            <label className="premium-subheading text-sm">What would you like to create?</label>
+            <Textarea
+              value={prompt}
+              onChange={(e) => setPrompt(e.target.value)}
+              placeholder="Describe your content idea..."
+              className="premium-focus bg-white/5 border-white/10 hover:border-white/20 focus:border-purple-400 transition-all duration-300 resize-none"
+              rows={4}
+            />
+            <div className="flex justify-between items-center text-xs">
+              <span className="premium-caption">Be specific for better results</span>
+              <Badge variant="outline" className="bg-white/5">
+                {prompt.length}/500
+              </Badge>
+            </div>
+          </div>
+
+          <PlatformSelector
+            selectedPlatforms={selectedPlatforms}
+            onPlatformChange={setSelectedPlatforms}
           />
-          <div className="flex justify-between items-center text-sm">
-            <span className={cn(
-              "text-[#B0B0B0]",
-              charCount > MAX_CHARS && "text-red-500"
-            )}>
-              {charCount}/{MAX_CHARS} characters
-            </span>
-            {showError && (
-              <span className="text-red-500 flex items-center gap-1">
-                <AlertCircle className="w-4 h-4" />
-                Character limit exceeded
-              </span>
-            )}
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <ToneSelector value={tone} onChange={setTone} />
+            <ModelLanguageSelector
+              language={language}
+              model={model}
+              onLanguageChange={setLanguage}
+              onModelChange={setModel}
+            />
           </div>
-        </div>
 
-        <PlatformSelector
-          selectedPlatforms={formData.platforms}
-          onPlatformToggle={handlePlatformToggle}
-        />
-
-        <ModelLanguageSelector
-          selectedModel={formData.aiModel}
-          selectedLanguage={formData.language}
-          onModelSelect={(model) => onChange({ ...formData, aiModel: model })}
-          onLanguageSelect={(language) => onChange({ ...formData, language: language })}
-        />
-
-        <ToneSelector
-          selectedTone={formData.tone}
-          onToneSelect={(tone) => onChange({ ...formData, tone: tone })}
-        />
-
-        <div className="flex gap-3">
-          <Button
-            type="submit"
-            size="lg"
-            isLoading={isGenerating}
-            className={cn(
-              "flex-1 h-12 transition-all duration-300 bg-gradient-to-r from-[#00C6FF] to-[#0072FF] text-white rounded-lg shadow-lg group hover:shadow-[0_0_15px_rgba(0,198,255,0.6)] hover:scale-[1.03]",
-              isGenerating && "relative overflow-hidden before:absolute before:inset-0 before:translate-x-[-100%] before:animate-[shimmer_2s_infinite] before:bg-gradient-to-r before:from-transparent before:via-white/20 before:to-transparent"
+          <Button 
+            type="submit" 
+            className="w-full premium-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:shadow-purple-500/25 border border-purple-500/20 hover:border-purple-400/40 font-semibold text-base micro-bounce disabled:opacity-50"
+            disabled={status === 'submitting' || status === 'processing'}
+          >
+            {status === 'submitting' ? (
+              <>
+                <Wand2 className="h-4 w-4 mr-2 animate-spin" />
+                Submitting...
+              </>
+            ) : status === 'processing' ? (
+              <>
+                <Wand2 className="h-4 w-4 mr-2 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4 mr-2" />
+                Generate Content
+              </>
             )}
-            disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
-          >
-            <Wand2 className="w-4 h-4 mr-2 group-hover:rotate-12 transition-transform duration-300" />
-            {isGenerating ? "Generating..." : "Generate Content"}
           </Button>
-
-          <Button
-            type="button"
-            size="lg"
-            variant="outline"
-            isLoading={isRegenerating}
-            className="flex-1 h-12 transition-all duration-300 text-white bg-transparent border border-white/30 rounded-lg hover:bg-white/5 hover:shadow-[0_0_8px_rgba(255,255,255,0.2)] hover:scale-[1.03] animate-fade-in"
-            onClick={handleRegenerate}
-            disabled={!formData.description || formData.platforms.length === 0 || isGenerating || isRegenerating || charCount > MAX_CHARS}
-          >
-            <RefreshCw className="w-4 h-4 mr-2 group-hover:rotate-180 transition-transform duration-500" />
-            {isRegenerating ? "Regenerating..." : "Regenerate"}
-          </Button>
-        </div>
-
-        {formData.platforms.length === 0 && (
-          <Alert className="bg-muted border-accent/20">
-            <AlertDescription className="text-[#B0B0B0]">
-              Select at least one platform to generate content
-            </AlertDescription>
-          </Alert>
+        </form>
+        
+        {error && (
+          <div className="premium-card rounded-xl p-4 bg-gradient-to-r from-red-500/10 to-pink-500/5 border border-red-500/20">
+            <p className="premium-body text-sm text-red-300">
+              {error}
+            </p>
+          </div>
         )}
-      </div>
-    </form>
+      </CardContent>
+    </Card>
   );
 }

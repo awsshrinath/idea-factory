@@ -1,162 +1,142 @@
-import { useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { Card } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { FileText, ChevronRight, ChevronLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
 
-interface TemplateItem {
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
+
+interface Template {
   id: string;
   title: string;
+  description: string;
   prompt: string;
-  icon: string;
-  color: string;
+  category: string;
+  platforms: string[];
 }
 
-const templates: TemplateItem[] = [
+const templates: Template[] = [
   {
-    id: "product-launch",
-    title: "Product Launch",
-    icon: "🚀",
-    color: "from-blue-500 to-purple-500",
-    prompt: "Announce the launch of [product name], a new [product type] that helps [target audience] solve [problem]. Highlight key features like [feature 1], [feature 2], and how it compares to alternatives. Include a call to action for early access or demos."
+    id: '1',
+    title: 'Product Launch',
+    description: 'Announce a new product with excitement',
+    prompt: 'Create an exciting announcement for our new product launch, highlighting key features and benefits',
+    category: 'Marketing',
+    platforms: ['Twitter', 'LinkedIn', 'Facebook']
   },
   {
-    id: "thought-leadership",
-    title: "Thought Leadership",
-    icon: "💡",
-    color: "from-amber-400 to-orange-500",
-    prompt: "Share insights on the future of [industry] and how [emerging trend] is transforming the way we [key activity]. Discuss the challenges of [common problem] and offer a unique perspective on how [solution approach] can create new opportunities."
+    id: '2', 
+    title: 'Behind the Scenes',
+    description: 'Share company culture and team insights',
+    prompt: 'Share behind-the-scenes content showing our team culture and work environment',
+    category: 'Culture',
+    platforms: ['Instagram', 'LinkedIn']
   },
   {
-    id: "motivational",
-    title: "Motivational",
-    icon: "✨",
-    color: "from-pink-500 to-rose-500",
-    prompt: "Create an inspirational post about [topic] that encourages [target audience] to overcome [challenge]. Include a memorable quote and personal reflection on why this message matters in today's professional environment."
+    id: '3',
+    title: 'Industry Insight',
+    description: 'Share expertise and thought leadership',
+    prompt: 'Share valuable insights about industry trends and our expert perspective',
+    category: 'Thought Leadership',
+    platforms: ['LinkedIn', 'Twitter']
   },
   {
-    id: "announcement",
-    title: "Announcement",
-    icon: "📢",
-    color: "from-emerald-400 to-cyan-500",
-    prompt: "Share exciting news about [event/milestone] happening on [date]. Explain why this matters to [audience] and how it relates to [industry trend]. Invite people to [specific action] and mention any special details they should know."
+    id: '4',
+    title: 'Customer Success',
+    description: 'Highlight customer achievements',
+    prompt: 'Celebrate a customer success story and how our solution helped them achieve their goals',
+    category: 'Social Proof',
+    platforms: ['LinkedIn', 'Twitter', 'Facebook']
   },
   {
-    id: "industry-tips",
-    title: "Industry Tips",
-    icon: "📋",
-    color: "from-indigo-400 to-blue-500",
-    prompt: "Share 5 practical tips for professionals in [industry] looking to improve their [skill/area]. For each tip, provide a brief explanation and an actionable takeaway that readers can implement immediately."
+    id: '5',
+    title: 'Educational Content',
+    description: 'Share knowledge and tutorials',
+    prompt: 'Create educational content that teaches our audience something valuable in our field',
+    category: 'Education',
+    platforms: ['YouTube', 'LinkedIn']
   },
   {
-    id: "case-study",
-    title: "Case Study",
-    icon: "📊",
-    color: "from-violet-500 to-purple-600",
-    prompt: "Present a case study of how [company/individual] achieved [specific result] by implementing [strategy/solution]. Outline the challenge, approach, implementation, and results with specific metrics. Conclude with lessons learned and recommendations."
+    id: '6',
+    title: 'Community Engagement',
+    description: 'Start conversations with your audience',
+    prompt: 'Create engaging content that encourages community discussion and interaction',
+    category: 'Engagement',
+    platforms: ['Twitter', 'Facebook', 'Instagram']
   }
 ];
 
 interface PromptTemplatesProps {
-  onSelectTemplate: (template: TemplateItem) => void;
+  onSelectTemplate: (prompt: string) => void;
 }
 
 export function PromptTemplates({ onSelectTemplate }: PromptTemplatesProps) {
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const isMobile = useIsMobile();
-  const [scrollPosition, setScrollPosition] = useState(0);
-  const maxScroll = templates.length * 180 - (isMobile ? 320 : 900);
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
 
-  const scrollLeft = () => {
-    const newPosition = Math.max(0, scrollPosition - 400);
-    setScrollPosition(newPosition);
-    const scrollContainer = document.getElementById('templates-scroll-container');
-    if (scrollContainer) {
-      scrollContainer.scrollLeft = newPosition;
-    }
-  };
-
-  const scrollRight = () => {
-    const newPosition = Math.min(maxScroll, scrollPosition + 400);
-    setScrollPosition(newPosition);
-    const scrollContainer = document.getElementById('templates-scroll-container');
-    if (scrollContainer) {
-      scrollContainer.scrollLeft = newPosition;
-    }
-  };
+  const categories = ['all', ...Array.from(new Set(templates.map(t => t.category)))];
+  
+  const filteredTemplates = selectedCategory === 'all' 
+    ? templates 
+    : templates.filter(t => t.category === selectedCategory);
 
   return (
-    <div className="w-full mb-4 animate-fadeIn">
-      <div className="flex items-center justify-between mb-2 px-1">
-        <div className="flex items-center gap-2">
-          <FileText className="h-4 w-4 text-primary" />
-          <h2 className="font-semibold font-heading text-foreground">Prompt Templates</h2>
-        </div>
-        {!isMobile && (
-          <div className="flex items-center gap-2">
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={scrollLeft} 
-              disabled={scrollPosition <= 0}
-              className="h-7 w-7 rounded-full hover:bg-background"
-            >
-              <ChevronLeft className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={scrollRight} 
-              disabled={scrollPosition >= maxScroll}
-              className="h-7 w-7 rounded-full hover:bg-background"
-            >
-              <ChevronRight className="h-5 w-5" />
-            </Button>
-          </div>
-        )}
-      </div>
-      
-      <ScrollArea 
-        id="templates-scroll-container"
-        className="w-full pb-2"
-      >
-        <div className="flex gap-2 min-w-max p-1">
-          {templates.map((template) => (
-            <Card
-              key={template.id}
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <h3 className="premium-subheading text-lg">Content Templates</h3>
+        <div className="flex gap-2 flex-wrap">
+          {categories.map((category) => (
+            <Badge
+              key={category}
+              variant={selectedCategory === category ? "default" : "outline"}
               className={cn(
-                "overflow-hidden cursor-pointer min-w-[160px] max-w-[160px]",
-                "transition-all duration-300 border-white/5 hover:scale-[1.03]",
-                "hover:shadow-[0_0_15px_rgba(255,255,255,0.1)]",
-                "hover:border-white/20",
-                "hover:ring-1 hover:ring-white/10"
+                "cursor-pointer transition-all duration-200 hover:scale-105",
+                selectedCategory === category 
+                  ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500/20" 
+                  : "bg-white/5 hover:bg-white/10 border-white/10"
               )}
-              onClick={() => onSelectTemplate(template)}
-              onMouseEnter={() => setHoveredId(template.id)}
-              onMouseLeave={() => setHoveredId(null)}
+              onClick={() => setSelectedCategory(category)}
             >
-              <div className={cn(
-                "p-3 flex flex-col gap-2 h-full",
-                `bg-template-${template.id.split('-')[0]}`,
-                "opacity-80 hover:opacity-100 transition-opacity"
-              )}>
-                <div className="flex justify-between items-center">
-                  <span className="text-2xl">{template.icon}</span>
-                  <span className="text-xs font-medium px-2 py-0.5 bg-black/20 rounded-full text-white/90">
-                    Template
-                  </span>
-                </div>
-                <h3 className="text-base font-medium text-white mt-1">{template.title}</h3>
-                <p className="text-xs text-white/80 line-clamp-3">
-                  {template.prompt.substring(0, 120)}...
-                </p>
-              </div>
-            </Card>
+              {category === 'all' ? 'All' : category}
+            </Badge>
           ))}
         </div>
-      </ScrollArea>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {filteredTemplates.map((template) => (
+          <Card 
+            key={template.id}
+            className="premium-card premium-card-hover border border-white/10 p-4 cursor-pointer transition-all duration-300 hover:shadow-[0_0_20px_rgba(147,51,234,0.15)] hover:border-purple-500/30 group"
+            onClick={() => onSelectTemplate(template.prompt)}
+          >
+            <div className="space-y-3">
+              <div className="flex items-start justify-between">
+                <div className="flex-1">
+                  <h4 className="premium-subheading text-sm font-semibold group-hover:text-purple-300 transition-colors">
+                    {template.title}
+                  </h4>
+                  <p className="premium-caption text-xs mt-1 text-muted-foreground">
+                    {template.description}
+                  </p>
+                </div>
+                <Badge variant="outline" className="bg-white/5 text-xs">
+                  {template.category}
+                </Badge>
+              </div>
+              
+              <div className="flex flex-wrap gap-1">
+                {template.platforms.map((platform) => (
+                  <Badge 
+                    key={platform} 
+                    variant="secondary" 
+                    className="text-[10px] px-2 py-0.5 bg-white/10 hover:bg-white/20 transition-colors"
+                  >
+                    {platform}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+          </Card>
+        ))}
+      </div>
     </div>
   );
 }

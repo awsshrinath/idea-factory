@@ -1,141 +1,152 @@
-import { useQuery } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Clock, Copy, Eye, Trash, FileText } from "lucide-react";
-import { formatDistanceToNow } from "date-fns";
+import { useEffect, useState } from 'react';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
+import { Clock, Copy, Eye, Heart, MoreHorizontal } from 'lucide-react';
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+import { cn } from '@/lib/utils';
 
-interface Content {
+interface ContentItem {
   id: string;
-  title: string;
-  description: string;
   created_at: string;
-  platforms: string[];
+  description: string;
+  generated_text: string;
+  platform: string[];
+  tone: string;
   status: string;
 }
 
-export function RecentContent() {
-  const { data: content, isLoading } = useQuery({
-    queryKey: ["recent-content"],
-    queryFn: async () => {
+interface RecentContentProps {
+  onContentSelect?: (content: string) => void;
+  refreshTrigger?: number;
+}
+
+export function RecentContent({ onContentSelect, refreshTrigger }: RecentContentProps) {
+  const [contentList, setContentList] = useState<ContentItem[]>([]);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    fetchContent();
+  }, [refreshTrigger]);
+
+  const fetchContent = async () => {
+    try {
       const { data, error } = await supabase
-        .from("content")
-        .select("*")
-        .order("created_at", { ascending: false })
+        .from('generated_content')
+        .select('*')
+        .order('created_at', { ascending: false })
         .limit(5);
 
       if (error) throw error;
-      return data as Content[];
-    },
-  });
+      if (data) setContentList(data);
+    } catch (error: any) {
+      console.error('Error fetching content:', error);
+      toast({
+        variant: 'destructive',
+        title: 'Error',
+        description: 'Failed to load recent content. Please try again.',
+      });
+    }
+  };
 
-  if (isLoading) {
-    return (
-      <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_12px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in rounded-[12px]">
-        <CardHeader className="p-[24px]">
-          <CardTitle className="flex items-center gap-2 text-[18px] font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent mb-[16px]">
-            <Clock className="w-6 h-6" />
-            Recent Content
-          </CardTitle>
-          <CardDescription>Your previously created content</CardDescription>
-        </CardHeader>
-        <CardContent className="p-[24px]">
-          <div className="space-y-4">
-            {[1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="h-24 rounded-lg bg-background/50 animate-pulse"
-              />
-            ))}
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const handleContentCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: 'Copied to clipboard',
+      description: 'Content has been copied to your clipboard.',
+    });
+  };
+
+  const formatDate = (dateString: string): string => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
+
+    if (minutes < 60) {
+      return `${minutes} minute${minutes === 1 ? '' : 's'} ago`;
+    } else if (hours < 24) {
+      return `${hours} hour${hours === 1 ? '' : 's'} ago`;
+    } else if (days < 7) {
+      return `${days} day${days === 1 ? '' : 's'} ago`;
+    } else {
+      return date.toLocaleDateString();
+    }
+  };
 
   return (
-    <Card className="border border-[rgba(255,255,255,0.05)] shadow-[0_8px_12px_rgba(0,0,0,0.2)] bg-gradient-to-br from-[#121212] to-[#1a1a1a] backdrop-blur-sm animate-fade-in hover:shadow-2xl transition-all duration-300 transform hover:scale-[1.01] rounded-[12px]">
-      <CardHeader className="p-4">
-        <CardTitle className="flex items-center gap-2 text-lg font-[600] bg-gradient-to-r from-primary via-primary/80 to-secondary bg-clip-text text-transparent">
-          <Clock className="w-5 h-5" />
-          Recent Content
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="p-4">
-        <div className="space-y-3">
-          {content?.length === 0 ? (
-            <div className="text-center py-8 px-4">
-              <div className="w-16 h-16 mx-auto mb-4 relative">
-                <div className="absolute inset-0 animate-float">
-                  <img
-                    src="https://images.unsplash.com/photo-1487887235947-a955ef187fcc"
-                    alt="Rocket"
-                    className="w-full h-full object-contain opacity-70"
-                  />
-                </div>
-              </div>
-              <p className="text-base font-medium text-muted-foreground mb-2">
-                No content yet! 🚀
-              </p>
-              <p className="text-sm text-muted-foreground">
-                Create your first post and launch your journey!
-              </p>
-            </div>
-          ) : (
-            content?.map((item) => (
-              <div
-                key={item.id}
-                className="p-3 rounded-lg border border-white/10 bg-background/50 hover:shadow-xl transition-all duration-300 hover:scale-[1.01] hover:border-primary/50 group"
-              >
-                <div className="flex justify-between items-start gap-3">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-base mb-1 group-hover:text-primary transition-colors duration-300">
-                      {item.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>
-                        {formatDistanceToNow(new Date(item.created_at), {
-                          addSuffix: true,
-                        })}
-                      </span>
-                      <span>•</span>
-                      <span className="capitalize">{item.status}</span>
-                    </div>
-                  </div>
-                  <div className="flex gap-1">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="hover:bg-accent/50 transition-colors group rounded-lg"
-                    >
-                      <Eye className="w-4 h-4 group-hover:text-primary transition-colors" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="hover:bg-accent/50 transition-colors group rounded-lg"
-                    >
-                      <Copy className="w-4 h-4 group-hover:text-primary transition-colors" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="hover:bg-accent/50 transition-colors group rounded-lg"
-                    >
-                      <Trash className="w-4 h-4 group-hover:text-primary transition-colors" />
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+    <Card className="premium-card premium-card-hover border border-white/10 shadow-lg backdrop-blur-sm">
+      <CardHeader className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600/20 to-purple-600/20 flex items-center justify-center border border-purple-500/20">
+            <Clock className="h-4 w-4 text-purple-400" />
+          </div>
+          <div>
+            <CardTitle className="premium-heading text-lg">Recent Content</CardTitle>
+          </div>
         </div>
+        <Badge variant="secondary" className="bg-white/5">
+          {contentList.length} items
+        </Badge>
+      </CardHeader>
+      <CardContent className="p-0">
+        <ScrollArea className="h-[400px]">
+          <div className="divide-y divide-white/10">
+            {contentList.length === 0 ? (
+              <div className="text-center p-6">
+                <CardDescription className="premium-caption text-muted-foreground">
+                  No recent content available
+                </CardDescription>
+              </div>
+            ) : (
+              contentList.map((item) => (
+                <div key={item.id} className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div className="space-y-1">
+                      <p className="premium-subheading text-sm font-medium line-clamp-1">
+                        {item.description}
+                      </p>
+                      <p className="premium-caption text-xs text-muted-foreground">
+                        Generated for {item.platform.join(', ')}
+                      </p>
+                      <p className="premium-caption text-xs text-muted-foreground">
+                        {formatDate(item.created_at)}
+                      </p>
+                    </div>
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" className="h-6 w-6 p-0">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Open menu</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end" className="w-[160px]">
+                        <DropdownMenuItem onClick={() => handleContentCopy(item.generated_text)}>
+                          <Copy className="h-3.5 w-3.5 mr-2" />
+                          Copy content
+                        </DropdownMenuItem>
+                        <DropdownMenuItem onClick={() => onContentSelect?.(item.generated_text)}>
+                          <Eye className="h-3.5 w-3.5 mr-2" />
+                          View details
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );
