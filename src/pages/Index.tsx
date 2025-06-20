@@ -2,13 +2,12 @@
 import { Sidebar } from "@/components/Sidebar";
 import { Button } from "@/components/ui/button";
 import { PersonalizedGreeting } from "@/components/dashboard/PersonalizedGreeting";
-import { QuickActions } from "@/components/dashboard/QuickActions";
-import { CreatorSuggestions } from "@/components/dashboard/CreatorSuggestions";
-import { LatestProjects } from "@/components/dashboard/LatestProjects";
+import { WorkflowActions } from "@/components/dashboard/WorkflowActions";
+import { SmartInsights } from "@/components/dashboard/SmartInsights";
+import { ContentPipeline } from "@/components/dashboard/ContentPipeline";
 import { PerformanceMetrics } from "@/components/dashboard/PerformanceMetrics";
 import { TipsCarousel } from "@/components/dashboard/TipsCarousel";
 import { HeroBanner } from "@/components/dashboard/HeroBanner";
-import { QuickLinkBar } from "@/components/dashboard/QuickLinkBar";
 import { UserProfile } from "@/components/dashboard/UserProfile";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -51,12 +50,11 @@ const Index = () => {
             </Link>
           </div>
           
-          <QuickLinkBar />
           <PersonalizedGreeting />
           <HeroBanner />
-          <QuickActions />
-          <CreatorSuggestions />
-          <LatestProjects />
+          <WorkflowActions />
+          <SmartInsights />
+          <ContentPipeline />
           <PerformanceMetrics />
           <TipsCarousel />
         </div>
