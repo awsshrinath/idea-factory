@@ -1,19 +1,44 @@
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
+import axios from 'axios';
+import axiosRetry from 'axios-retry';
 
 dotenv.config();
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+const openaiApiKey = process.env.OPENAI_API_KEY;
+
+const apiClient = axios.create({
+    baseURL: 'https://api.openai.com/v1',
+    headers: {
+        'Authorization': `Bearer ${openaiApiKey}`,
+        'Content-Type': 'application/json',
+    },
+});
+
+axiosRetry(apiClient, {
+    retries: 3,
+    retryDelay: (retryCount) => {
+        console.log(`Retrying request, attempt: ${retryCount}`);
+        return retryCount * 2000; // Exponential backoff
+    },
+    retryCondition: (error) => {
+        // Retry on network errors or 5xx server errors
+        return error.code !== 'ECONNABORTED' && (!error.response || error.response.status >= 500);
+    },
 });
 
 export const generateText = async (prompt: string): Promise<string | null> => {
+  if (!openaiApiKey) {
+    console.error('OpenAI API key not configured.');
+    return null;
+  }
+
   try {
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o', // Or another model of your choice
+    const response = await apiClient.post('/chat/completions', {
+      model: 'gpt-4o',
       messages: [{ role: 'user', content: prompt }],
     });
-    return response.choices[0].message.content;
+    return response.data.choices[0].message.content;
   } catch (error) {
     console.error('Error generating text with OpenAI:', error);
     return null;
@@ -21,23 +46,22 @@ export const generateText = async (prompt: string): Promise<string | null> => {
 };
 
 export const generateImage = async (prompt: string): Promise<string | null> => {
+  if (!openaiApiKey) {
+    console.error('OpenAI API key not configured.');
+    return null;
+  }
+
   try {
-    const response = await openai.images.generate({
-      model: "dall-e-3",
+    const response = await apiClient.post('/images/generations', {
+      model: 'dall-e-3',
       prompt: prompt,
       n: 1,
-      size: "1024x1024",
-      response_format: "url",
+      size: '1024x1024',
     });
-
-    if (response.data && response.data.length > 0 && response.data[0].url) {
-      return response.data[0].url;
-    }
-    return null;
+    return response.data.data[0].url;
   } catch (error) {
-    console.error('Error generating image with OpenAI:', error);
-    // It's good practice to throw a custom error or handle it as per your app's needs
-    throw new Error('Failed to generate image.');
+    console.error('Error generating image with DALL-E 3:', error);
+    return null;
   }
 };
 

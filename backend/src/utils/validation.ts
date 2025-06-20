@@ -3,11 +3,19 @@ import { isAppropriate } from './validation/appropriateness';
 import { validateForPlatform } from './validation/platform';
 import { isDuplicate } from './validation/duplicate';
 import { Platform } from '../types';
+import DOMPurify from 'dompurify';
+import { JSDOM } from 'jsdom';
+import * as Filter from 'bad-words';
 
 interface ValidationOptions {
   platform?: Platform;
   existingContent?: string[];
 }
+
+// We need to provide a DOM environment for DOMPurify to work in Node.js
+const window = new JSDOM('').window;
+const purify = DOMPurify(window as any);
+const filter = new (Filter as any)();
 
 /**
  * Validates the generated content based on a set of rules.
@@ -41,4 +49,22 @@ export const validateContent = (content: string, options: ValidationOptions = {}
   }
 
   return true;
+};
+
+/**
+ * Sanitizes a string to remove any potential XSS attacks.
+ * @param dirty The string to sanitize.
+ * @returns The sanitized string.
+ */
+export const sanitizeInput = (dirty: string): string => {
+    return purify.sanitize(dirty);
+};
+
+/**
+ * Checks if a string contains any profane words.
+ * @param text The string to check.
+ * @returns True if the string is clean, false otherwise.
+ */
+export const isClean = (text: string): boolean => {
+    return !filter.isProfane(text);
 }; 

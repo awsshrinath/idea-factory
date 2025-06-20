@@ -1,4 +1,3 @@
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
 
@@ -87,6 +86,105 @@ serve(async (req) => {
       `
     });
 
+    // Create profiles table
+    const { error: createProfilesError } = await supabaseAdmin.rpc('exec_sql', {
+      sql: `
+        CREATE OR REPLACE FUNCTION create_profiles_table_and_trigger()
+        RETURNS void AS $$
+        BEGIN
+          -- Create the profiles table
+          IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'profiles') THEN
+            CREATE TABLE public.profiles (
+              id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
+              username TEXT UNIQUE,
+              full_name TEXT,
+              avatar_url TEXT,
+              updated_at TIMESTAMPTZ DEFAULT now()
+            );
+
+            -- Add RLS policies for profiles
+            ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
+
+            CREATE POLICY "Public profiles are viewable by everyone."
+              ON public.profiles FOR SELECT USING (true);
+
+            CREATE POLICY "Users can insert their own profile."
+              ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
+
+            CREATE POLICY "Users can update their own profile."
+              ON public.profiles FOR UPDATE USING (auth.uid() = id);
+          END IF;
+
+          -- Create the trigger function
+          CREATE OR REPLACE FUNCTION public.handle_new_user()
+          RETURNS trigger AS $$
+          BEGIN
+            INSERT INTO public.profiles (id, username)
+            VALUES (new.id, new.email);
+            return new;
+          END;
+          $$ LANGUAGE plpgsql SECURITY DEFINER;
+
+          -- Create the trigger
+          DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+          CREATE TRIGGER on_auth_user_created
+            AFTER INSERT ON auth.users
+            FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+        END;
+        $$ LANGUAGE plpgsql;
+      `
+    });
+
+    // Create content_generation_jobs table
+    const { error: createJobsError } = await supabaseAdmin.rpc('exec_sql', {
+      sql: `
+        CREATE OR REPLACE FUNCTION create_content_generation_jobs_table()
+        RETURNS void AS $$
+        BEGIN
+          -- Create the table
+          IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'content_generation_jobs') THEN
+            CREATE TABLE public.content_generation_jobs (
+              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+              user_id UUID REFERENCES auth.users NOT NULL,
+              status TEXT NOT NULL DEFAULT 'pending',
+              prompt TEXT NOT NULL,
+              platform TEXT,
+              result_url TEXT,
+              error_message TEXT,
+              cost NUMERIC(10, 6),
+              estimated_completion_time INTEGER,
+              created_at TIMESTAMPTZ DEFAULT now() NOT NULL,
+              updated_at TIMESTAMPTZ DEFAULT now() NOT NULL
+            );
+
+            -- Add RLS policies
+            ALTER TABLE public.content_generation_jobs ENABLE ROW LEVEL SECURITY;
+            
+            CREATE POLICY "Users can view their own jobs" 
+              ON public.content_generation_jobs
+              FOR SELECT
+              USING (auth.uid() = user_id);
+              
+            CREATE POLICY "Users can insert their own jobs"
+              ON public.content_generation_jobs
+              FOR INSERT
+              WITH CHECK (auth.uid() = user_id);
+
+            CREATE POLICY "Users can update their own jobs"
+              ON public.content_generation_jobs
+              FOR UPDATE
+              USING (auth.uid() = user_id);
+
+            CREATE POLICY "Users can delete their own jobs"
+              ON public.content_generation_jobs
+              FOR DELETE
+              USING (auth.uid() = user_id);
+          END IF;
+        END;
+        $$ LANGUAGE plpgsql;
+      `
+    });
+
     // Create storage bucket
     const { error: bucketError } = await supabaseAdmin
       .storage
@@ -100,12 +198,27 @@ serve(async (req) => {
         return { error: null };
       });
 
+    // Create storage bucket for text content
+    const { error: textBucketError } = await supabaseAdmin
+      .storage
+      .createBucket('generated_content', {
+        public: true,
+      })
+      .catch(e => {
+        // Bucket might already exist, which is fine
+        console.log('Bucket may already exist:', e.message);
+        return { error: null };
+      });
+
     return new Response(
       JSON.stringify({ 
         success: true,
         sqlFunctionError: sqlFunctionError?.message,
         createFunctionError: createFunctionError?.message,
-        bucketError: bucketError?.message
+        createProfilesError: createProfilesError?.message,
+        createJobsError: createJobsError?.message,
+        bucketError: bucketError?.message,
+        textBucketError: textBucketError?.message
       }),
       { 
         headers: { 
