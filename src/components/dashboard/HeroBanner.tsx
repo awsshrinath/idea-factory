@@ -1,9 +1,10 @@
+
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { 
-  ArrowRight, 
   Crown, 
-  Play
+  Play,
+  Sparkles
 } from 'lucide-react';
 
 export const HeroBanner = () => {

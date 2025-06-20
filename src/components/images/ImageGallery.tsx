@@ -2,13 +2,8 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { Separator } from '@/components/ui/separator';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useSessionContext } from '@supabase/auth-helpers-react';
@@ -17,33 +12,15 @@ import { CarouselView } from './gallery/CarouselView';
 import { ImageDetailModal } from './gallery/ImageDetailModal';
 import { EmptyGalleryState } from './gallery/EmptyGalleryState';
 import { LoadingState } from './gallery/LoadingState';
-import { PlaceholderCards } from './gallery/PlaceholderCards';
-import { GeneratedImage as ImageCardType } from './gallery/types';
+import { GeneratedImage } from './gallery/types';
 import { 
   Image, 
   Grid3X3, 
   LayoutGrid, 
   Search, 
   Filter, 
-  SortAsc, 
-  SortDesc, 
-  Star, 
-  Calendar,
-  Eye
+  SortDesc
 } from 'lucide-react';
-
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string;
-  updated_at?: string;
-  title?: string;
-  is_favorite?: boolean;
-}
 
 interface ImageGalleryProps {
   previewMode?: boolean;
@@ -72,7 +49,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
     try {
       setLoading(true);
       let query = supabase
-        .from('ai_generated_images')
+        .from('generated_images')
         .select('*')
         .eq('user_id', session?.user?.id || '');
 
@@ -119,7 +96,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
 
   const handleRegenerate = async (image: GeneratedImage) => {
     try {
-      const { data, error } = await supabase.functions.invoke('generate-image', {
+      const { error } = await supabase.functions.invoke('generate-image', {
         body: {
           prompt: image.prompt,
           style: image.style,
@@ -179,7 +156,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
   const handleDelete = async (id: string) => {
     try {
       const { error } = await supabase
-        .from('ai_generated_images')
+        .from('generated_images')
         .delete()
         .eq('id', id);
 
@@ -204,7 +181,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
   const handleToggleFavorite = async (image: GeneratedImage) => {
     try {
       const { error } = await supabase
-        .from('ai_generated_images')
+        .from('generated_images')
         .update({ is_favorite: !image.is_favorite })
         .eq('id', image.id);
 
@@ -229,7 +206,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
   const handleSaveTitle = async (id: string, title: string) => {
     try {
       const { error } = await supabase
-        .from('ai_generated_images')
+        .from('generated_images')
         .update({ title })
         .eq('id', id);
 
@@ -342,18 +319,13 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
                 </SelectContent>
               </Select>
             </div>
-            
-            <Separator className="bg-white/10 mb-6" />
           </CardContent>
         )}
       </Card>
 
       {currentViewMode === "grid" ? (
         <GridView
-          images={filteredImages.map(img => ({
-            ...img,
-            created_at: img.created_at || new Date().toISOString()
-          }) as ImageCardType)}
+          images={filteredImages}
           onImageClick={handleImageClick}
           onRegenerate={handleRegenerate}
           onDownload={handleDownload}
@@ -363,10 +335,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
         />
       ) : (
         <CarouselView
-          images={filteredImages.map(img => ({
-            ...img,
-            created_at: img.created_at || new Date().toISOString()
-          }) as ImageCardType)}
+          images={filteredImages}
           onImageClick={handleImageClick}
           onRegenerate={handleRegenerate}
           onDownload={handleDownload}
@@ -378,10 +347,7 @@ export function ImageGallery({ previewMode = false, viewMode = "grid", filter = 
 
       {selectedImage && (
         <ImageDetailModal
-          image={{
-            ...selectedImage,
-            created_at: selectedImage.created_at || new Date().toISOString()
-          } as ImageCardType}
+          image={selectedImage}
           isOpen={!!selectedImage}
           onClose={() => setSelectedImage(null)}
           onRegenerate={handleRegenerate}
