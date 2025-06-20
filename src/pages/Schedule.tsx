@@ -5,8 +5,13 @@ import { QuickStats } from '@/components/schedule/QuickStats';
 import { AddPostModal } from '@/components/schedule/AddPostModal';
 import { FilterSection } from '@/components/schedule/FilterSection';
 import { ScheduleHeader } from '@/components/schedule/ScheduleHeader';
+import { Sidebar } from "@/components/Sidebar";
+import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { cn } from "@/lib/utils";
 
 export function Schedule() {
+  const isMobile = useIsMobile();
   const [events] = useState([
     {
       id: '1',
@@ -31,30 +36,38 @@ export function Schedule() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto px-4 py-8">
-        <ScheduleHeader />
-        
-        <div className="space-y-6">
-          <QuickStats />
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
+      <MultimediaPremiumBackground />
+      <Sidebar />
+      <main className={cn(
+        "flex-1 animate-fadeIn w-full max-w-full relative z-10",
+        "p-6 md:p-8",
+        isMobile ? "ml-0 pt-20" : "ml-64 pl-8",
+      )}>
+        <div className="container mx-auto">
+          <ScheduleHeader />
           
-          <div className="grid lg:grid-cols-4 gap-6">
-            <div className="lg:col-span-1">
-              <FilterSection />
-            </div>
+          <div className="space-y-6">
+            <QuickStats />
             
-            <div className="lg:col-span-3">
-              <CalendarView 
-                events={events}
-                onDateSelect={handleDateSelect}
-                onEventClick={handleEventClick}
-              />
+            <div className="grid lg:grid-cols-4 gap-6">
+              <div className="lg:col-span-1">
+                <FilterSection />
+              </div>
+              
+              <div className="lg:col-span-3">
+                <CalendarView 
+                  events={events}
+                  onDateSelect={handleDateSelect}
+                  onEventClick={handleEventClick}
+                />
+              </div>
             </div>
           </div>
-        </div>
 
-        <AddPostModal />
-      </div>
+          <AddPostModal />
+        </div>
+      </main>
     </div>
   );
 }
