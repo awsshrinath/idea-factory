@@ -35,7 +35,6 @@ export function Sidebar() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
-        // For now, use the user's email as username since we don't have a profiles table
         setProfile({
           id: user.id,
           username: user.email?.split('@')[0] || 'User',
@@ -99,11 +98,11 @@ export function Sidebar() {
   ];
 
   return (
-    <aside className="fixed left-0 top-0 z-20 flex h-full w-64 flex-col space-y-4 border-r border-white/10 bg-secondary py-4 text-white">
+    <aside className="fixed left-0 top-0 z-20 flex h-full w-64 flex-col space-y-4 bg-gray-900 border-r border-gray-800 py-4 text-white">
       <div className="px-6">
         <NavLink to="/" className="flex items-center space-x-2">
-          <Video className="h-6 w-6 text-primary" />
-          <span className="font-bold text-xl">AI Suite</span>
+          <Video className="h-6 w-6 text-purple-500" />
+          <span className="font-bold text-xl text-white">AI Suite</span>
         </NavLink>
       </div>
 
@@ -113,41 +112,48 @@ export function Sidebar() {
             key={item.name}
             to={item.href}
             className={({ isActive }) =>
-              `group flex items-center space-x-3 rounded-md px-3 py-2 text-sm font-medium hover:bg-primary/10 hover:text-primary ${
-                isActive ? "bg-primary/10 text-primary" : "text-white/70"
+              `group relative flex items-center space-x-3 rounded-lg px-3 py-3 text-sm font-medium transition-all duration-200 hover:bg-gray-800 ${
+                isActive 
+                  ? "bg-purple-600/10 text-purple-400 border-l-4 border-purple-500" 
+                  : "text-gray-300 hover:text-white border-l-4 border-transparent"
               }`
             }
           >
-            <item.icon className="h-4 w-4" />
+            <item.icon className="h-5 w-5 flex-shrink-0" />
             <span>{item.name}</span>
           </NavLink>
         ))}
       </nav>
 
-      <div className="border-t border-white/10 p-4">
+      <div className="border-t border-gray-800 p-4">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex h-8 w-full items-center justify-between rounded-md">
-              <div className="flex items-center space-x-2">
-                <Avatar className="h-6 w-6">
+            <Button variant="ghost" className="flex h-10 w-full items-center justify-between rounded-lg px-3 py-2 hover:bg-gray-800 transition-colors">
+              <div className="flex items-center space-x-3">
+                <Avatar className="h-7 w-7">
                   <AvatarImage src={profile?.avatar_url || `https://avatar.vercel.sh/${profile?.username}.png`} />
-                  <AvatarFallback>{profile?.username?.charAt(0).toUpperCase() || 'U'}</AvatarFallback>
+                  <AvatarFallback className="bg-purple-600 text-white text-sm">
+                    {profile?.username?.charAt(0).toUpperCase() || 'U'}
+                  </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium">{profile?.username || 'User'}</span>
+                <span className="text-sm font-medium text-gray-300">{profile?.username || 'User'}</span>
               </div>
-              <Settings className="h-4 w-4" />
+              <Settings className="h-4 w-4 text-gray-400" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
-            <DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-56 bg-gray-800 border-gray-700">
+            <DropdownMenuItem className="text-gray-300 hover:bg-gray-700 hover:text-white">
               <NavLink to="/settings" className="w-full">
                 Settings
               </NavLink>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={async () => {
-              await supabase.auth.signOut();
-              window.location.href = '/auth';
-            }}>
+            <DropdownMenuItem 
+              className="text-gray-300 hover:bg-gray-700 hover:text-white"
+              onClick={async () => {
+                await supabase.auth.signOut();
+                window.location.href = '/auth';
+              }}
+            >
               Logout
             </DropdownMenuItem>
           </DropdownMenuContent>

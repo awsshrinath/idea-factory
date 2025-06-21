@@ -36,7 +36,6 @@ export function Content() {
           setGeneratedContent(textContent);
         } catch (fetchError: any) {
           console.error(fetchError);
-          // Optionally, set an error state here to inform the user
         }
       };
       fetchContent();
@@ -44,82 +43,108 @@ export function Content() {
   }, [status, data]);
 
   return (
-    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
+    <div className="min-h-screen flex bg-gray-950 overflow-x-hidden w-full relative">
       <MultimediaPremiumBackground />
       <Sidebar />
       <MobileNavigation />
       <main className={cn(
         "flex-1 animate-fadeIn w-full max-w-full relative z-10 transition-all duration-300",
         getCardPadding(),
-        isMobile ? "ml-0 pt-20 px-4" : "ml-64 pl-8 p-6 md:p-8",
+        isMobile ? "ml-0 pt-20 px-4" : "ml-64 pl-8 p-8",
       )}>
-        <div className="container mx-auto">
+        <div className="container mx-auto max-w-7xl">
+          {/* Premium Header Section */}
           <div className={cn(
-            "text-center mb-8",
-            isMobile && "mb-6"
+            "text-center mb-12",
+            isMobile && "mb-8"
           )}>
             <h1 className={cn(
-              "font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent mb-4",
+              "font-bold bg-gradient-to-r from-purple-400 via-purple-500 to-pink-500 bg-clip-text text-transparent mb-6",
               isMobile ? "text-3xl" : "text-4xl"
             )}>
               AI Content Generator
             </h1>
             <p className={cn(
-              "text-muted-foreground max-w-2xl mx-auto",
+              "text-gray-400 max-w-3xl mx-auto leading-relaxed",
               isMobile ? "text-lg px-4" : "text-xl"
             )}>
               Create engaging content for social media, blogs, and marketing campaigns with the power of AI
             </p>
           </div>
 
+          {/* Main Content Grid */}
           <div className={cn(
-            "gap-8 max-w-7xl mx-auto",
-            isMobile ? "flex flex-col space-y-6" : "grid lg:grid-cols-2"
+            "gap-8 max-w-none mx-auto",
+            isMobile ? "flex flex-col space-y-8" : "grid lg:grid-cols-2"
           )}>
-            <div className="space-y-6">
+            {/* Left Panel - Content Generation */}
+            <div className="space-y-8">
               <ContentForm onContentGenerated={handleContentGenerated} />
               
+              {/* Generation Status */}
               {(status === 'processing' || status === 'submitting') && (
-                <div className="flex items-center justify-between space-x-2 text-muted-foreground">
-                  <div className="flex items-center space-x-2">
-                    <Loader2 className="h-5 w-5 animate-spin" />
-                    <span>{status === 'submitting' ? 'Submitting job...' : `Processing... (Job ID: ${jobId})`}</span>
+                <div className="bg-gray-900 rounded-xl p-6 border border-gray-800 shadow-lg">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center space-x-3">
+                      <Loader2 className="h-5 w-5 animate-spin text-purple-400" />
+                      <span className="text-gray-300 font-medium">
+                        {status === 'submitting' ? 'Submitting job...' : `Processing... (Job ID: ${jobId})`}
+                      </span>
+                    </div>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={cancel}
+                      className="text-gray-400 hover:text-white hover:bg-gray-800"
+                    >
+                      Cancel
+                    </Button>
                   </div>
-                  <Button variant="ghost" size="sm" onClick={cancel}>Cancel</Button>
                 </div>
               )}
 
+              {/* Error State */}
               {status === 'failed' && (
-                <div className="text-destructive">
-                  <p>Generation failed:</p>
-                  <p className="text-sm">{error}</p>
+                <div className="bg-red-900/20 rounded-xl p-6 border border-red-800/50 shadow-lg">
+                  <div className="text-red-400">
+                    <p className="font-semibold mb-2">Generation failed:</p>
+                    <p className="text-sm text-red-300">{error}</p>
+                  </div>
                 </div>
               )}
 
-              <Separator className="bg-white/10" />
+              <Separator className="bg-gray-800" />
               
-              <PromptTemplates onSelectTemplate={(template: string) => console.log('Template selected:', template)} />
-
+              {/* Templates Section */}
+              <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-lg">
+                <PromptTemplates onSelectTemplate={(template: string) => console.log('Template selected:', template)} />
+              </div>
             </div>
 
-            <div className="space-y-6">
+            {/* Right Panel - Preview & Trending */}
+            <div className="space-y-8">
               <ContentPreview 
                 content={generatedContent}
                 platform="instagram"
                 tone="professional"
               />
               
-              <Separator className="bg-white/10" />
+              <Separator className="bg-gray-800" />
               
-              <TrendingTopics onTopicSelect={(topic: string) => console.log('Topic selected:', topic)} />
+              <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-lg">
+                <TrendingTopics onTopicSelect={(topic: string) => console.log('Topic selected:', topic)} />
+              </div>
             </div>
           </div>
 
+          {/* Recent Content Section */}
           <div className={cn(
-            "mt-12",
-            isMobile && "mt-8"
+            "mt-16",
+            isMobile && "mt-12"
           )}>
-            <RecentContent />
+            <div className="bg-gray-900 rounded-xl p-8 border border-gray-800 shadow-lg">
+              <RecentContent />
+            </div>
           </div>
         </div>
       </main>
