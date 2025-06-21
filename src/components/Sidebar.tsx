@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Calendar,
@@ -8,8 +9,9 @@ import {
   HelpCircle,
   Sparkles,
 } from "lucide-react";
-import { NavLink, useLocation } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,7 +23,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 
 export function Sidebar() {
-  const location = useLocation();
   const [profile, setProfile] = useState<{
     id: string;
     username: string | null;
@@ -34,26 +35,12 @@ export function Sidebar() {
       const { data: { user } } = await supabase.auth.getUser();
 
       if (user) {
-        const { data: profileData, error } = await supabase
-          .from('profiles')
-          .select('id, username, avatar_url')
-          .eq('id', user.id)
-          .single();
-
-        if (error) {
-          console.error("Error fetching profile:", error);
-          toast({
-            variant: "destructive",
-            title: "Error",
-            description: "Failed to load profile data."
-          });
-        } else {
-          setProfile({
-            id: profileData?.id,
-            username: profileData?.username,
-            avatar_url: profileData?.avatar_url,
-          });
-        }
+        // For now, use the user's email as username since we don't have a profiles table
+        setProfile({
+          id: user.id,
+          username: user.email?.split('@')[0] || 'User',
+          avatar_url: null,
+        });
       }
     };
 
@@ -159,7 +146,7 @@ export function Sidebar() {
             </DropdownMenuItem>
             <DropdownMenuItem onClick={async () => {
               await supabase.auth.signOut();
-              window.location.href = '/login';
+              window.location.href = '/auth';
             }}>
               Logout
             </DropdownMenuItem>

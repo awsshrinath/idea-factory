@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -52,14 +53,7 @@ const App = () => {
                     <Route path="/videos" element={<Videos />} />
                     <Route path="/schedule" element={<Schedule />} />
                     <Route path="/settings" element={<Settings />} />
-                    <Route
-                      path="/video-studio"
-                      element={
-                        <ProtectedRoute>
-                          <VideoStudio />
-                        </ProtectedRoute>
-                      }
-                    />
+                    <Route path="/video-studio" element={<VideoStudio />} />
                   </Route>
                   <Route path="*" element={<Navigate to="/" replace />} />
                 </Routes>

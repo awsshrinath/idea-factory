@@ -5,15 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Pause, Volume2, Star, CheckCircle } from 'lucide-react';
+import { Tables } from '@/integrations/supabase/types';
+
+type AudioTrack = Tables<"audio_library">;
 
 interface AudioLibraryProps {
-  audioTracks: any[];
-  selectedAudio: any;
-  onSelect: (audio: any) => void;
+  audioTracks: AudioTrack[];
+  selectedAudio: AudioTrack | null;
+  onSelect: (audio: AudioTrack) => void;
 }
 
 export function AudioLibrary({ audioTracks, selectedAudio, onSelect }: AudioLibraryProps) {
-  const [playingTrack, setPlayingTrack] = useState(null);
+  const [playingTrack, setPlayingTrack] = useState<AudioTrack | null>(null);
 
   const groupedAudio = audioTracks.reduce((acc, track) => {
     if (!acc[track.category]) {
@@ -21,9 +24,9 @@ export function AudioLibrary({ audioTracks, selectedAudio, onSelect }: AudioLibr
     }
     acc[track.category].push(track);
     return acc;
-  }, {} as Record<string, any[]>);
+  }, {} as Record<string, AudioTrack[]>);
 
-  const togglePlay = (track: any) => {
+  const togglePlay = (track: AudioTrack) => {
     if (playingTrack?.id === track.id) {
       setPlayingTrack(null);
     } else {
@@ -33,7 +36,8 @@ export function AudioLibrary({ audioTracks, selectedAudio, onSelect }: AudioLibr
     }
   };
 
-  const formatDuration = (seconds: number) => {
+  const formatDuration = (seconds: number | null) => {
+    if (!seconds) return '0:00';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
@@ -110,7 +114,7 @@ export function AudioLibrary({ audioTracks, selectedAudio, onSelect }: AudioLibr
             <div className="flex items-center gap-3">
               <Volume2 className="h-4 w-4" />
               <span className="font-medium">{selectedAudio.name}</span>
-              <Badge variant="secondary">{selectedAudio.mood}</Badge>
+              {selectedAudio.mood && <Badge variant="secondary">{selectedAudio.mood}</Badge>}
             </div>
           </CardContent>
         </Card>
@@ -119,7 +123,16 @@ export function AudioLibrary({ audioTracks, selectedAudio, onSelect }: AudioLibr
   );
 }
 
-function AudioTrackCard({ track, isSelected, isPlaying, onSelect, onTogglePlay, formatDuration }: any) {
+interface AudioTrackCardProps {
+  track: AudioTrack;
+  isSelected: boolean;
+  isPlaying: boolean;
+  onSelect: () => void;
+  onTogglePlay: () => void;
+  formatDuration: (seconds: number | null) => string;
+}
+
+function AudioTrackCard({ track, isSelected, isPlaying, onSelect, onTogglePlay, formatDuration }: AudioTrackCardProps) {
   return (
     <Card
       className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${
