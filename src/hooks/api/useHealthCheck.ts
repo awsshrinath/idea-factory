@@ -1,4 +1,4 @@
-import { apiClient } from '@/api';
+
 import { useApi } from './useApi';
 
 interface HealthStatus {
@@ -6,16 +6,20 @@ interface HealthStatus {
   timestamp: string;
 }
 
-const checkHealth = () => apiClient.get<HealthStatus>('/health');
+export const useHealthCheck = () => {
+  const { useGet } = useApi();
+  const healthQuery = useGet('/health');
 
-export const useHealthCheck = (options = {}) => {
-  const healthApi = useApi(checkHealth, options);
+  const checkHealth = () => {
+    // For manual health checks, we can use refetch
+    healthQuery.refetch();
+  };
 
   return {
-    checkHealth: healthApi.execute,
-    status: healthApi.data?.status || 'unknown',
-    lastChecked: healthApi.data?.timestamp,
-    isLoading: healthApi.status === 'loading',
-    error: healthApi.error,
+    checkHealth,
+    status: (healthQuery.data as HealthStatus)?.status || 'unknown',
+    lastChecked: (healthQuery.data as HealthStatus)?.timestamp,
+    isLoading: healthQuery.isLoading,
+    error: healthQuery.error,
   };
-}; 
+};
