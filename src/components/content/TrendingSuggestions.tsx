@@ -3,6 +3,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { TrendingUp, Clock, Users, Zap } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const trendingSuggestions = [
   {

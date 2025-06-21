@@ -5,7 +5,6 @@ import { MobileNavigation } from "@/components/MobileNavigation";
 import { ContentForm } from '@/components/content/ContentForm';
 import { ContentPreview } from '@/components/content/ContentPreview';
 import { RecentContent } from '@/components/content/RecentContent';
-import { PromptTemplates } from '@/components/content/PromptTemplates';
 import { Button } from '@/components/ui/button';
 import { Loader2, ArrowLeft, ArrowRight } from 'lucide-react';
 import { Sidebar } from "@/components/Sidebar";
@@ -25,7 +24,6 @@ export function Content() {
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([]);
-  const [contentPrompt, setContentPrompt] = useState('');
   const { isMobile, getCardPadding } = useMobileOptimized();
   const { jobId, status, data, error, cancel } = useContentJob();
 
@@ -34,7 +32,6 @@ export function Content() {
   };
 
   const handleTemplateSelect = (template: any) => {
-    setContentPrompt(template.prompt);
     setCurrentStep(2); // Move to platform selection
   };
 
@@ -47,7 +44,7 @@ export function Content() {
   };
 
   const handleTopicSelect = (topic: string) => {
-    setContentPrompt(topic);
+    // Handle topic selection logic here
   };
 
   const handleNextStep = () => {
