@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Separator } from '@/components/ui/separator';
 import { MobileNavigation } from "@/components/MobileNavigation";
@@ -31,7 +30,7 @@ export function Content() {
     setGeneratedContent(content);
   };
 
-  const handleTemplateSelect = (template: any) => {
+  const handleTemplateSelect = (_template: any) => {
     setCurrentStep(2); // Move to platform selection
   };
 
@@ -43,7 +42,7 @@ export function Content() {
     );
   };
 
-  const handleTopicSelect = (topic: string) => {
+  const handleTopicSelect = (_topic: string) => {
     // Handle topic selection logic here
   };
 
