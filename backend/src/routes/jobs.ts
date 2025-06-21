@@ -58,16 +58,18 @@ const createJobHandler: express.RequestHandler = async (req, res) => {
     const userId = (req as any).user?.sub;
 
     if (!prompt || !userId) {
-        return res.status(400).json({ message: 'Prompt and user authentication are required.' });
+        res.status(400).json({ message: 'Prompt and user authentication are required.' });
+        return;
     }
 
     const sanitizedPrompt = sanitizeInput(prompt);
 
     if (!isClean(sanitizedPrompt)) {
-        return res.status(400).json({ 
+        res.status(400).json({ 
             message: 'Prompt contains inappropriate language.',
             errorCode: JobError.PROFANITY_DETECTED 
         });
+        return;
     }
 
     const estimatedCost = estimateCost(sanitizedPrompt, platform);
@@ -88,19 +90,19 @@ const createJobHandler: express.RequestHandler = async (req, res) => {
             .single();
 
         if (existingJob) {
-            return res.status(200).json({ 
+            res.status(200).json({ 
                 message: 'Returning result from a recent identical job.', 
                 jobId: existingJob.id,
                 result_url: existingJob.result_url,
                 isDuplicate: true,
             });
+            return;
         }
         // --- End Deduplication Check ---
 
         const { data, error } = await supabase
             .from('content_generation_jobs')
             .insert({
-                id: uuidv4(),
                 user_id: userId,
                 prompt: sanitizedPrompt,
                 platform,
@@ -120,7 +122,6 @@ const createJobHandler: express.RequestHandler = async (req, res) => {
     }
 };
 
-
 const getJobStatusHandler: express.RequestHandler = async (req, res) => {
     const { jobId } = req.params;
     const userId = (req as any).user?.sub;
@@ -138,12 +139,54 @@ const getJobStatusHandler: express.RequestHandler = async (req, res) => {
         }
 
         if (!data) {
-            return res.status(404).json({ message: 'Job not found.' });
+            res.status(404).json({ message: 'Job not found.' });
+            return;
         }
 
         res.status(200).json(data);
     } catch (error: any) {
         res.status(500).json({ message: 'Failed to get job status.', error: error.message });
+    }
+};
+
+const cancelJobHandler: express.RequestHandler = async (req, res) => {
+    const { jobId } = req.params;
+    const userId = (req as any).user?.sub;
+
+    try {
+        const { data: job, error: fetchError } = await supabase
+            .from('content_generation_jobs')
+            .select('id, status')
+            .eq('id', jobId)
+            .eq('user_id', userId)
+            .single();
+
+        if (fetchError) throw fetchError;
+
+        if (!job) {
+            res.status(404).json({ message: 'Job not found.' });
+            return;
+        }
+
+        if (job.status !== 'pending') {
+            res.status(400).json({ 
+                message: `Cannot cancel job with status '${job.status}'. Only pending jobs can be cancelled.`
+            });
+            return;
+        }
+
+        const { data, error } = await supabase
+            .from('content_generation_jobs')
+            .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+            .eq('id', jobId)
+            .select()
+            .single();
+        
+        if (error) throw error;
+
+        res.status(200).json({ message: 'Job cancelled successfully.', job: data });
+    } catch (error: any) {
+        res.status(500).json({ message: 'Failed to cancel job.', error: error.message });
     }
 };
 
@@ -153,8 +196,10 @@ router.post('/content', createJobHandler);
 // GET /api/v1/jobs/:jobId/status - Get job status
 router.get('/:jobId/status', getJobStatusHandler);
 
+// POST /api/v1/jobs/:jobId/cancel - Cancel a pending job
+router.post('/:jobId/cancel', cancelJobHandler);
+
 // GET /api/v1/jobs/stream - Stream job status updates
 router.get('/stream', sseHandler);
-
 
 export default router; 

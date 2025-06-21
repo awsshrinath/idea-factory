@@ -1,4 +1,7 @@
 
+import { useState, useEffect } from "react";
+
+
 import { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { MobileNavigation } from "@/components/MobileNavigation";
@@ -7,18 +10,50 @@ import { ContentPreview } from '@/components/content/ContentPreview';
 import { RecentContent } from '@/components/content/RecentContent';
 import { TrendingTopics } from '@/components/content/TrendingTopics';
 import { PromptTemplates } from '@/components/content/PromptTemplates';
+
 import { Sidebar } from "@/components/Sidebar";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
 import { cn } from "@/lib/utils";
 
 export function Content() {
+
+  const [formData, setFormData] = useState<ContentFormData>({
+    description: "",
+    platforms: [],
+    tone: "professional",
+    aiModel: "chatgpt",
+    language: "English",
+  });
+  const isMobile = useIsMobile();
+  const { jobId, status, data, error, submit, cancel } = useContentJob();
+
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const { isMobile, getCardPadding } = useMobileOptimized();
+
 
   const handleContentGenerated = (content: string) => {
     setGeneratedContent(content);
   };
+
+  useEffect(() => {
+    if (status === 'completed' && data?.result_url) {
+      const fetchContent = async () => {
+        try {
+          const response = await fetch(data.result_url);
+          if (!response.ok) {
+            throw new Error('Failed to fetch generated content.');
+          }
+          const textContent = await response.text();
+          setFormData(prev => ({...prev, description: textContent}));
+        } catch (fetchError: any) {
+          console.error(fetchError);
+          // Optionally, set an error state here to inform the user
+        }
+      };
+      fetchContent();
+    }
+  }, [status, data]);
 
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
@@ -56,9 +91,29 @@ export function Content() {
             <div className="space-y-6">
               <ContentForm onContentGenerated={handleContentGenerated} />
               
+
+              {(status === 'processing' || status === 'submitting') && (
+                <div className="flex items-center justify-between space-x-2 text-muted-foreground">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>{status === 'submitting' ? 'Submitting job...' : `Processing... (Job ID: ${jobId})`}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={cancel}>Cancel</Button>
+                </div>
+              )}
+
+              {status === 'failed' && (
+                <div className="text-destructive">
+                  <p>Generation failed:</p>
+                  <p className="text-sm">{error}</p>
+                </div>
+              )}
+
+
               <Separator className="bg-white/10" />
               
               <PromptTemplates onSelectTemplate={(template: string) => console.log('Template selected:', template)} />
+
             </div>
 
             <div className="space-y-6">
