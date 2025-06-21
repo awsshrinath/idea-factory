@@ -13,8 +13,6 @@ interface EffectsLibraryProps {
 }
 
 export function EffectsLibrary({ effects, selectedEffects, onSelectionChange }: EffectsLibraryProps) {
-  const [previewEffect, setPreviewEffect] = useState(null);
-
   const groupedEffects = effects.reduce((acc, effect) => {
     if (!acc[effect.category]) {
       acc[effect.category] = [];
@@ -55,19 +53,19 @@ export function EffectsLibrary({ effects, selectedEffects, onSelectionChange }: 
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          {Object.entries(groupedEffects).map(([category, categoryEffects]) => (
+          {Object.entries(groupedEffects).map(([category, categoryEffects]: [string, any[]]) => (
             <div key={category} className="space-y-3">
               <h4 className="font-medium capitalize text-primary">
                 {category.replace('_', ' ')} Effects
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categoryEffects.map((effect) => (
+                {categoryEffects.map((effect: any) => (
                   <EffectCard
                     key={effect.id}
                     effect={effect}
                     isSelected={isEffectSelected(effect)}
                     onToggle={() => toggleEffect(effect)}
-                    onPreview={() => setPreviewEffect(effect)}
+                    onPreview={() => {}}
                   />
                 ))}
               </div>
@@ -75,16 +73,16 @@ export function EffectsLibrary({ effects, selectedEffects, onSelectionChange }: 
           ))}
         </TabsContent>
 
-        {Object.entries(groupedEffects).map(([category, categoryEffects]) => (
+        {Object.entries(groupedEffects).map(([category, categoryEffects]: [string, any[]]) => (
           <TabsContent key={category} value={category} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryEffects.map((effect) => (
+              {categoryEffects.map((effect: any) => (
                 <EffectCard
                   key={effect.id}
                   effect={effect}
                   isSelected={isEffectSelected(effect)}
                   onToggle={() => toggleEffect(effect)}
-                  onPreview={() => setPreviewEffect(effect)}
+                  onPreview={() => {}}
                 />
               ))}
             </div>

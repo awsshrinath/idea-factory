@@ -107,7 +107,7 @@ export function VideoPreview({ project, settings }: VideoPreviewProps) {
               {getStatusIcon()}
               <div>
                 <h4 className="text-white font-medium">{project.title}</h4>
-                <p className="text-white/70 text-sm">{getStatus()}</p>
+                <p className="text-white/70 text-sm">{getStatusText()}</p>
               </div>
               {project.status === 'processing' && (
                 <Progress value={65} className="w-48" />

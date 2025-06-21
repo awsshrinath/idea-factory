@@ -1,7 +1,6 @@
 
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Play, Settings, Palette, Music, Type, Wand2 } from 'lucide-react';
 import { useVideoProduction } from '@/hooks/useVideoProduction';
@@ -12,6 +11,12 @@ import { CaptionEditor } from './CaptionEditor';
 import { BrandSettings } from './BrandSettings';
 import { VideoPreview } from './VideoPreview';
 import { TemplateSelector } from './TemplateSelector';
+import { Tables } from '@/integrations/supabase/types';
+
+type VideoProject = Tables<"videos">;
+type AudioTrack = Tables<"audio_library">;
+type Template = Tables<"video_templates">;
+type CaptionStyle = Tables<"caption_styles">;
 
 export function VideoProductionStudio() {
   const {
@@ -26,11 +31,11 @@ export function VideoProductionStudio() {
     createVideoProject
   } = useVideoProduction();
 
-  const [activeProject, setActiveProject] = useState(null);
-  const [selectedTemplate, setSelectedTemplate] = useState(null);
-  const [selectedEffects, setSelectedEffects] = useState([]);
-  const [selectedAudio, setSelectedAudio] = useState(null);
-  const [selectedCaptions, setSelectedCaptions] = useState(null);
+  const [activeProject, setActiveProject] = useState<VideoProject | null>(null);
+  const [selectedTemplate, setSelectedTemplate] = useState<Template | null>(null);
+  const [selectedEffects, setSelectedEffects] = useState<any[]>([]);
+  const [selectedAudio, setSelectedAudio] = useState<AudioTrack | null>(null);
+  const [selectedCaptions, setSelectedCaptions] = useState<CaptionStyle | null>(null);
 
   useEffect(() => {
     loadVideoData();
@@ -38,10 +43,10 @@ export function VideoProductionStudio() {
 
   const handleCreateProject = async (formData: any) => {
     const settings = {
-      template: selectedTemplate,
+      template: selectedTemplate || undefined,
       effects: selectedEffects,
-      audioTrack: selectedAudio,
-      captionStyle: selectedCaptions,
+      audioTrack: selectedAudio || undefined,
+      captionStyle: selectedCaptions || undefined,
       brandSettings,
       customSettings: {
         duration: formData.duration || 30,
@@ -61,6 +66,14 @@ export function VideoProductionStudio() {
     if (project) {
       setActiveProject(project);
     }
+  };
+
+  const handleEffectsChange = (effects: any[]) => {
+    setSelectedEffects(effects);
+  };
+
+  const handleAudioSelect = (audio: AudioTrack) => {
+    setSelectedAudio(audio);
   };
 
   return (
@@ -136,7 +149,7 @@ export function VideoProductionStudio() {
                 <EffectsLibrary
                   effects={effects}
                   selectedEffects={selectedEffects}
-                  onSelectionChange={setSelectedEffects}
+                  onSelectionChange={handleEffectsChange}
                 />
               </TabsContent>
 
@@ -144,7 +157,7 @@ export function VideoProductionStudio() {
                 <AudioLibrary
                   audioTracks={audioLibrary}
                   selectedAudio={selectedAudio}
-                  onSelect={setSelectedAudio}
+                  onSelect={handleAudioSelect}
                 />
               </TabsContent>
 
