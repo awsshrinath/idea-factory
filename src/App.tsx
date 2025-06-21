@@ -1,9 +1,8 @@
-
 import { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import Index from "./pages/Index";
 import { Content } from "./pages/Content";
 import { Images } from "./pages/Images";
@@ -17,6 +16,7 @@ import { SessionContextProvider } from '@supabase/auth-helpers-react';
 import { supabase } from './integrations/supabase/client';
 import { ProtectedRoute } from './components/system/ProtectedRoute';
 import { useIdleTimeout } from './hooks/useIdleTimeout';
+import { VideoStudio } from "./pages/VideoStudio";
 
 const App = () => {
   const [queryClient] = useState(
@@ -41,20 +41,30 @@ const App = () => {
           <TooltipProvider>
             <Toaster />
             <OfflineIndicator />
-            <BrowserRouter>
-              <Routes>
-                <Route path="/" element={<Index />} />
-                <Route path="/auth" element={<Auth />} />
-                <Route element={<ProtectedRoute />}>
-                  <Route path="/content" element={<Content />} />
-                  <Route path="/images" element={<Images />} />
-                  <Route path="/videos" element={<Videos />} />
-                  <Route path="/schedule" element={<Schedule />} />
-                  <Route path="/settings" element={<Settings />} />
-                </Route>
-                <Route path="*" element={<Navigate to="/" replace />} />
-              </Routes>
-            </BrowserRouter>
+            <Router>
+              <div className="min-h-screen bg-background">
+                <Routes>
+                  <Route path="/" element={<Index />} />
+                  <Route path="/auth" element={<Auth />} />
+                  <Route element={<ProtectedRoute />}>
+                    <Route path="/content" element={<Content />} />
+                    <Route path="/images" element={<Images />} />
+                    <Route path="/videos" element={<Videos />} />
+                    <Route path="/schedule" element={<Schedule />} />
+                    <Route path="/settings" element={<Settings />} />
+                    <Route
+                      path="/video-studio"
+                      element={
+                        <ProtectedRoute>
+                          <VideoStudio />
+                        </ProtectedRoute>
+                      }
+                    />
+                  </Route>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </div>
+            </Router>
           </TooltipProvider>
         </QueryClientProvider>
       </ErrorBoundary>

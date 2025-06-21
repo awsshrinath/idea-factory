@@ -1,6 +1,7 @@
 
 import { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { WorkflowSelection } from '@/components/videos/WorkflowSelection';
@@ -12,6 +13,8 @@ import { Sidebar } from "@/components/Sidebar";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
 import { cn } from "@/lib/utils";
+import { Sparkles, Play, Settings } from "lucide-react";
+import { Link } from "react-router-dom";
 
 export function Videos() {
   const [selectedWorkflow, setSelectedWorkflow] = useState<"direct" | "fine-tuned" | null>(null);
@@ -35,6 +38,45 @@ export function Videos() {
           {!selectedWorkflow ? (
             <>
               <HeroSection />
+              
+              {/* Professional Video Studio CTA */}
+              <div className="max-w-4xl mx-auto mb-8">
+                <Card className="premium-card border border-purple-500/20 bg-gradient-to-r from-purple-500/10 to-pink-500/10 backdrop-blur-sm">
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Sparkles className="h-5 w-5 text-purple-400" />
+                          <h3 className="text-xl font-bold text-white">Professional Video Studio</h3>
+                        </div>
+                        <p className="text-purple-100">
+                          Create studio-quality videos with advanced effects, professional audio, smart captions, and brand customization
+                        </p>
+                        <div className="flex items-center gap-4 text-sm text-purple-200">
+                          <span className="flex items-center gap-1">
+                            <Play className="h-4 w-4" />
+                            Advanced Effects
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Settings className="h-4 w-4" />
+                            Professional Audio
+                          </span>
+                          <span className="flex items-center gap-1">
+                            <Sparkles className="h-4 w-4" />
+                            Smart Captions
+                          </span>
+                        </div>
+                      </div>
+                      <Link to="/video-studio">
+                        <Button className="bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                          <Sparkles className="h-4 w-4 mr-2" />
+                          Launch Studio
+                        </Button>
+                      </Link>
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
               
               <div className="max-w-4xl mx-auto space-y-8">
                 <WorkflowSelection onSelect={handleWorkflowSelect} />
