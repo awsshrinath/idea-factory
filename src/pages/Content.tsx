@@ -1,8 +1,5 @@
 
 import { useState, useEffect } from "react";
-
-
-import { useState } from 'react';
 import { Separator } from '@/components/ui/separator';
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { ContentForm } from '@/components/content/ContentForm';
@@ -10,27 +7,19 @@ import { ContentPreview } from '@/components/content/ContentPreview';
 import { RecentContent } from '@/components/content/RecentContent';
 import { TrendingTopics } from '@/components/content/TrendingTopics';
 import { PromptTemplates } from '@/components/content/PromptTemplates';
-
+import { Button } from '@/components/ui/button';
+import { Loader2 } from 'lucide-react';
 import { Sidebar } from "@/components/Sidebar";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
+import { useContentJob } from "@/hooks/api/useContentJob";
+import { ContentFormData } from "@/types/content";
 import { cn } from "@/lib/utils";
 
 export function Content() {
-
-  const [formData, setFormData] = useState<ContentFormData>({
-    description: "",
-    platforms: [],
-    tone: "professional",
-    aiModel: "chatgpt",
-    language: "English",
-  });
-  const isMobile = useIsMobile();
-  const { jobId, status, data, error, submit, cancel } = useContentJob();
-
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const { isMobile, getCardPadding } = useMobileOptimized();
-
+  const { jobId, status, data, error, submit, cancel } = useContentJob();
 
   const handleContentGenerated = (content: string) => {
     setGeneratedContent(content);
@@ -45,7 +34,7 @@ export function Content() {
             throw new Error('Failed to fetch generated content.');
           }
           const textContent = await response.text();
-          setFormData(prev => ({...prev, description: textContent}));
+          setGeneratedContent(textContent);
         } catch (fetchError: any) {
           console.error(fetchError);
           // Optionally, set an error state here to inform the user
@@ -91,7 +80,6 @@ export function Content() {
             <div className="space-y-6">
               <ContentForm onContentGenerated={handleContentGenerated} />
               
-
               {(status === 'processing' || status === 'submitting') && (
                 <div className="flex items-center justify-between space-x-2 text-muted-foreground">
                   <div className="flex items-center space-x-2">
@@ -108,7 +96,6 @@ export function Content() {
                   <p className="text-sm">{error}</p>
                 </div>
               )}
-
 
               <Separator className="bg-white/10" />
               

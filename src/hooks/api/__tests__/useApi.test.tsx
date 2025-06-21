@@ -1,9 +1,8 @@
 
-import { renderHook, act } from '@testing-library/react';
+import { renderHook } from '@testing-library/react';
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { useApi } from '@/hooks/api/useApi';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { apiClient } from '@/api/ApiClient';
 
 // Mock the API client
 vi.mock('@/api/ApiClient', () => ({
