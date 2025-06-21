@@ -114,10 +114,5 @@ export const useContentJob = () => {
         };
     }, [jobState.status, jobState.jobId, session]);
 
-
-    return { ...jobState, submit, cancel };
-}; 
-=======
     return { ...jobState, submit };
-}; 
-
+};
