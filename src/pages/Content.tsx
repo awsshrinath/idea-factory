@@ -13,13 +13,12 @@ import { Sidebar } from "@/components/Sidebar";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
 import { useContentJob } from "@/hooks/api/useContentJob";
-import { ContentFormData } from "@/types/content";
 import { cn } from "@/lib/utils";
 
 export function Content() {
   const [generatedContent, setGeneratedContent] = useState<string>('');
   const { isMobile, getCardPadding } = useMobileOptimized();
-  const { jobId, status, data, error, submit, cancel } = useContentJob();
+  const { jobId, status, data, error, cancel } = useContentJob();
 
   const handleContentGenerated = (content: string) => {
     setGeneratedContent(content);
