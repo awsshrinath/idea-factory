@@ -1,30 +1,14 @@
 
-import React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  DialogClose,
-} from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Heart, RefreshCcw, Download, Trash2, Edit2 } from "lucide-react";
-import { supabase } from "@/integrations/supabase/client";
+import { Separator } from "@/components/ui/separator";
+import { Download, Trash2, RefreshCcw, Heart, Edit2, Copy } from "lucide-react";
 import { cn } from "@/lib/utils";
-
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string;
-  updated_at?: string;
-  title?: string | null;
-  is_favorite?: boolean | null;
-}
+import { supabase } from "@/integrations/supabase/client";
+import { GeneratedImage } from "./types";
+import { format } from "date-fns";
 
 interface ImageDetailModalProps {
   isOpen: boolean;
@@ -32,7 +16,7 @@ interface ImageDetailModalProps {
   selectedImage: GeneratedImage | null;
   editingId: string | null;
   editTitle: string;
-  onEditChange: (value: string) => void;
+  onEditChange: (title: string) => void;
   onStartEditing: (image: GeneratedImage) => void;
   onSaveTitle: (id: string) => void;
   onCancelEditing: () => void;
@@ -59,144 +43,172 @@ export function ImageDetailModal({
 }: ImageDetailModalProps) {
   if (!selectedImage) return null;
 
+  const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(selectedImage.image_path).data.publicUrl;
+
+  const handleCopyPrompt = async () => {
+    try {
+      await navigator.clipboard.writeText(selectedImage.prompt);
+    } catch (error) {
+      console.error('Failed to copy prompt:', error);
+    }
+  };
+
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[90vw] md:max-w-[80vw] lg:max-w-[70vw] max-h-[90vh] overflow-y-auto">
-        <DialogTitle className="flex justify-between items-center">
-          <span>{selectedImage?.title || "Image Details"}</span>
-          <div className="flex gap-2">
-            <Button 
-              variant="outline" 
-              size="sm"
-              className={cn(
-                "h-8 transition-all duration-300",
-                selectedImage?.is_favorite 
-                  ? "bg-primary/20 text-white hover:bg-primary/30" 
-                  : "hover:bg-accent/20"
-              )}
-              onClick={() => onToggleFavorite(selectedImage)}
-            >
-              <Heart 
-                className={cn(
-                  "h-4 w-4 mr-1", 
-                  selectedImage?.is_favorite ? "fill-primary text-primary" : ""
-                )} 
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto premium-card border border-white/10">
+        <DialogHeader>
+          <DialogTitle className="premium-heading text-xl">
+            {selectedImage.title || "Generated Image"}
+          </DialogTitle>
+        </DialogHeader>
+        
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Image Display */}
+          <div className="space-y-4">
+            <div className="aspect-square w-full overflow-hidden rounded-lg border border-white/10">
+              <img
+                src={imageUrl}
+                alt={selectedImage.prompt}
+                className="w-full h-full object-cover"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = '/placeholder.svg';
+                }}
               />
-              {selectedImage?.is_favorite ? "Favorited" : "Favorite"}
-            </Button>
-            <DialogClose asChild>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="grid grid-cols-2 gap-2">
               <Button 
                 variant="outline" 
-                size="sm" 
-                className="h-8"
+                onClick={() => onRegenerate(selectedImage)}
+                className="bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
               >
-                Close
+                <RefreshCcw className="h-4 w-4 mr-2" />
+                Regenerate
               </Button>
-            </DialogClose>
+              <Button 
+                variant="outline" 
+                onClick={() => onDownload(selectedImage)}
+                className="hover:bg-gradient-primary transition-all duration-300"
+              >
+                <Download className="h-4 w-4 mr-2" />
+                Download
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => onToggleFavorite(selectedImage)}
+                className={cn(
+                  "transition-all duration-300",
+                  selectedImage.is_favorite 
+                    ? "bg-primary/20 text-white hover:bg-primary/30" 
+                    : "hover:bg-accent/20"
+                )}
+              >
+                <Heart 
+                  className={cn(
+                    "h-4 w-4 mr-2", 
+                    selectedImage.is_favorite ? "fill-primary text-primary" : ""
+                  )} 
+                />
+                Favorite
+              </Button>
+              <Button 
+                variant="outline" 
+                onClick={() => onDelete(selectedImage.id)}
+                className="hover:bg-destructive/20 transition-all duration-300"
+              >
+                <Trash2 className="h-4 w-4 mr-2" />
+                Delete
+              </Button>
+            </div>
           </div>
-        </DialogTitle>
-        
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="relative bg-black/30 rounded-lg overflow-hidden border border-white/10">
-            <img 
-              src={supabase.storage.from('ai_generated_images').getPublicUrl(selectedImage.image_path).data.publicUrl}
-              alt={selectedImage.prompt}
-              className="w-full object-contain max-h-[70vh]"
-            />
-          </div>
-          
-          <div className="space-y-4">
-            <div>
-              <h3 className="text-sm font-medium mb-1">Title</h3>
+
+          {/* Image Details */}
+          <div className="space-y-6">
+            {/* Title Edit */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium premium-subheading">Title</label>
               {editingId === selectedImage.id ? (
-                <div className="flex items-center gap-2">
+                <div className="flex gap-2">
                   <Input 
                     value={editTitle} 
                     onChange={(e) => onEditChange(e.target.value)}
                     className="bg-muted/30 border border-white/10"
                   />
                   <Button 
-                    size="sm" 
-                    variant="outline" 
+                    size="sm"
                     onClick={() => onSaveTitle(selectedImage.id)}
+                    className="premium-button"
                   >
                     Save
                   </Button>
                   <Button 
-                    size="sm" 
-                    variant="outline" 
+                    size="sm"
+                    variant="outline"
                     onClick={onCancelEditing}
                   >
                     Cancel
                   </Button>
                 </div>
               ) : (
-                <div className="flex items-center justify-between mb-2">
-                  <p className="text-lg font-medium">
-                    {selectedImage.title || "Untitled Image"}
+                <div className="flex items-center justify-between">
+                  <p className="premium-body">
+                    {selectedImage.title || selectedImage.prompt.substring(0, 50) + '...'}
                   </p>
                   <Button 
-                    size="sm" 
-                    variant="outline" 
+                    size="sm"
+                    variant="ghost"
                     onClick={() => onStartEditing(selectedImage)}
-                    className="h-8"
                   >
-                    <Edit2 className="h-4 w-4 mr-1" />
-                    Edit Title
+                    <Edit2 className="h-4 w-4" />
                   </Button>
                 </div>
               )}
             </div>
-            
-            <div>
-              <h3 className="text-sm font-medium mb-1">Prompt</h3>
-              <p className="bg-muted/10 p-3 rounded-md border border-white/10">{selectedImage.prompt}</p>
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <h3 className="text-sm font-medium mb-1">Style</h3>
-                <Badge className="bg-primary/20 hover:bg-primary/30 text-white">{selectedImage.style}</Badge>
+
+            <Separator className="bg-white/10" />
+
+            {/* Prompt */}
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-sm font-medium premium-subheading">Prompt</label>
+                <Button 
+                  size="sm"
+                  variant="ghost"
+                  onClick={handleCopyPrompt}
+                >
+                  <Copy className="h-4 w-4" />
+                </Button>
               </div>
-              <div>
-                <h3 className="text-sm font-medium mb-1">Aspect Ratio</h3>
-                <Badge className="bg-secondary/20 hover:bg-secondary/30 text-white">{selectedImage.aspect_ratio}</Badge>
-              </div>
-            </div>
-            
-            <div>
-              <h3 className="text-sm font-medium mb-1">Created</h3>
-              <p className="text-sm text-muted-foreground">
-                {new Date(selectedImage.created_at).toLocaleString()}
+              <p className="premium-body text-sm bg-muted/20 p-3 rounded-md border border-white/10">
+                {selectedImage.prompt}
               </p>
             </div>
-            
-            <div className="flex flex-wrap gap-2 pt-4">
-              <Button 
-                className="flex-1 bg-gradient-secondary hover:bg-gradient-primary transition-all duration-300"
-                onClick={() => onRegenerate(selectedImage)}
-              >
-                <RefreshCcw className="h-4 w-4 mr-2" />
-                Regenerate
-              </Button>
-              <Button
-                className="flex-1"
-                onClick={() => onDownload(selectedImage)}
-              >
-                <Download className="h-4 w-4 mr-2" />
-                Download
-              </Button>
-              <Button
-                variant="destructive"
-                className="flex-1"
-                onClick={() => {
-                  onDelete(selectedImage.id);
-                  onOpenChange(false);
-                }}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                Delete
-              </Button>
+
+            {/* Style & Settings */}
+            <div className="space-y-3">
+              <label className="text-sm font-medium premium-subheading">Settings</label>
+              <div className="flex flex-wrap gap-2">
+                <Badge variant="secondary">
+                  Style: {selectedImage.style}
+                </Badge>
+                <Badge variant="secondary">
+                  Ratio: {selectedImage.aspect_ratio}
+                </Badge>
+                {selectedImage.is_favorite && (
+                  <Badge variant="outline" className="border-primary/30 text-primary">
+                    ❤️ Favorite
+                  </Badge>
+                )}
+              </div>
+            </div>
+
+            {/* Creation Date */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium premium-subheading">Created</label>
+              <p className="premium-caption">
+                {selectedImage.created_at ? format(new Date(selectedImage.created_at), 'PPP p') : 'Unknown'}
+              </p>
             </div>
           </div>
         </div>

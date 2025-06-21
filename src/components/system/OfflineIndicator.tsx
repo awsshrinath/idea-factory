@@ -1,7 +1,12 @@
+
 import { useOnlineStatus } from '@/hooks/use-mobile';
 import { WifiOff } from 'lucide-react';
+=======
 
-export const OfflineIndicator = () => {
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+
+
+export function OfflineIndicator() {
   const isOnline = useOnlineStatus();
 
   if (isOnline) {
@@ -19,4 +24,4 @@ export const OfflineIndicator = () => {
       </div>
     </div>
   );
-}; 
+}

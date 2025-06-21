@@ -1,262 +1,109 @@
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { GridView } from './gallery/GridView';
+import { CarouselView } from './gallery/CarouselView';
+import { EmptyGalleryState } from './gallery/EmptyGalleryState';
+import { LoadingState } from './gallery/LoadingState';
+import { ImageDetailModal } from './gallery/ImageDetailModal';
+import { GeneratedImage, SortOption, ViewMode } from './gallery/types';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import { Grid, List, Filter, SortAsc, SortDesc, Heart, Calendar, Sparkles } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { toast } from 'sonner';
 
-import React, { useEffect, useState } from "react";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { supabase } from "@/integrations/supabase/client";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { Clock, Filter, Heart } from "lucide-react";
-import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger
-} from "@/components/ui/dropdown-menu";
-import { GridView } from "./gallery/GridView";
-import { CarouselView } from "./gallery/CarouselView";
-import { ImageDetailModal } from "./gallery/ImageDetailModal";
-import { LoadingState } from "./gallery/LoadingState";
-import { EmptyGalleryState } from "./gallery/EmptyGalleryState";
-import { ImageCard } from "./gallery/ImageCard";
-import { PlaceholderCards } from "./gallery/PlaceholderCards";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { cn } from "@/lib/utils";
-import { GeneratedImage, ImageGalleryProps, SortOption, ViewMode } from "./gallery/types";
+interface ImageGalleryProps {
+  previewMode?: boolean;
+  viewMode?: ViewMode;
+  filter?: "all" | "favorites" | "recent";
+}
 
 export function ImageGallery({ 
   previewMode = false, 
-  fullGallery = false, 
-  viewMode: initialViewMode = "grid", 
-  filter = "all" 
+  viewMode: initialViewMode = "grid",
+  filter: initialFilter = "all"
 }: ImageGalleryProps) {
   const [images, setImages] = useState<GeneratedImage[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState("");
-  const [sortOption, setSortOption] = useState<SortOption>("recent");
-  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-  const { toast } = useToast();
-  const isMobile = useIsMobile();
+  const [sortBy, setSortBy] = useState<SortOption>("recent");
+  const [filter, setFilter] = useState<"all" | "favorites" | "recent">(initialFilter);
+  const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
+  const [showDetailModal, setShowDetailModal] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editTitle, setEditTitle] = useState('');
+  const { user } = useAuth();
 
+  // Fetch images from Supabase
   useEffect(() => {
-    const checkAuth = async () => {
-      const { data } = await supabase.auth.getSession();
-      setIsAuthenticated(!!data.session);
-      if (data.session) {
-        fetchImages();
-      } else {
-        setIsLoading(false);
-      }
-    };
-
-    checkAuth();
-
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-      setIsAuthenticated(!!session);
-      if (session) {
-        fetchImages();
-      } else {
-        setImages([]);
-        setIsLoading(false);
-      }
-    });
-
-    return () => {
-      authListener?.subscription?.unsubscribe();
-    };
-  }, [filter]);
-
-  useEffect(() => {
-    sortImages(sortOption);
-  }, [sortOption]);
+    fetchImages();
+  }, [user, sortBy, filter]);
 
   const fetchImages = async () => {
-    setIsLoading(true);
+    if (!user) return;
+    
+    setLoading(true);
     try {
       let query = supabase
         .from('generated_images')
-        .select('*');
-      
-      if (filter === "favorites") {
+        .select('*')
+        .eq('user_id', user.id);
+
+      // Apply filters
+      if (filter === 'favorites') {
         query = query.eq('is_favorite', true);
-      } else if (filter === "recent") {
-        query = query.order('created_at', { ascending: false }).limit(10);
-      } else {
-        query = query.order('created_at', { ascending: false });
+      } else if (filter === 'recent') {
+        query = query.gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
       }
-      
+
+      // Apply sorting
+      if (sortBy === 'recent') {
+        query = query.order('created_at', { ascending: false });
+      } else if (sortBy === 'oldest') {
+        query = query.order('created_at', { ascending: true });
+      } else if (sortBy === 'favorites') {
+        query = query.order('is_favorite', { ascending: false });
+      }
+
+      // Limit for preview mode
+      if (previewMode) {
+        query = query.limit(6);
+      }
+
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching images:', error);
+        toast.error('Failed to load images');
+        return;
+      }
 
-      console.log("Fetched images:", data);
-      
-      const filteredData = previewMode ? (data && data.length > 0 ? [data[0]] : []) : data || [];
-      
-      setImages(filteredData);
-      sortImages(sortOption, filteredData);
-    } catch (error: any) {
+      if (data) {
+        const processedImages: GeneratedImage[] = data.map(img => ({
+          ...img,
+          created_at: img.created_at || new Date().toISOString(),
+          updated_at: img.updated_at || undefined,
+          title: img.title || undefined,
+          is_favorite: img.is_favorite || false
+        }));
+        setImages(processedImages);
+      }
+    } catch (error) {
       console.error('Error fetching images:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load images. Please try again.",
-      });
+      toast.error('Failed to load images');
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  const sortImages = (option: SortOption, imagesToSort: GeneratedImage[] = images) => {
-    let sortedImages = [...imagesToSort];
-    
-    switch (option) {
-      case "recent":
-        sortedImages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-        break;
-      case "oldest":
-        sortedImages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-        break;
-      case "favorites":
-        sortedImages.sort((a, b) => {
-          if (a.is_favorite === b.is_favorite) {
-            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-          }
-          return a.is_favorite ? -1 : 1;
-        });
-        break;
-    }
-    
-    setImages(sortedImages);
+  const handleImageClick = (image: GeneratedImage) => {
+    setSelectedImage(image);
+    setShowDetailModal(true);
   };
 
-  const handleDelete = async (id: string) => {
-    try {
-      const imageToDelete = images.find(img => img.id === id);
-      if (!imageToDelete) return;
-
-      const { error: storageError } = await supabase
-        .storage
-        .from('ai_generated_images')
-        .remove([imageToDelete.image_path]);
-
-      if (storageError) throw storageError;
-
-      const { error: dbError } = await supabase
-        .from('generated_images')
-        .delete()
-        .eq('id', id);
-
-      if (dbError) throw dbError;
-
-      setImages(images.filter(img => img.id !== id));
-      toast({
-        title: "Success",
-        description: "Image deleted successfully",
-      });
-      
-      if (selectedImage?.id === id) {
-        setIsDetailModalOpen(false);
-      }
-    } catch (error: any) {
-      console.error('Error deleting image:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to delete image. Please try again.",
-      });
-    }
-  };
-
-  const handleDownload = async (image: GeneratedImage) => {
-    try {
-      const { data, error } = await supabase
-        .storage
-        .from('ai_generated_images')
-        .download(image.image_path);
-
-      if (error) throw error;
-
-      const url = window.URL.createObjectURL(data);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${image.title || 'generated-image'}-${image.id}.png`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-    } catch (error: any) {
-      console.error('Error downloading image:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to download image. Please try again.",
-      });
-    }
-  };
-
-  const handleRegenerate = async (image: GeneratedImage) => {
-    window.dispatchEvent(new CustomEvent('regenerate-image', { 
-      detail: { 
-        prompt: image.prompt,
-        style: image.style,
-        aspectRatio: image.aspect_ratio
-      }
-    }));
-    
-    toast({
-      title: "Ready to Regenerate",
-      description: "Settings applied. Click generate to create a new version.",
-    });
-  };
-
-  const startEditing = (image: GeneratedImage) => {
-    setEditingId(image.id);
-    setEditTitle(image.title || image.prompt.substring(0, 20));
-  };
-
-  const saveTitle = async (id: string) => {
-    try {
-      const { error } = await supabase
-        .from('generated_images')
-        .update({ title: editTitle })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setImages(images.map(img => 
-        img.id === id ? { ...img, title: editTitle } : img
-      ));
-      
-      if (selectedImage?.id === id) {
-        setSelectedImage({...selectedImage, title: editTitle});
-      }
-      
-      setEditingId(null);
-      
-      toast({
-        title: "Success",
-        description: "Image title updated",
-      });
-    } catch (error: any) {
-      console.error('Error updating title:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update title. Please try again.",
-      });
-    }
-  };
-
-  const cancelEditing = () => {
-    setEditingId(null);
-  };
-
-  const toggleFavorite = async (image: GeneratedImage) => {
+  const handleFavoriteToggle = async (image: GeneratedImage) => {
     try {
       const newFavoriteStatus = !image.is_favorite;
       
@@ -267,261 +114,300 @@ export function ImageGallery({
 
       if (error) throw error;
 
-      const updatedImages = images.map(img => 
-        img.id === image.id ? { ...img, is_favorite: newFavoriteStatus } : img
-      );
-      
-      setImages(updatedImages);
-      
-      if (selectedImage?.id === image.id) {
-        setSelectedImage({...selectedImage, is_favorite: newFavoriteStatus});
-      }
-      
-      if (sortOption === "favorites") {
-        sortImages(sortOption, updatedImages);
-      }
-      
-      toast({
-        title: newFavoriteStatus ? "Added to favorites" : "Removed from favorites",
-        description: newFavoriteStatus ? 
-          "Image added to your favorites" : 
-          "Image removed from your favorites",
-      });
-    } catch (error: any) {
-      console.error('Error updating favorite status:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update favorite status. Please try again.",
-      });
+      setImages(prev => prev.map(img => 
+        img.id === image.id 
+          ? { ...img, is_favorite: newFavoriteStatus }
+          : img
+      ));
+
+      toast.success(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites');
+    } catch (error) {
+      console.error('Error toggling favorite:', error);
+      toast.error('Failed to update favorite status');
     }
   };
 
-  const showImageDetails = (image: GeneratedImage) => {
-    setSelectedImage(image);
-    setIsDetailModalOpen(true);
+  const handleDownload = async (image: GeneratedImage) => {
+    try {
+      const { data } = await supabase.storage
+        .from('generated-images')
+        .download(image.image_path);
+      
+      if (data) {
+        const url = URL.createObjectURL(data);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${image.title || 'generated-image'}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+        toast.success('Image downloaded successfully');
+      }
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      toast.error('Failed to download image');
+    }
   };
 
-  if (!isAuthenticated) {
-    return (
-      <div className="text-center text-muted-foreground p-6 bg-gradient-card border border-white/10 shadow-card h-32 flex items-center justify-center">
-        Please log in to view your generated images.
-      </div>
-    );
-  }
+  const handleRegenerate = async () => {
+    toast.info('Regeneration feature coming soon');
+  };
 
-  if (isLoading) {
-    return <LoadingState previewMode={previewMode} />;
+  const handleDelete = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('generated_images')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setImages(prev => prev.filter(img => img.id !== id));
+      toast.success('Image deleted successfully');
+    } catch (error) {
+      console.error('Error deleting image:', error);
+      toast.error('Failed to delete image');
+    }
+  };
+
+  const handleSaveTitle = async (id: string, title: string) => {
+    try {
+      const { error } = await supabase
+        .from('generated_images')
+        .update({ title })
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setImages(prev => prev.map(img => 
+        img.id === id ? { ...img, title } : img
+      ));
+
+      toast.success('Title updated successfully');
+    } catch (error) {
+      console.error('Error updating title:', error);
+      toast.error('Failed to update title');
+    }
+  };
+
+  const handleShare = async (image: GeneratedImage) => {
+    try {
+      if (navigator.share) {
+        await navigator.share({
+          title: image.title || 'Generated Image',
+          text: image.prompt,
+        });
+      } else {
+        await navigator.clipboard.writeText(window.location.href);
+        toast.success('Link copied to clipboard');
+      }
+    } catch (error) {
+      console.error('Error sharing:', error);
+      toast.error('Failed to share image');
+    }
+  };
+
+  const handleStartEditing = (image: GeneratedImage) => {
+    setEditingId(image.id);
+    setEditTitle(image.title || '');
+  };
+
+  const handleSaveTitleModal = (id: string) => {
+    handleSaveTitle(id, editTitle);
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const handleCancelEditing = () => {
+    setEditingId(null);
+    setEditTitle('');
+  };
+
+  const handleEditChange = (title: string) => {
+    setEditTitle(title);
+  };
+
+  const getFilteredAndSortedImages = () => {
+    let filteredImages = [...images];
+
+    // Apply sorting
+    if (sortBy === 'recent') {
+      filteredImages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    } else if (sortBy === 'oldest') {
+      filteredImages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+    } else if (sortBy === 'favorites') {
+      filteredImages.sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0));
+    }
+
+    return filteredImages;
+  };
+
+  const filteredImages = getFilteredAndSortedImages();
+
+  if (loading) {
+    return <LoadingState />;
   }
 
   if (images.length === 0) {
-    return <EmptyGalleryState previewMode={previewMode} fullGallery={fullGallery} />;
+    return <EmptyGalleryState />;
   }
 
-  // Preview mode - show latest creation
-  if (previewMode) {
-    const image = images[0];
-    
+  const renderControls = () => {
+    if (previewMode) return null;
+
     return (
-      <div>
-        <ImageCard
-          image={image}
-          onImageClick={showImageDetails}
-          onRegenerate={handleRegenerate}
-          onDownload={handleDownload}
-          onDelete={handleDelete}
-          onToggleFavorite={toggleFavorite}
-          onSaveTitle={saveTitle}
-          isCompact
-        />
-        
-        <ImageDetailModal
-          isOpen={isDetailModalOpen}
-          onOpenChange={setIsDetailModalOpen}
-          selectedImage={selectedImage}
-          editingId={editingId}
-          editTitle={editTitle}
-          onEditChange={setEditTitle}
-          onStartEditing={startEditing}
-          onSaveTitle={saveTitle}
-          onCancelEditing={cancelEditing}
-          onToggleFavorite={toggleFavorite}
-          onRegenerate={handleRegenerate}
-          onDownload={handleDownload}
-          onDelete={handleDelete}
-        />
+      <div className="flex flex-col sm:flex-row gap-4 mb-6">
+        <div className="flex gap-2">
+          <Button
+            variant={viewMode === 'grid' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('grid')}
+            className="flex items-center gap-2"
+          >
+            <Grid className="h-4 w-4" />
+            Grid
+          </Button>
+          <Button
+            variant={viewMode === 'carousel' ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => setViewMode('carousel')}
+            className="flex items-center gap-2"
+          >
+            <List className="h-4 w-4" />
+            Carousel
+          </Button>
+        </div>
+
+        <div className="flex gap-2 flex-1">
+          <Select value={filter} onValueChange={(value: "all" | "favorites" | "recent") => setFilter(value)}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Filter" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">
+                <div className="flex items-center gap-2">
+                  <Filter className="h-4 w-4" />
+                  All
+                </div>
+              </SelectItem>
+              <SelectItem value="favorites">
+                <div className="flex items-center gap-2">
+                  <Heart className="h-4 w-4" />
+                  Favorites
+                </div>
+              </SelectItem>
+              <SelectItem value="recent">
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4" />
+                  Recent
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
+            <SelectTrigger className="w-32">
+              <SelectValue placeholder="Sort" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="recent">
+                <div className="flex items-center gap-2">
+                  <SortDesc className="h-4 w-4" />
+                  Recent
+                </div>
+              </SelectItem>
+              <SelectItem value="oldest">
+                <div className="flex items-center gap-2">
+                  <SortAsc className="h-4 w-4" />
+                  Oldest
+                </div>
+              </SelectItem>
+              <SelectItem value="favorites">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4" />
+                  Favorites
+                </div>
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
     );
-  }
-  
-  // Full gallery mode with filtering and view options
-  if (fullGallery) {
+  };
+
+  const renderGallery = () => {
+    const commonProps = {
+      images: filteredImages,
+      onImageClick: handleImageClick,
+      onToggleFavorite: handleFavoriteToggle,
+      onDownload: handleDownload,
+      onRegenerate: handleRegenerate,
+      onDelete: handleDelete,
+      onSaveTitle: handleSaveTitle,
+      onShare: handleShare,
+    };
+
+    if (viewMode === 'carousel') {
+      return <CarouselView {...commonProps} />;
+    }
+
+    return <GridView {...commonProps} />;
+  };
+
+  if (previewMode) {
     return (
       <div className="space-y-4">
-        <div className="flex flex-wrap gap-3 justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Badge variant="outline" className="bg-accent/10">
-              {images.length} Images
-            </Badge>
-            
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm" className="h-8">
-                  <Filter className="h-3.5 w-3.5 mr-1.5" />
-                  <span>Sort: </span>
-                  <span className="ml-1 text-primary">
-                    {sortOption === "recent" ? "Recent" : 
-                    sortOption === "oldest" ? "Oldest" : "Favorites"}
-                  </span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent>
-                <DropdownMenuRadioGroup value={sortOption} onValueChange={(val) => setSortOption(val as SortOption)}>
-                  <DropdownMenuRadioItem value="recent">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Most Recent
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="oldest">
-                    <Clock className="h-4 w-4 mr-2" />
-                    Oldest First
-                  </DropdownMenuRadioItem>
-                  <DropdownMenuRadioItem value="favorites">
-                    <Heart className="h-4 w-4 mr-2" />
-                    Favorites
-                  </DropdownMenuRadioItem>
-                </DropdownMenuRadioGroup>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-          
-          <div className="flex gap-2">
-            <Button 
-              variant={viewMode === "grid" ? "secondary" : "outline"} 
-              size="sm"
-              className="h-8"
-              onClick={() => setViewMode("grid")}
-            >
-              <div className="grid grid-cols-2 gap-0.5 h-3.5 w-3.5 mr-1.5">
-                <div className="bg-current rounded-sm"></div>
-                <div className="bg-current rounded-sm"></div>
-                <div className="bg-current rounded-sm"></div>
-                <div className="bg-current rounded-sm"></div>
-              </div>
-              Grid
-            </Button>
-            <Button 
-              variant={viewMode === "carousel" ? "secondary" : "outline"}
-              size="sm"
-              className="h-8"
-              onClick={() => setViewMode("carousel")}
-            >
-              <div className="flex space-x-0.5 h-3.5 w-3.5 mr-1.5">
-                <div className="bg-current w-2 rounded-sm"></div>
-                <div className="bg-current w-1 rounded-sm"></div>
-              </div>
-              Carousel
-            </Button>
-          </div>
-        </div>
-        
-        {viewMode === "grid" ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-            <GridView 
-              images={images}
-              onImageClick={showImageDetails}
-              onRegenerate={handleRegenerate}
-              onDownload={handleDownload}
-              onDelete={handleDelete}
-              onToggleFavorite={toggleFavorite}
-              onSaveTitle={(id, title) => {
-                setEditTitle(title);
-                saveTitle(id);
-              }}
-            />
-            
-            {images.length < 5 && fullGallery && <PlaceholderCards count={5 - images.length} />}
-          </div>
-        ) : (
-          <CarouselView
-            images={images}
-            editingId={editingId}
-            editTitle={editTitle}
-            onEditTitle={setEditTitle}
-            onImageClick={showImageDetails}
-            onStartEditing={startEditing}
-            onSaveTitle={saveTitle}
-            onCancelEditing={cancelEditing}
-            onToggleFavorite={toggleFavorite}
-            onRegenerate={handleRegenerate}
-            onDownload={handleDownload}
-            onDelete={handleDelete}
-          />
-        )}
-        
+        {renderGallery()}
         <ImageDetailModal
-          isOpen={isDetailModalOpen}
-          onOpenChange={setIsDetailModalOpen}
           selectedImage={selectedImage}
+          isOpen={showDetailModal}
+          onOpenChange={setShowDetailModal}
           editingId={editingId}
           editTitle={editTitle}
-          onEditChange={setEditTitle}
-          onStartEditing={startEditing}
-          onSaveTitle={saveTitle}
-          onCancelEditing={cancelEditing}
-          onToggleFavorite={toggleFavorite}
-          onRegenerate={handleRegenerate}
-          onDownload={handleDownload}
-          onDelete={handleDelete}
+          onEditChange={handleEditChange}
+          onStartEditing={handleStartEditing}
+          onSaveTitle={handleSaveTitleModal}
+          onCancelEditing={handleCancelEditing}
+          onToggleFavorite={handleFavoriteToggle}
+          onRegenerate={selectedImage ? () => handleRegenerate() : () => {}}
+          onDownload={selectedImage ? () => handleDownload(selectedImage) : () => {}}
+          onDelete={(id: string) => handleDelete(id)}
         />
       </div>
     );
   }
-  
-  // Simple gallery mode (not preview or full gallery)
+
   return (
-    <>
-      <ScrollArea className={cn(
-        "rounded-lg border border-white/10 bg-gradient-card shadow-card",
-        "max-h-[calc(100vh-170px)]"
-      )}>
-        <div className="p-2 space-y-3">
-          {images.map((image) => {
-            const imageUrl = supabase.storage.from('ai_generated_images').getPublicUrl(image.image_path).data.publicUrl;
-            return (
-              <div key={image.id} onClick={() => showImageDetails(image)}>
-                <ImageCard
-                  image={image}
-                  onImageClick={showImageDetails}
-                  onRegenerate={handleRegenerate}
-                  onDownload={handleDownload}
-                  onDelete={handleDelete}
-                  onToggleFavorite={toggleFavorite}
-                  onSaveTitle={(id, title) => {
-                    setEditTitle(title);
-                    saveTitle(id);
-                  }}
-                />
-              </div>
-            );
-          })}
-        </div>
-      </ScrollArea>
-      
-      <ImageDetailModal
-        isOpen={isDetailModalOpen}
-        onOpenChange={setIsDetailModalOpen}
-        selectedImage={selectedImage}
-        editingId={editingId}
-        editTitle={editTitle}
-        onEditChange={setEditTitle}
-        onStartEditing={startEditing}
-        onSaveTitle={saveTitle}
-        onCancelEditing={cancelEditing}
-        onToggleFavorite={toggleFavorite}
-        onRegenerate={handleRegenerate}
-        onDownload={handleDownload}
-        onDelete={handleDelete}
-      />
-    </>
+    <Card className="premium-card border border-white/10 shadow-lg">
+      <CardHeader>
+        <CardTitle className="premium-heading flex items-center gap-2">
+          <Sparkles className="h-5 w-5 text-purple-400" />
+          Generated Images
+          <Badge variant="secondary" className="ml-auto">
+            {filteredImages.length} images
+          </Badge>
+        </CardTitle>
+      </CardHeader>
+      <CardContent className="space-y-6">
+        {renderControls()}
+        {renderGallery()}
+        <ImageDetailModal
+          selectedImage={selectedImage}
+          isOpen={showDetailModal}
+          onOpenChange={setShowDetailModal}
+          editingId={editingId}
+          editTitle={editTitle}
+          onEditChange={handleEditChange}
+          onStartEditing={handleStartEditing}
+          onSaveTitle={handleSaveTitleModal}
+          onCancelEditing={handleCancelEditing}
+          onToggleFavorite={handleFavoriteToggle}
+          onRegenerate={selectedImage ? () => handleRegenerate() : () => {}}
+          onDownload={selectedImage ? () => handleDownload(selectedImage) : () => {}}
+          onDelete={(id: string) => handleDelete(id)}
+        />
+      </CardContent>
+    </Card>
   );
 }

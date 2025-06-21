@@ -1,7 +1,8 @@
+
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { fetchEventSource, EventSourceMessage } from '@microsoft/fetch-event-source';
 import { useAuth } from '../useAuth';
-import { ApiClient } from '../../api/ApiClient';
+import { apiClient } from '../../api/ApiClient';
 
 type JobStatus = 'idle' | 'submitting' | 'processing' | 'completed' | 'failed';
 
@@ -31,7 +32,6 @@ export const useContentJob = () => {
         setJobState({ jobId: null, status: 'submitting', data: null, error: null });
 
         try {
-            const apiClient = new ApiClient();
             const response = await apiClient.post<{ jobId: string }>('/jobs/content', { prompt, platform });
             setJobState(prevState => ({ ...prevState, jobId: response.jobId, status: 'processing' }));
         } catch (error: any) {
@@ -77,7 +77,7 @@ export const useContentJob = () => {
                     'Authorization': `Bearer ${session.access_token}`,
                 },
                 signal: ctrl.signal,
-                onopen(response) {
+                async onopen(response) {
                     if (response.ok && response.headers.get('content-type') === 'text/event-stream') {
                         console.log('SSE connection opened');
                         return; 
@@ -114,5 +114,10 @@ export const useContentJob = () => {
         };
     }, [jobState.status, jobState.jobId, session]);
 
+
     return { ...jobState, submit, cancel };
 }; 
+=======
+    return { ...jobState, submit };
+}; 
+

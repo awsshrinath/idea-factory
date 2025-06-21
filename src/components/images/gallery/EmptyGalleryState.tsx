@@ -1,5 +1,4 @@
 
-import React from "react";
 import { Card } from "@/components/ui/card";
 import { Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -54,7 +53,7 @@ export function EmptyGalleryState({ previewMode = false, fullGallery = false }: 
   if (fullGallery) {
     return (
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        <PlaceholderCards />
+        <PlaceholderCards count={5} />
       </div>
     );
   }

@@ -1,31 +1,36 @@
 
-import { Button } from "@/components/ui/button";
-import { RecentVideosGrid } from "../RecentVideosGrid";
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { EmptyRecentVideos } from '../EmptyRecentVideos';
+import { RecentVideosGrid } from '../RecentVideosGrid';
+import { History, Plus } from 'lucide-react';
 
 export function RecentVideosSection() {
   const hasRecentVideos = false;
 
   return (
-    <Card className="border border-white/10 bg-card/70 backdrop-blur-sm hover:shadow-lg transition-all duration-300">
-      <CardHeader className="pb-2">
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle className="text-xl font-semibold text-foreground">Your Recent Videos</CardTitle>
-            <CardDescription>Previously created content</CardDescription>
-          </div>
-          <Button variant="outline" size="sm" className="border-white/10 bg-background hover:bg-background/80 hover:scale-105 transition-transform">
-            View All
-          </Button>
+    <Card className="premium-card border border-white/10 shadow-lg backdrop-blur-sm">
+      <CardHeader className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <History className="h-5 w-5 text-muted-foreground" />
+          <CardTitle className="premium-heading text-xl">Recent Videos</CardTitle>
         </div>
+        <Button size="sm">
+          <Plus className="h-4 w-4 mr-2" />
+          Create New
+        </Button>
       </CardHeader>
       <CardContent>
-        <RecentVideosGrid
-          videos={[]}
-          onView={() => {}}
-          onRegenerate={() => {}}
-          onDelete={() => {}}
-        />
+        {hasRecentVideos ? (
+          <RecentVideosGrid 
+            videos={[]}
+            onView={() => {}}
+            onRegenerate={() => {}}
+            onDelete={() => {}}
+          />
+        ) : (
+          <EmptyRecentVideos />
+        )}
       </CardContent>
     </Card>
   );

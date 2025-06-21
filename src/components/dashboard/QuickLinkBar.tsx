@@ -1,118 +1,93 @@
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardTitle } from '@/components/ui/card';
+import { useNavigate } from 'react-router-dom';
+import { 
+  ImageIcon, 
+  Video, 
+  FileText, 
+  Calendar,
+  Sparkles
+} from 'lucide-react';
 
-import { Button } from "@/components/ui/button";
-import { ArrowRight, Calendar, FileText, Image, Video, Settings, BarChart3 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { cn } from "@/lib/utils";
+const quickLinks = [
+  {
+    title: "AI Images",
+    description: "Generate stunning visuals",
+    path: "/images",
+    icon: ImageIcon,
+    color: "from-purple-600 to-indigo-600",
+    bgGradient: "from-purple-600/10 to-indigo-600/10",
+    borderColor: "border-purple-500/20"
+  },
+  {
+    title: "AI Videos",
+    description: "Create engaging video content",
+    path: "/videos",
+    icon: Video,
+    color: "from-blue-600 to-cyan-600",
+    bgGradient: "from-blue-600/10 to-cyan-600/10",
+    borderColor: "border-blue-500/20"
+  },
+  {
+    title: "AI Content",
+    description: "Generate articles and copy",
+    path: "/content",
+    icon: FileText,
+    color: "from-orange-600 to-yellow-600",
+    bgGradient: "from-orange-600/10 to-yellow-600/10",
+    borderColor: "border-orange-500/20"
+  },
+  {
+    title: "AI Schedule",
+    description: "Plan and schedule content",
+    path: "/schedule",
+    icon: Calendar,
+    color: "from-red-600 to-pink-600",
+    bgGradient: "from-red-600/10 to-pink-600/10",
+    borderColor: "border-red-500/20"
+  }
+];
 
-export const QuickLinkBar = () => {
+export function QuickLinkBar() {
   const navigate = useNavigate();
-  const isMobile = useIsMobile();
-
-  const quickLinks = [
-    {
-      title: "Content",
-      icon: FileText,
-      path: "/content",
-      description: "Generate posts",
-      gradient: "from-slate-600/20 to-slate-700/20",
-      borderColor: "border-slate-500/20",
-    },
-    {
-      title: "Images", 
-      icon: Image,
-      path: "/images",
-      description: "Create visuals",
-      gradient: "from-indigo-600/20 to-purple-600/20",
-      borderColor: "border-indigo-500/20",
-    },
-    {
-      title: "Videos",
-      icon: Video,
-      path: "/videos", 
-      description: "Make videos",
-      gradient: "from-teal-600/20 to-cyan-600/20",
-      borderColor: "border-teal-500/20",
-    },
-    {
-      title: "Schedule",
-      icon: Calendar,
-      path: "/schedule",
-      description: "Plan posts",
-      gradient: "from-violet-600/20 to-purple-600/20",
-      borderColor: "border-violet-500/20",
-    },
-    {
-      title: "Analytics",
-      icon: BarChart3,
-      path: "/analytics",
-      description: "View metrics",
-      gradient: "from-emerald-600/20 to-green-600/20",
-      borderColor: "border-emerald-500/20",
-    },
-    {
-      title: "Settings",
-      icon: Settings,
-      path: "/settings",
-      description: "Configure",
-      gradient: "from-amber-600/20 to-orange-600/20",
-      borderColor: "border-amber-500/20",
-    },
-  ];
-
+  
   return (
-    <section className="mb-8 animate-fadeIn">
-      <div className={cn(
-        "glass-card rounded-2xl p-6 border border-white/10",
-        "bg-gradient-to-br from-white/[0.02] to-white/[0.01]",
-        "backdrop-blur-xl shadow-xl"
-      )}>
-        <div className={cn(
-          "flex items-center gap-4",
-          isMobile ? "flex-wrap justify-center" : "justify-between"
-        )}>
-          <div className="flex items-center gap-3">
-            <h3 className="premium-subheading text-lg">Quick Access</h3>
-            <ArrowRight className="h-5 w-5 text-purple-400" />
-          </div>
-          
-          <div className={cn(
-            "flex gap-3",
-            isMobile ? "flex-wrap justify-center" : "flex-row"
-          )}>
-            {quickLinks.map((link, index) => {
-              const Icon = link.icon;
-              return (
-                <Button
-                  key={link.title}
-                  onClick={() => navigate(link.path)}
-                  variant="ghost"
-                  size="sm" 
-                  className={cn(
-                    "group relative h-12 px-4",
-                    "bg-gradient-to-br hover:bg-gradient-to-br",
-                    "border hover:border-white/20 transition-all duration-300",
-                    "hover:scale-105 transform",
-                    link.gradient,
-                    link.borderColor,
-                    isMobile ? "min-w-[100px]" : ""
-                  )}
-                >
-                  <div className="flex items-center gap-2">
-                    <Icon className="h-4 w-4 transition-transform group-hover:scale-110" />
-                    <div className="text-left">
-                      <div className="text-xs font-semibold">{link.title}</div>
-                      {!isMobile && (
-                        <div className="text-xs text-white/60">{link.description}</div>
-                      )}
-                    </div>
-                  </div>
-                </Button>
-              );
-            })}
-          </div>
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h2 className="premium-heading text-2xl">
+            Quick Links
+          </h2>
+          <Sparkles className="h-5 w-5 text-purple-400 animate-pulse" />
         </div>
+        <Badge variant="secondary">
+          AI Powered
+        </Badge>
       </div>
-    </section>
+      
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {quickLinks.map((link) => (
+          <Card 
+            key={link.path}
+            className="premium-card premium-card-hover cursor-pointer transition-all duration-300 group hover:scale-[1.02] border border-white/10 bg-gradient-to-br from-slate-900/60 to-slate-800/40 backdrop-blur-sm"
+            onClick={() => navigate(link.path)}
+          >
+            <CardContent className="space-y-3">
+              <div className="flex items-center gap-3">
+                <div className={`h-8 w-8 rounded-lg bg-gradient-to-br ${link.bgGradient} flex items-center justify-center border ${link.borderColor}`}>
+                  <link.icon className="h-4 w-4 text-white" />
+                </div>
+                <CardTitle className="premium-subheading text-lg">
+                  {link.title}
+                </CardTitle>
+              </div>
+              <p className="premium-body text-sm line-clamp-2">
+                {link.description}
+              </p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
   );
-};
+}

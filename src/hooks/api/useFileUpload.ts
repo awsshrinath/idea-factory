@@ -1,3 +1,4 @@
+
 import { useState, useCallback } from 'react';
 import { apiClient } from '@/api';
 import { useApi } from './useApi';
@@ -5,12 +6,22 @@ import { useApi } from './useApi';
 interface SignedUrlResponse {
   signedUrl: string;
   path: string;
+=======
+
+import { useMutation } from '@tanstack/react-query';
+
+interface UploadPayload {
+  file: File;
+  bucket?: string;
+  path?: string;
+
 }
 
 const getSignedUrl = (fileName: string, fileType: string) =>
   apiClient.post<SignedUrlResponse>('/storage/upload', { fileName, fileType });
 
 export const useFileUpload = () => {
+
   const [progress, setProgress] = useState(0);
   const getSignedUrlApi = useApi(getSignedUrl);
 
@@ -66,5 +77,27 @@ export const useFileUpload = () => {
     progress,
     isLoading: getSignedUrlApi.status === 'loading',
     error: getSignedUrlApi.error,
+
+  const uploadMutation = useMutation({
+    mutationFn: async (payload: UploadPayload) => {
+      const formData = new FormData();
+      formData.append('file', payload.file);
+      
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+      
+      if (!response.ok) throw new Error('Failed to upload file');
+      return response.json();
+    },
+  });
+
+  return {
+    data: uploadMutation.data,
+    error: uploadMutation.error,
+    isLoading: uploadMutation.isPending,
+    upload: uploadMutation.mutate,
+
   };
-}; 
+};

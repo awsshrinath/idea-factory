@@ -1,19 +1,6 @@
 
-import React from "react";
 import { ImageCard } from "./ImageCard";
-
-interface GeneratedImage {
-  id: string;
-  user_id: string;
-  prompt: string;
-  style: string;
-  aspect_ratio: string;
-  image_path: string;
-  created_at: string;
-  updated_at?: string;
-  title?: string | null;
-  is_favorite?: boolean | null;
-}
+import { GeneratedImage } from "./types";
 
 interface GridViewProps {
   images: GeneratedImage[];
@@ -39,7 +26,11 @@ export function GridView({
       {images.map((image) => (
         <ImageCard
           key={image.id}
-          image={image}
+          image={{
+            ...image,
+            created_at: image.created_at || new Date().toISOString(),
+            updated_at: image.updated_at || undefined
+          }}
           onImageClick={onImageClick}
           onRegenerate={onRegenerate}
           onDownload={onDownload}

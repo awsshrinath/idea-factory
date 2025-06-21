@@ -3,7 +3,6 @@ import { Sidebar } from "@/components/Sidebar";
 import { ImageGenerationForm } from "@/components/images/ImageGenerationForm";
 import { ImageGallery } from "@/components/images/ImageGallery";
 import { StyleTemplates } from "@/components/images/StyleTemplates";
-import { Card } from "@/components/ui/card";
 import { Wand2, Sparkles, BookImage, Grid, LayoutGrid, Rows, Heart, Clock, Filter, Image as ImageIcon, Bell } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
@@ -25,7 +24,6 @@ import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/components/ui/use-toast";
 
 export function Images() {
-  const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<"create" | "gallery">("create");
@@ -50,7 +48,7 @@ export function Images() {
     
     checkAuth();
     
-    const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: authListener } = supabase.auth.onAuthStateChange((_event, session) => {
       const authenticated = !!session;
       setIsAuthenticated(authenticated);
       
@@ -63,15 +61,6 @@ export function Images() {
       authListener?.subscription?.unsubscribe();
     };
   }, [navigate]);
-
-  const handleImageGenerated = () => {
-    // Increment the refresh trigger to cause ImageGallery to reload
-    setRefreshTrigger(prev => prev + 1);
-    // On mobile, switch to gallery tab after generating
-    if (isMobile) {
-      setActiveTab("gallery");
-    }
-  };
   
   const toggleNotifyMe = () => {
     setNotifyMeEnabled(prev => !prev);
@@ -87,57 +76,60 @@ export function Images() {
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
-        <p className="text-muted-foreground">Loading...</p>
+        <p className="premium-body">Loading...</p>
       </div>
     );
   }
 
   if (!isAuthenticated) {
-    return null; // Will be redirected by the useEffect
+    return null;
   }
 
   return (
-    <div className="min-h-screen flex bg-background overflow-x-hidden w-full">
+    <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
       <Sidebar />
       <main className={cn(
-        "flex-1 p-0",
+        "flex-1 p-0 relative z-10",
         isMobile ? "ml-0 pt-16" : "ml-64",
         "w-full max-w-full"
       )}>
-        <div className="w-full px-2 sm:px-4">
+        <div className="w-full px-6 md:px-8 lg:px-10">
           {isMobile ? (
-            // Mobile View - Tabbed Interface
+            // Mobile View - Enhanced
             <>
-              <div className="flex justify-between items-center p-4">
-                <div className="animate-fadeIn">
-                  <h1 className="text-2xl font-bold mb-1 text-foreground font-heading">
+              <div className="flex justify-between items-center p-6 mb-6">
+                <div className="animate-fadeIn space-y-2">
+                  <h1 className="enterprise-heading text-3xl">
                     AI Image Generation
                   </h1>
+                  <p className="premium-body">Create stunning visuals with AI</p>
                 </div>
                 <AuthStatus />
               </div>
               
               <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as "create" | "gallery")}>
-                <TabsList className="grid grid-cols-2 mb-4">
-                  <TabsTrigger value="create" className="flex items-center">
+                <TabsList className="grid grid-cols-2 mb-6 premium-card border border-white/10 bg-gradient-to-r from-slate-900/80 to-slate-800/60">
+                  <TabsTrigger value="create" className="premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30">
                     <Wand2 className="h-4 w-4 mr-2" />
                     Create
                   </TabsTrigger>
-                  <TabsTrigger value="gallery" className="flex items-center">
+                  <TabsTrigger value="gallery" className="premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30">
                     <BookImage className="h-4 w-4 mr-2" />
                     Gallery
                   </TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="create" className="animate-fadeIn">
+                <TabsContent value="create" className="animate-fadeIn space-y-6">
                   <StyleTemplates />
-                  <Card className="p-4 mt-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 overflow-hidden">
-                    <h2 className="text-xl font-semibold mb-4 text-foreground font-heading flex items-center gap-2">
-                      <Wand2 className="h-5 w-5 text-primary" />
+                  <div className="premium-card premium-card-hover rounded-2xl p-6 backdrop-blur-sm border border-white/10">
+                    <h2 className="premium-heading text-xl mb-6 flex items-center gap-3">
+                      <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-600/20 to-indigo-600/20 flex items-center justify-center border border-purple-500/20">
+                        <Wand2 className="h-4 w-4 text-purple-400" />
+                      </div>
                       Create New Image
                     </h2>
-                    <ImageGenerationForm onImageGenerated={handleImageGenerated} />
-                  </Card>
+                    <ImageGenerationForm />
+                  </div>
                 </TabsContent>
                 
                 <TabsContent value="gallery" className="animate-fadeIn">
@@ -196,7 +188,7 @@ export function Images() {
                   </div>
                   
                   <ImageGallery 
-                    key={`${galleryView}-${galleryFilter}-${refreshTrigger}`} 
+                    key={`${galleryView}-${galleryFilter}`} 
                     viewMode={galleryView}
                     filter={galleryFilter}
                   />
@@ -204,14 +196,14 @@ export function Images() {
               </Tabs>
             </>
           ) : (
-            // Desktop View - Side by Side Interface
+            // Desktop View - Enhanced
             <>
-              <div className="flex justify-between items-center p-4">
-                <div className="animate-fadeIn">
-                  <h1 className="text-3xl font-bold mb-1 text-foreground font-heading">
+              <div className="flex justify-between items-center p-6 mb-8">
+                <div className="animate-fadeIn space-y-3">
+                  <h1 className="enterprise-heading text-4xl">
                     AI Image Generation
                   </h1>
-                  <p className="text-muted-foreground text-sm">
+                  <p className="premium-body text-lg max-w-2xl">
                     Create unique images using AI. Describe what you want to see, choose a
                     style, and let AI do the magic.
                   </p>
@@ -219,115 +211,127 @@ export function Images() {
                 <AuthStatus />
               </div>
               
-              {/* Visual Templates Section */}
-              <StyleTemplates />
+              {/* Enhanced Visual Templates Section */}
+              <section className="mb-8">
+                <div className="flex items-center gap-3 mb-6">
+                  <h2 className="premium-heading text-2xl">Style Templates</h2>
+                  <Sparkles className="h-5 w-5 text-purple-400 animate-pulse" />
+                </div>
+                <StyleTemplates />
+              </section>
               
-              <div className="grid gap-4 p-2 sm:p-4 grid-cols-1 lg:grid-cols-12">
-                {/* Left Column - Main Controls - Takes ~65% of the space */}
-                <Card className="p-4 bg-gradient-card border border-white/10 shadow-card hover:shadow-card-hover transition-all duration-300 lg:col-span-8 overflow-hidden">
-                  <h2 className="text-xl font-semibold mb-4 text-foreground font-heading flex items-center gap-2">
-                    <Wand2 className="h-5 w-5 text-primary" />
+              <div className="grid gap-8 grid-cols-1 lg:grid-cols-12 mb-12">
+                {/* Left Column - Enhanced */}
+                <div className="premium-card premium-card-hover rounded-2xl p-8 backdrop-blur-sm border border-white/10 lg:col-span-8">
+                  <h2 className="premium-heading text-xl mb-6 flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-600/20 to-indigo-600/20 flex items-center justify-center border border-purple-500/20">
+                      <Wand2 className="h-4 w-4 text-purple-400" />
+                    </div>
                     Create New Image
                   </h2>
-                  <ImageGenerationForm onImageGenerated={handleImageGenerated} />
-                </Card>
+                  <ImageGenerationForm />
+                </div>
 
-                {/* Right Column - Image Preview - Takes ~35% of the space */}
-                <div className="space-y-3 lg:col-span-4">
-                  <h2 className="text-xl font-semibold text-foreground font-heading px-2 flex items-center gap-2">
-                    <Sparkles className="h-4 w-4 text-primary" />
-                    Your Latest Creation
-                  </h2>
-                  <ScrollArea className="h-[600px]">
-                    <ImageGallery key={`preview-${refreshTrigger}`} previewMode={true} />
-                  </ScrollArea>
+                {/* Right Column - Enhanced */}
+                <div className="space-y-6 lg:col-span-4">
+                  <div className="premium-card premium-card-hover rounded-2xl p-6 backdrop-blur-sm border border-white/10">
+                    <h2 className="premium-heading text-lg mb-4 flex items-center gap-2">
+                      <div className="h-6 w-6 rounded-md bg-gradient-to-br from-emerald-600/20 to-green-600/20 flex items-center justify-center border border-emerald-500/20">
+                        <Sparkles className="h-3 w-3 text-emerald-400" />
+                      </div>
+                      Your Latest Creation
+                    </h2>
+                    <ScrollArea className="h-[600px]">
+                      <ImageGallery key="preview" previewMode={true} />
+                    </ScrollArea>
+                  </div>
                 </div>
               </div>
               
-              {/* Full Gallery Section */}
-              <div className="mt-8 px-2 sm:px-4 pb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-2xl font-bold text-foreground font-heading flex items-center gap-2">
-                    <BookImage className="h-5 w-5 text-primary" />
-                    Your Image Gallery
-                  </h2>
-                  
+              {/* Enhanced Full Gallery Section */}
+              <section className="pb-12">
+                <div className="flex items-center justify-between mb-8">
                   <div className="flex items-center gap-3">
+                    <h2 className="premium-heading text-3xl">Your Image Gallery</h2>
+                    <BookImage className="h-6 w-6 text-purple-400 animate-pulse" />
+                  </div>
+                  
+                  <div className="flex items-center gap-4">
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
                         <Button 
                           variant="outline" 
-                          size="sm"
-                          className="text-sm"
+                          className="premium-button bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                         >
                           <Filter className="h-4 w-4 mr-2" />
                           {galleryFilter === "all" ? "All Images" : 
                            galleryFilter === "favorites" ? "Favorites" : "Recent"}
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => setGalleryFilter("all")}>
+                      <DropdownMenuContent align="end" className="premium-card border border-white/10 bg-slate-900/95 backdrop-blur-xl">
+                        <DropdownMenuItem onClick={() => setGalleryFilter("all")} className="premium-caption hover:bg-white/10">
                           <ImageIcon className="h-4 w-4 mr-2" />
                           All Images
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setGalleryFilter("favorites")}>
+                        <DropdownMenuItem onClick={() => setGalleryFilter("favorites")} className="premium-caption hover:bg-white/10">
                           <Heart className="h-4 w-4 mr-2" />
                           Favorites
                         </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => setGalleryFilter("recent")}>
+                        <DropdownMenuItem onClick={() => setGalleryFilter("recent")} className="premium-caption hover:bg-white/10">
                           <Clock className="h-4 w-4 mr-2" />
                           Recent
                         </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                     
-                    <div className="flex items-center gap-1 border border-white/10 rounded-md bg-muted/10">
+                    <div className="flex items-center gap-1 border border-white/10 rounded-lg bg-muted/10 premium-card">
                       <Button
                         variant={galleryView === "grid" ? "secondary" : "ghost"}
                         size="sm"
                         onClick={() => setGalleryView("grid")}
+                        className="premium-caption"
                       >
                         <Grid className="h-4 w-4" />
-                        <span className="sr-only">Grid View</span>
                       </Button>
                       <Separator orientation="vertical" className="h-6 bg-white/10" />
                       <Button 
                         variant={galleryView === "carousel" ? "secondary" : "ghost"}
                         size="sm"
                         onClick={() => setGalleryView("carousel")}
+                        className="premium-caption"
                       >
                         <Rows className="h-4 w-4" />
-                        <span className="sr-only">Carousel View</span>
                       </Button>
                     </div>
                   </div>
                 </div>
                 <ImageGallery 
-                  key={`full-${galleryView}-${galleryFilter}-${refreshTrigger}`} 
-                  fullGallery={true}
+                  key={`full-${galleryView}-${galleryFilter}`} 
                   viewMode={galleryView}
                   filter={galleryFilter}
                 />
-              </div>
+              </section>
             </>
           )}
           
-          {/* Future Feature Placeholder with added notification CTA */}
-          <div className="mt-8 px-4 pb-8 opacity-90">
-            <Card className="p-4 bg-gradient-to-br from-background to-muted/30 border border-white/5 backdrop-blur-sm overflow-hidden">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-lg font-semibold text-foreground/90">Coming Soon: Personal Style Training</h3>
+          {/* Enhanced Future Feature Placeholder */}
+          <div className="pb-12">
+            <div className="premium-card premium-card-hover rounded-2xl p-8 backdrop-blur-sm border border-white/10">
+              <div className="flex items-center justify-between mb-6">
+                <div className="space-y-2">
+                  <h3 className="premium-heading text-xl">Coming Soon: Personal Style Training</h3>
+                  <p className="premium-body">Train AI models on your unique creative style</p>
+                </div>
                 <Button 
                   variant={notifyMeEnabled ? "secondary" : "outline"}
-                  size="sm"
-                  className="transition-all duration-300 hover:scale-[1.02]"
+                  className="premium-button transition-all duration-300 hover:scale-[1.02]"
                   onClick={toggleNotifyMe}
                 >
                   <Bell className={`h-4 w-4 mr-2 ${notifyMeEnabled ? "text-secondary-foreground" : ""}`} />
                   {notifyMeEnabled ? "Notifications On" : "Notify Me"}
                 </Button>
               </div>
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-6">
                 {[
                   {name: "Fashion", desc: "Train AI on your fashion preferences"}, 
                   {name: "Architecture", desc: "Create buildings in your unique style"}, 
@@ -335,26 +339,28 @@ export function Images() {
                 ].map((style) => (
                   <div 
                     key={style.name} 
-                    className="relative overflow-hidden rounded-lg aspect-square bg-muted/20 flex items-center justify-center border border-white/10 backdrop-blur-sm hover:shadow-[0_0_15px_rgba(66,230,149,0.15)] transition-all duration-300 group"
+                    className="relative overflow-hidden rounded-xl aspect-square premium-card border border-white/10 flex items-center justify-center backdrop-blur-sm hover:shadow-[0_0_30px_rgba(147,51,234,0.15)] transition-all duration-500 group"
                   >
                     <div className="absolute inset-0 backdrop-blur-md flex items-center justify-center">
-                      <div className="bg-background/60 px-3 py-1 rounded-full text-xs font-medium mb-8">Coming Soon</div>
+                      <Badge className="badge-premium mb-8">Coming Soon</Badge>
                     </div>
-                    <div className="absolute bottom-0 left-0 right-0 p-3 bg-gradient-to-t from-black/80 to-transparent flex flex-col items-center">
-                      <p className="text-sm font-medium">{style.name}</p>
-                      <p className="text-xs text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-center">{style.desc}</p>
+                    <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/80 to-transparent">
+                      <p className="premium-subheading text-sm mb-1">{style.name}</p>
+                      <p className="premium-caption text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-300">{style.desc}</p>
                     </div>
                   </div>
                 ))}
               </div>
               
               {notifyMeEnabled && (
-                <div className="mt-3 bg-accent/10 rounded-md p-2 text-xs text-accent-foreground flex items-center justify-center">
-                  <Sparkles className="h-3 w-3 mr-2" />
-                  You'll be the first to know when Personal Style Training launches!
+                <div className="mt-6 premium-card rounded-xl p-4 bg-gradient-to-r from-emerald-500/10 to-green-500/5 border border-emerald-500/20">
+                  <p className="premium-body text-sm flex items-center text-emerald-300">
+                    <Sparkles className="h-4 w-4 mr-2" />
+                    You'll be the first to know when Personal Style Training launches!
+                  </p>
                 </div>
               )}
-            </Card>
+            </div>
           </div>
         </div>
       </main>
