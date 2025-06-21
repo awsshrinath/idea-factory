@@ -39,6 +39,29 @@ export const useContentJob = () => {
         }
     }, [session]);
 
+    const cancel = useCallback(async () => {
+        if (!jobState.jobId || !session) {
+            setJobState(prevState => ({ ...prevState, error: 'No job to cancel or not authenticated', status: 'failed' }));
+            return;
+        }
+
+        // Abort any ongoing SSE connection
+        if (ctrlRef.current) {
+            ctrlRef.current.abort();
+        }
+
+        try {
+            const apiClient = new ApiClient();
+            await apiClient.post(`/jobs/${jobState.jobId}/cancel`, {});
+            setJobState(prevState => ({ ...prevState, status: 'failed', error: 'Job cancelled by user.' }));
+        } catch (error: any) {
+            // It might fail if the job is already processing, which is fine.
+            // The SSE event would have already updated the state.
+            console.error("Failed to cancel job:", error.message);
+            setJobState(prevState => ({ ...prevState, error: `Failed to cancel job: ${error.message}` }));
+        }
+    }, [session, jobState.jobId]);
+
     useEffect(() => {
         if (jobState.status !== 'processing' || !jobState.jobId || !session) {
             return;
@@ -91,5 +114,5 @@ export const useContentJob = () => {
         };
     }, [jobState.status, jobState.jobId, session]);
 
-    return { ...jobState, submit };
+    return { ...jobState, submit, cancel };
 }; 

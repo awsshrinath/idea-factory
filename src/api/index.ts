@@ -1,2 +1,2 @@
-export * from './ApiClient';
-export * from './ApiError'; 
+export { apiClient } from './ApiClient';
+export { ApiError, isApiError } from './ApiError'; 

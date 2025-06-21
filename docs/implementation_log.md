@@ -666,1209 +666,737 @@ class ApiClient {
 export const apiClient = new ApiClient();
 ```
 
-### `backend/src/index.ts`
+### `src/api/ApiError.ts`
 ```typescript
-import express, { Request, Response, NextFunction } from 'express';
-import dotenv from 'dotenv';
-import cors from 'cors';
-import rateLimit from 'express-rate-limit';
-import jwt from 'jsonwebtoken';
-
-dotenv.config();
-
-const JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
-
-if (!JWT_SECRET) {
-  throw new Error('Supabase JWT Secret must be provided in environment variables.');
-}
-
-declare global {
-  namespace Express {
-    export interface Request {
-      user?: string | jwt.JwtPayload;
+export class ApiError extends Error {
+    public readonly status: number;
+    public readonly code: string | undefined;
+  
+    constructor(message: string, status: number, code?: string) {
+      super(message);
+      this.status = status;
+      this.code = code;
+      Object.setPrototypeOf(this, ApiError.prototype);
+    }
+  
+    static networkError(originalError: Error) {
+      return new ApiError(
+        'Network error: Please check your connection.', 
+        -1, 
+        'NETWORK_ERROR'
+      );
+    }
+  
+    static unknown(originalError: any) {
+      return new ApiError(
+        'An unexpected error occurred.',
+        -2,
+        'UNKNOWN_ERROR'
+      );
     }
   }
+  
+  export function isApiError(error: unknown): error is ApiError {
+    return error instanceof ApiError;
+  }
+```
+
+### `src/hooks/api/useApi.ts`
+```typescript
+import { useState, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
+import { ApiError, isApiError } from '@/api/ApiError';
+
+type ApiStatus = 'idle' | 'loading' | 'success' | 'error';
+
+interface UseApiState<T> {
+  data: T | null;
+  status: ApiStatus;
+  error: ApiError | null;
 }
 
-const authMiddleware = (
-  req: Request,
-  res: Response,
-  next: NextFunction
+interface UseApiOptions {
+  showSuccessToast?: boolean;
+  successMessage?: string;
+  showErrorToast?: boolean;
+  errorMessage?: string;
+}
+
+export const useApi = <T, P extends any[]>(
+  apiFunc: (...args: P) => Promise<T>,
+  options: UseApiOptions = {}
 ) => {
-  const authHeader = req.headers.authorization;
+  const { 
+    showSuccessToast = true, 
+    successMessage = 'Operation successful!',
+    showErrorToast = true, 
+    errorMessage,
+  } = options;
 
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return res.status(401).json({ message: 'Authentication token is required.' });
-  }
+  const [state, setState] = useState<UseApiState<T>>({
+    data: null,
+    status: 'idle',
+    error: null,
+  });
 
-  const token = authHeader.split(' ')[1];
+  const mounted = useRef(true);
 
-  try {
-    const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded;
-    // Log token usage
-    if (typeof decoded === 'object' && decoded.sub) {
-      console.log(`[Auth] User ${decoded.sub} accessed ${req.originalUrl}`);
-    }
-    next();
-  } catch (error) {
-    return res.status(401).json({ message: 'Invalid or expired token.' });
-  }
-};
+  const execute = useCallback(async (...args: P) => {
+    if (!mounted.current) return;
 
-const app = express();
-const port = process.env.PORT || 3001;
-
-// CORS Configuration
-const allowedOrigins =
-  process.env.NODE_ENV === 'production'
-    ? [process.env.FRONTEND_URL || '']
-    : ['http://localhost:5173', 'http://127.0.0.1:5173'];
-
-const corsOptions: cors.CorsOptions = {
-  origin: (origin, callback) => {
-    if (!origin || allowedOrigins.indexOf(origin) !== -1) {
-      callback(null, true);
-    } else {
-      callback(new Error('Not allowed by CORS'));
-    }
-  },
-  credentials: true,
-};
-
-app.use(cors(corsOptions));
-app.use(express.json());
-
-// Rate Limiting
-const limiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100, // Limit each IP to 100 requests per windowMs
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-});
-
-app.use(limiter);
-
-// Health check endpoint
-app.get('/api/v1/health', (req: Request, res: Response) => {
-  res.status(200).json({ status: 'ok' });
-});
-
-// Add routes here
-import aiRoutes from './routes/ai';
-app.use('/api/v1/ai', authMiddleware, aiRoutes);
-
-import instagramRoutes from './routes/instagram';
-app.use('/api/v1/instagram', authMiddleware, instagramRoutes);
-
-import schedulerRoutes from './routes/scheduler';
-app.use('/api/v1/scheduler', authMiddleware, schedulerRoutes);
-
-import storageRoutes from './routes/storage';
-app.use('/api/v1/storage', authMiddleware, storageRoutes);
-
-// Example: import contentRoutes from './routes/content';
-// app.use('/api/v1/content', contentRoutes);
-
-app.listen(port, () => {
-  console.log(`[server]: Server is running at http://localhost:${port}`);
-});
-```
-
-### `supabase/functions/setup-database/index.ts`
-```typescript
-import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.7.1';
-
-const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
-
-serve(async (req) => {
-  // Handle CORS preflight requests
-  if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
-  }
-
-  try {
-    // Get admin supabase client
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') || '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
-    );
-
-    // Create the 'exec_sql' function if it doesn't exist
-    const { error: sqlFunctionError } = await supabaseAdmin.rpc('exec_sql', {
-      sql: `
-        CREATE OR REPLACE FUNCTION exec_sql(sql text) RETURNS void AS $$
-        BEGIN
-          EXECUTE sql;
-        END;
-        $$ LANGUAGE plpgsql SECURITY DEFINER;
-      `
-    }).catch(() => {
-      // Function might already exist or exec_sql might not exist yet
-      // Create it directly with a raw query
-      return supabaseAdmin.auth.admin.createUser({
-        email: 'temp@example.com',
-        password: 'password',
-        email_confirm: true
-      }).then(() => {
-        // This is just to get to the raw query method
-        return { error: null };
-      });
-    });
-
-    // Now try creating the table function
-    const { error: createFunctionError } = await supabaseAdmin.rpc('exec_sql', {
-      sql: `
-        CREATE OR REPLACE FUNCTION create_generated_images_table()
-        RETURNS void AS $$
-        BEGIN
-          -- Check if the table exists
-          IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'generated_images') THEN
-            -- Create the table
-            CREATE TABLE public.generated_images (
-              id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-              user_id UUID REFERENCES auth.users NOT NULL,
-              prompt TEXT NOT NULL,
-              style TEXT,
-              aspect_ratio TEXT,
-              image_path TEXT NOT NULL,
-              created_at TIMESTAMPTZ DEFAULT now() NOT NULL
-            );
-
-            -- Add RLS policies
-            ALTER TABLE public.generated_images ENABLE ROW LEVEL SECURITY;
-            
-            -- Allow users to see only their own images
-            CREATE POLICY "Users can view their own images" 
-              ON public.generated_images 
-              FOR SELECT 
-              USING (auth.uid() = user_id);
-              
-            -- Allow users to insert their own images
-            CREATE POLICY "Users can insert their own images" 
-              ON public.generated_images 
-              FOR INSERT 
-              WITH CHECK (auth.uid() = user_id);
-              
-            -- Allow users to delete their own images
-            CREATE POLICY "Users can delete their own images" 
-              ON public.generated_images 
-              FOR DELETE 
-              USING (auth.uid() = user_id);
-          END IF;
-        END;
-        $$ LANGUAGE plpgsql;
-      `
-    });
-
-    // Create profiles table
-    const { error: createProfilesError } = await supabaseAdmin.rpc('exec_sql', {
-      sql: `
-        CREATE OR REPLACE FUNCTION create_profiles_table_and_trigger()
-        RETURNS void AS $$
-        BEGIN
-          -- Create the profiles table
-          IF NOT EXISTS (SELECT FROM pg_tables WHERE schemaname = 'public' AND tablename = 'profiles') THEN
-            CREATE TABLE public.profiles (
-              id UUID PRIMARY KEY REFERENCES auth.users ON DELETE CASCADE,
-              username TEXT UNIQUE,
-              full_name TEXT,
-              avatar_url TEXT,
-              updated_at TIMESTAMPTZ DEFAULT now()
-            );
-
-            -- Add RLS policies for profiles
-            ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;
-
-            CREATE POLICY "Public profiles are viewable by everyone."
-              ON public.profiles FOR SELECT USING (true);
-
-            CREATE POLICY "Users can insert their own profile."
-              ON public.profiles FOR INSERT WITH CHECK (auth.uid() = id);
-
-            CREATE POLICY "Users can update their own profile."
-              ON public.profiles FOR UPDATE USING (auth.uid() = id);
-          END IF;
-
-          -- Create the trigger function
-          CREATE OR REPLACE FUNCTION public.handle_new_user()
-          RETURNS trigger AS $$
-          BEGIN
-            INSERT INTO public.profiles (id, username)
-            VALUES (new.id, new.email);
-            return new;
-          END;
-          $$ LANGUAGE plpgsql SECURITY DEFINER;
-
-          -- Create the trigger
-          DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-          CREATE TRIGGER on_auth_user_created
-            AFTER INSERT ON auth.users
-            FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
-        END;
-        $$ LANGUAGE plpgsql;
-      `
-    });
-
-    // Create storage bucket
-    const { error: bucketError } = await supabaseAdmin
-      .storage
-      .createBucket('ai_generated_images', {
-        public: true,
-        fileSizeLimit: 10485760, // 10MB
-      })
-      .catch(e => {
-        // Bucket might already exist, which is fine
-        console.log('Bucket may already exist:', e.message);
-        return { error: null };
-      });
-
-    return new Response(
-      JSON.stringify({ 
-        success: true,
-        sqlFunctionError: sqlFunctionError?.message,
-        createFunctionError: createFunctionError?.message,
-        createProfilesError: createProfilesError?.message,
-        bucketError: bucketError?.message
-      }),
-      { 
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json'
-        } 
-      }
-    );
-  } catch (error) {
-    console.error('Error setting up database:', error);
-    return new Response(
-      JSON.stringify({ error: error.message || 'Unknown error occurred' }),
-      { 
-        status: 500,
-        headers: { 
-          ...corsHeaders,
-          'Content-Type': 'application/json'
+    setState(prevState => ({ ...prevState, status: 'loading', error: null }));
+    
+    try {
+      const response = await apiFunc(...args);
+      if (mounted.current) {
+        setState({ data: response, status: 'success', error: null });
+        if (showSuccessToast) {
+          toast.success(successMessage);
         }
       }
-    );
-  }
-});
-```
+      return { data: response, error: null };
+    } catch (err) {
+      const error = isApiError(err) ? err : ApiError.unknown(err);
+      if (mounted.current) {
+        setState({ data: null, status: 'error', error });
+        if (showErrorToast) {
+          toast.error(errorMessage || error.message);
+        }
+      }
+      return { data: null, error };
+    }
+  }, [apiFunc, showSuccessToast, successMessage, showErrorToast, errorMessage]);
 
-### `src/hooks/useAuth.ts`
-```typescript
-import { useSession, useUser } from '@supabase/auth-helpers-react';
-import { supabase } from '@/integrations/supabase/client';
-
-export const useAuth = () => {
-  const session = useSession();
-  const user = useUser();
-
-  const signInWithGithub = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'github',
-    });
-  };
-
-  const signOut = async () => {
-    await supabase.auth.signOut();
-  };
-
-  return {
-    session,
-    user,
-    signInWithGithub,
-    signOut,
-    isAuthenticated: !!session,
-  };
+  return { ...state, execute };
 };
 ```
 
-### `src/components/system/ProtectedRoute.tsx`
+### `src/components/system/ErrorBoundary.tsx`
 ```typescript
-import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { ErrorDisplay } from './ErrorDisplay';
 
-interface ProtectedRouteProps {
-  redirectPath?: string;
+interface Props {
+  children: ReactNode;
 }
 
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
-  redirectPath = '/auth',
-}) => {
-  const { isAuthenticated, session } = useAuth();
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
 
-  // The session is still loading
-  if (session === undefined) {
-    return <div>Loading...</div>; // Or a spinner
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true, error };
   }
 
-  if (!isAuthenticated) {
-    return <Navigate to={redirectPath} replace />;
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // You can also log the error to an error reporting service
+    console.error("Uncaught error:", error, errorInfo);
   }
 
-  return <Outlet />;
-};
-```
-
-### `src/pages/Auth.tsx`
-```typescript
-import { supabase } from '@/integrations/supabase/client';
-import { Auth as SupabaseAuth } from '@supabase/auth-ui-react';
-import { ThemeSupa } from '@supabase/auth-ui-shared';
-import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth';
-import { useEffect } from 'react';
-
-const AuthPage = () => {
-    const navigate = useNavigate();
-    const { isAuthenticated, session } = useAuth();
-
-    useEffect(() => {
-        if (isAuthenticated) {
-            navigate('/');
-        }
-    }, [isAuthenticated, navigate]);
-
-    // Don't render the auth form until we know the auth state
-    if (session === undefined) {
-        return <div>Loading...</div>; // Or a spinner
+  public render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return (
+        <ErrorDisplay 
+          error={this.state.error}
+          onReset={() => this.setState({ hasError: false, error: null })} 
+        />
+      );
     }
 
-    return (
-        <div className="flex justify-center items-center h-screen">
-            <div className="w-full max-w-md p-8 space-y-8 bg-white rounded-lg shadow-md">
-                <SupabaseAuth
-                    supabaseClient={supabase}
-                    appearance={{ theme: ThemeSupa }}
-                    providers={['github']}
-                    redirectTo="/"
-                />
-            </div>
-        </div>
-    );
-};
-
-export default AuthPage;
-```
-
-### `src/components/Sidebar.tsx`
-```typescript
-import { Link, useLocation } from 'react-router-dom';
-import { cn } from '@/lib/utils';
-import {
-  Home,
-  FileText,
-  Image,
-  Video,
-  Calendar,
-  Settings,
-  LogOut,
-} from 'lucide-react';
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from '@/components/ui/tooltip';
-import { useAuth } from '@/hooks/useAuth';
-
-const menuItems = [
-  { icon: Home, label: 'Dashboard', path: '/' },
-  { icon: FileText, label: 'Content', path: '/content' },
-  { icon: Image, label: 'Images', path: '/images' },
-  { icon: Video, label: 'Videos', path: '/videos' },
-  { icon: Calendar, label: 'Schedule', path: '/schedule' },
-  { icon: Settings, label: 'Settings', path: '/settings' },
-];
-
-export function Sidebar() {
-  const location = useLocation();
-  const { isAuthenticated, signOut } = useAuth();
-
-  return (
-    <TooltipProvider>
-      <aside className="fixed inset-y-0 left-0 z-10 flex w-14 flex-col border-r bg-background">
-        <nav className="flex flex-col items-center gap-4 px-2 sm:py-5">
-          {menuItems.map((item) => (
-            <Tooltip key={item.path}>
-              <TooltipTrigger asChild>
-                <Link
-                  to={item.path}
-                  className={cn(
-                    'flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8',
-                    location.pathname === item.path && 'bg-accent text-accent-foreground'
-                  )}
-                >
-                  <item.icon className="h-5 w-5" />
-                  <span className="sr-only">{item.label}</span>
-                </Link>
-              </TooltipTrigger>
-              <TooltipContent side="right">{item.label}</TooltipContent>
-            </Tooltip>
-          ))}
-        </nav>
-        <nav className="mt-auto flex flex-col items-center gap-4 px-2 sm:py-5">
-          {isAuthenticated && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <button
-                  onClick={signOut}
-                  className="flex h-9 w-9 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:text-foreground md:h-8 md:w-8"
-                >
-                  <LogOut className="h-5 w-5" />
-                  <span className="sr-only">Sign Out</span>
-                </button>
-              </TooltipTrigger>
-              <TooltipContent side="right">Sign Out</TooltipContent>
-            </Tooltip>
-          )}
-        </nav>
-      </aside>
-    </TooltipProvider>
-  );
+    return this.props.children;
+  }
 }
 ```
 
-### `src/hooks/useIdleTimeout.ts`
+### `src/components/system/ErrorDisplay.tsx`
 ```typescript
-import { useEffect, useState, useCallback } from 'react';
-import { useAuth } from './useAuth';
-
-export const useIdleTimeout = (timeout: number) => {
-  const { signOut } = useAuth();
-  const [isIdle, setIsIdle] = useState(false);
-
-  const resetTimer = useCallback(() => {
-    setIsIdle(false);
-  }, []);
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    const handleIdle = () => {
-      setIsIdle(true);
-      signOut();
-    };
-
-    const setupTimer = () => {
-      timer = setTimeout(handleIdle, timeout);
-    };
-
-    const clearTimer = () => {
-      clearTimeout(timer);
-    };
-
-    const events = ['mousemove', 'keydown', 'mousedown', 'touchstart'];
-
-    const eventListener = () => {
-      clearTimer();
-      setupTimer();
-      resetTimer();
-    };
-
-    events.forEach((event) => {
-      window.addEventListener(event, eventListener);
-    });
-
-    setupTimer();
-
-    return () => {
-      clearTimer();
-      events.forEach((event) => {
-        window.removeEventListener(event, eventListener);
-      });
-    };
-  }, [timeout, signOut, resetTimer]);
-
-  return isIdle;
-};
-```
-
-### `src/hooks/useProfile.ts`
-```typescript
-import { useState, useEffect } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from './useAuth';
-
-export const useProfile = () => {
-  const { user } = useAuth();
-  const [profile, setProfile] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<any>(null);
-
-  useEffect(() => {
-    const fetchProfile = async () => {
-      if (user) {
-        try {
-          setLoading(true);
-          const { data, error } = await supabase
-            .from('profiles')
-            .select('*')
-            .eq('id', user.id)
-            .single();
-
-          if (error) {
-            throw error;
-          }
-
-          setProfile(data);
-        } catch (error) {
-          setError(error);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchProfile();
-  }, [user]);
-
-  const updateProfile = async (updates: {
-    username: string;
-    full_name: string;
-  }) => {
-    if (user) {
-      try {
-        setLoading(true);
-        const { error } = await supabase.from('profiles').upsert({
-          id: user.id,
-          ...updates,
-          updated_at: new Date(),
-        });
-
-        if (error) {
-          throw error;
-        }
-
-        // Refetch profile to get the latest data
-        const { data } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', user.id)
-          .single();
-        setProfile(data);
-      } catch (error) {
-        setError(error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-  return { profile, loading, error, updateProfile };
-};
-```
-
-### `src/integrations/supabase/types.ts`
-```typescript
-export type Json =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: Json | undefined }
-  | Json[]
-
-export type Database = {
-  public: {
-    Tables: {
-      content: {
-        Row: {
-          created_at: string | null
-          description: string
-          generated_content: string | null
-          id: string
-          platforms: string[]
-          status: string
-          title: string
-          tone: string
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          generated_content?: string | null
-          id: string
-          platforms: string[]
-          status?: string
-          title: string
-          tone: string
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          generated_content?: string | null
-          id?: string
-          platforms?: string[]
-          status?: string
-          title?: string
-          tone?: string
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "content_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      content_versions: {
-        Row: {
-          content: string
-          content_id: string | null
-          created_at: string | null
-          id: string
-          user_id: string | null
-          version_number: number
-        }
-        Insert: {
-          content: string
-          content_id?: string | null
-          created_at?: string | null
-          id?: string
-          user_id?: string | null
-          version_number: number
-        }
-        Update: {
-          content?: string
-          content_id?: string | null
-          created_at?: string | null
-          id?: string
-          user_id?: string | null
-          version_number?: number
-        }
-        Relationships: [
-          {
-            foreignKeyName: "content_versions_content_id_fkey"
-            columns: ["content_id"]
-            isOneToOne: false
-            referencedRelation: "generated_content"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      generated_content: {
-        Row: {
-          ai_model: string
-          created_at: string | null
-          description: string
-          edited_content: string | null
-          generated_text: string | null
-          hashtags: string[] | null
-          id: string
-          is_edited: boolean | null
-          language: string
-          platform: string[]
-          seo_score: number | null
-          status: string | null
-          tone: string
-          updated_at: string | null
-          user_id: string
-          version: number
-        }
-        Insert: {
-          ai_model?: string
-          created_at?: string | null
-          description: string
-          edited_content?: string | null
-          generated_text?: string | null
-          hashtags?: string[] | null
-          id?: string
-          is_edited?: boolean | null
-          language?: string
-          platform: string[]
-          seo_score?: number | null
-          status?: string | null
-          tone: string
-          updated_at?: string | null
-          user_id: string
-          version?: number
-        }
-        Update: {
-          ai_model?: string
-          created_at?: string | null
-          description?: string
-          edited_content?: string | null
-          generated_text?: string | null
-          hashtags?: string[] | null
-          id?: string
-          is_edited?: boolean | null
-          language?: string
-          platform?: string[]
-          seo_score?: number | null
-          status?: string | null
-          tone?: string
-          updated_at?: string | null
-          user_id?: string
-          version?: number
-        }
-        Relationships: []
-      }
-      generated_images: {
-        Row: {
-          aspect_ratio: string
-          created_at: string | null
-          id: string
-          image_path: string
-          is_favorite: boolean | null
-          prompt: string
-          style: string
-          title: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          aspect_ratio: string
-          created_at?: string | null
-          id?: string
-          image_path: string
-          is_favorite?: boolean | null
-          prompt: string
-          style: string
-          title?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          aspect_ratio?: string
-          created_at?: string | null
-          id?: string
-          image_path?: string
-          is_favorite?: boolean | null
-          prompt?: string
-          style?: string
-          title?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      profiles: {
-        Row: {
-          id: string
-          username: string | null
-          full_name: string | null
-          avatar_url: string | null
-          updated_at: string | null
-        }
-        Insert: {
-          id: string
-          username?: string | null
-          full_name?: string | null
-          avatar_url?: string | null
-          updated_at?: string | null
-        }
-        Update: {
-          id?: string
-          username?: string | null
-          full_name?: string | null
-          avatar_url?: string | null
-          updated_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "profiles_id_fkey"
-            columns: ["id"]
-            isOneToOne: true
-            referencedRelation: "users"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      recent_activity: {
-        Row: {
-          activity_type: string
-          created_at: string | null
-          details: Json | null
-          id: string
-          user_id: string
-        }
-        Insert: {
-          activity_type: string
-          created_at?: string | null
-          details?: Json | null
-          id?: string
-          user_id: string
-        }
-        Update: {
-          activity_type?: string
-          created_at?: string | null
-          details?: Json | null
-          id?: string
-          user_id?: string
-        }
-        Relationships: []
-      }
-      sample_videos: {
-        Row: {
-          created_at: string | null
-          description: string
-          id: string
-          style: string
-          thumbnail_url: string
-          title: string
-          video_url: string
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          id?: string
-          style: string
-          thumbnail_url: string
-          title: string
-          video_url: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          id?: string
-          style?: string
-          thumbnail_url?: string
-          title?: string
-          video_url?: string
-        }
-        Relationships: []
-      }
-      scheduled_posts: {
-        Row: {
-          content: string
-          created_at: string | null
-          id: string
-          platform: string[]
-          scheduled_date: string
-          status: string | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          content: string
-          created_at?: string | null
-          id?: string
-          platform: string[]
-          scheduled_date: string
-          status?: string | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          content?: string
-          created_at?: string | null
-          id?: string
-          platform?: string[]
-          scheduled_date?: string
-          status?: string | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      trending_topics: {
-        Row: {
-          created_at: string | null
-          description: string
-          id: string
-          title: string
-        }
-        Insert: {
-          created_at?: string | null
-          description: string
-          id?: string
-          title: string
-        }
-        Update: {
-          created_at?: string | null
-          description?: string
-          id?: string
-          title?: string
-        }
-        Relationships: []
-      }
-      user_metrics: {
-        Row: {
-          engagement_rate: number | null
-          top_content: Json | null
-          total_content: number | null
-          updated_at: string | null
-          user_id: string
-        }
-        Insert: {
-          engagement_rate?: number | null
-          top_content?: Json | null
-          total_content?: number | null
-          updated_at?: string | null
-          user_id: string
-        }
-        Update: {
-          engagement_rate?: number | null
-          top_content?: Json | null
-          total_content?: number | null
-          updated_at?: string | null
-          user_id?: string
-        }
-        Relationships: []
-      }
-      videos: {
-        Row: {
-          created_at: string | null
-          file_path: string
-          id: string
-          public_url: string | null
-          script_content: string | null
-          status: string
-          style: string | null
-          thumbnail_url: string | null
-          title: string
-          updated_at: string | null
-          user_id: string
-          video_type: string
-        }
-        Insert: {
-          created_at?: string | null
-          file_path: string
-          id?: string
-          public_url?: string | null
-          script_content?: string | null
-          status?: string
-          style?: string | null
-          thumbnail_url?: string | null
-          title: string
-          updated_at?: string | null
-          user_id: string
-          video_type: string
-        }
-        Update: {
-          created_at?: string | null
-          file_path?: string
-          id?: string
-          public_url?: string | null
-          script_content?: string | null
-          status?: string
-          style?: string | null
-          thumbnail_url?: string | null
-          title?: string
-          updated_at?: string | null
-          user_id?: string
-          video_type?: string
-        }
-        Relationships: []
-      }
-    }
-    Views: {
-      [_ in never]: never
-    }
-    Functions: {
-      [_ in never]: never
-    }
-    Enums: {
-      [_ in never]: never
-    }
-    CompositeTypes: {
-      [_ in never]: never
-    }
-  }
-}
-
-type DefaultSchema = Database[Extract<keyof Database, "public">]
-
-export type Tables<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof (DefaultSchema["Tables"] & DefaultSchema["Views"])
-    | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-        Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? (Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"] &
-      Database[DefaultSchemaTableNameOrOptions["schema"]]["Views"])[TableName] extends {
-      Row: infer R
-    }
-    ? R
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])
-    ? (DefaultSchema["Tables"] &
-        DefaultSchema["Views"])[DefaultSchemaTableNameOrOptions] extends {
-        Row: infer R
-      }
-      ? R
-      : never
-    : never
-
-export type TablesInsert<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Insert: infer I
-    }
-    ? I
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Insert: infer I
-      }
-      ? I
-      : never
-    : never
-
-export type TablesUpdate<
-  DefaultSchemaTableNameOrOptions extends
-    | keyof DefaultSchema["Tables"]
-    | { schema: keyof Database },
-  TableName extends DefaultSchemaTableNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"]
-    : never = never,
-> = DefaultSchemaTableNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaTableNameOrOptions["schema"]]["Tables"][TableName] extends {
-      Update: infer U
-    }
-    ? U
-    : never
-  : DefaultSchemaTableNameOrOptions extends keyof DefaultSchema["Tables"]
-    ? DefaultSchema["Tables"][DefaultSchemaTableNameOrOptions] extends {
-        Update: infer U
-      }
-      ? U
-      : never
-    : never
-
-export type Enums<
-  DefaultSchemaEnumNameOrOptions extends
-    | keyof DefaultSchema["Enums"]
-    | { schema: keyof Database },
-  EnumName extends DefaultSchemaEnumNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"]
-    : never = never,
-> = DefaultSchemaEnumNameOrOptions extends { schema: keyof Database }
-  ? Database[DefaultSchemaEnumNameOrOptions["schema"]]["Enums"][EnumName]
-  : DefaultSchemaEnumNameOrOptions extends keyof DefaultSchema["Enums"]
-    ? DefaultSchema["Enums"][DefaultSchemaEnumNameOrOptions]
-    : never
-
-export type CompositeTypes<
-  PublicCompositeTypeNameOrOptions extends
-    | keyof DefaultSchema["CompositeTypes"]
-    | { schema: keyof Database },
-  CompositeTypeName extends PublicCompositeTypeNameOrOptions extends {
-    schema: keyof Database
-  }
-    ? keyof Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"]
-    : never = never,
-> = PublicCompositeTypeNameOrOptions extends { schema: keyof Database }
-  ? Database[PublicCompositeTypeNameOrOptions["schema"]]["CompositeTypes"][CompositeTypeName]
-  : PublicCompositeTypeNameOrOptions extends keyof DefaultSchema["CompositeTypes"]
-    ? DefaultSchema["CompositeTypes"][PublicCompositeTypeNameOrOptions]
-    : never
-
-export const Constants = {
-  public: {
-    Enums: {},
-  },
-} as const
-```
-
-### `src/pages/Settings.tsx`
-```typescript
-import { useState, useEffect } from 'react';
+import { AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { useProfile } from '@/hooks/useProfile';
-import { useToast } from '@/components/ui/use-toast';
+import { ApiError } from '@/api';
 
-export function Settings() {
-  const { profile, loading, error, updateProfile } = useProfile();
-  const { toast } = useToast();
-  const [fullName, setFullName] = useState('');
-  const [username, setUsername] = useState('');
+interface ErrorDisplayProps {
+  error: Error | ApiError | null;
+  onReset: () => void;
+  title?: string;
+}
 
-  useEffect(() => {
-    if (profile) {
-      setFullName(profile.full_name || '');
-      setUsername(profile.username || '');
-    }
-  }, [profile]);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await updateProfile({ full_name: fullName, username });
-    toast({
-      title: 'Profile updated',
-      description: 'Your profile has been updated successfully.',
-    });
-  };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
-
-  if (error) {
-    return <div>Error loading profile: {(error as Error).message}</div>;
-  }
+export const ErrorDisplay = ({
+  error,
+  onReset,
+  title = "Oops! Something went wrong.",
+}: ErrorDisplayProps) => {
+  const errorMessage = 
+    error instanceof ApiError 
+      ? error.message 
+      : error?.message || 'An unexpected error occurred.';
 
   return (
-    <div className="flex-1 space-y-4 p-8 pt-6">
-      <h2 className="text-3xl font-bold tracking-tight">Settings</h2>
-      <Card>
-        <CardHeader>
-          <CardTitle>Profile</CardTitle>
-          <CardDescription>Manage your profile settings.</CardDescription>
-        </CardHeader>
-        <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="fullName">Full Name</Label>
-              <Input
-                id="fullName"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
-              <Input
-                id="username"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-              />
-            </div>
-            <Button type="submit" disabled={loading}>
-              {loading ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </form>
-        </CardContent>
-      </Card>
+    <div
+      role="alert"
+      className="flex flex-col items-center justify-center space-y-4 rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center text-destructive"
+    >
+      <AlertTriangle className="h-10 w-10" />
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="text-sm">{errorMessage}</p>
+      </div>
+      <Button
+        variant="destructive"
+        onClick={onReset}
+        className="bg-destructive/80 hover:bg-destructive"
+      >
+        Try Again
+      </Button>
     </div>
   );
-}
+};
+```
+
+### `src/components/system/OfflineIndicator.tsx`
+```typescript
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { WifiOff } from 'lucide-react';
+
+export const OfflineIndicator = () => {
+  const isOnline = useOnlineStatus();
+
+  if (isOnline) {
+    return null;
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-2 rounded-lg bg-secondary p-3 text-secondary-foreground shadow-lg">
+      <WifiOff className="h-5 w-5" />
+      <span>You are currently offline.</span>
+    </div>
+  );
+};
+```
+
+### `src/hooks/useOnlineStatus.ts`
+```typescript
+import { useState, useEffect } from 'react';
+
+export const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};
 ```
 
 ---
+
+## API Client
+
+### `src/api/ApiClient.ts`
+
+```typescript
+import { supabase } from '@/integrations/supabase/client';
+import { ApiError, isApiError } from './ApiError';
+
+// --- Type Definitions ---
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+interface RequestConfig extends Omit<RequestInit, 'method' | 'body'> {
+  method?: HttpMethod;
+  data?: unknown;
+  params?: Record<string, any>;
+  onUploadProgress?: (progress: number) => void;
+  useAuth?: boolean; // Default true, set to false for public endpoints
+  retries?: number;
+  retryDelay?: number;
+  useCache?: boolean;
+  cacheTTL?: number; // Time-to-live in milliseconds
+}
+
+interface CacheEntry<T> {
+    timestamp: number;
+    data: T;
+}
+
+// --- Token Management ---
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value: unknown) => void;
+  reject: (reason?: unknown) => void;
+}> = [];
+
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      // The original request function will be re-called with the new token.
+      // We just need to resolve the promise that is waiting for the token.
+      prom.resolve(token); 
+    }
+  });
+  failedQueue = [];
+};
+
+const getRefreshedToken = async (): Promise<string> => {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data.session) {
+      await supabase.auth.signOut();
+      throw new ApiError('Session expired. Please log in again.', 401, 'SESSION_EXPIRED');
+    }
+    return data.session.access_token;
+}
+
+// --- Core ApiClient Class ---
+class ApiClient {
+  private readonly baseUrl: string;
+  private pendingRequests = new Map<string, Promise<any>>();
+  private cache = new Map<string, CacheEntry<any>>();
+
+  constructor() {
+    this.baseUrl = this.getBaseUrl();
+  }
+
+  private getBaseUrl(): string {
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl) return envUrl;
+    return import.meta.env.PROD
+      ? 'https://your-production-api.com/api/v1' // Replace with your actual prod URL
+      : 'http://localhost:3000/api/v1';
+  }
+
+  public async get<T>(endpoint: string, config?: Omit<RequestConfig, 'data'>): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'GET' });
+  }
+
+  public async post<T>(endpoint:string, data: unknown, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'POST', data });
+  }
+  
+  public async put<T>(endpoint:string, data: unknown, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'PUT', data });
+  }
+
+  public async patch<T>(endpoint:string, data: unknown, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'PATCH', data });
+  }
+
+  public async delete<T>(endpoint: string, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'DELETE' });
+  }
+
+  private async request<T>(
+    endpoint: string,
+    config: RequestConfig
+  ): Promise<T> {
+    const { useCache = false, cacheTTL = 300000, method = 'GET' } = config;
+    const requestKey = `${method}:${endpoint}:${JSON.stringify(config.data)}:${JSON.stringify(config.params)}`;
+
+    if (method === 'GET' && useCache) {
+        const cached = this.cache.get(requestKey);
+        if (cached && (Date.now() - cached.timestamp < cacheTTL)) {
+            return Promise.resolve(cached.data as T);
+        }
+    }
+
+    if (this.pendingRequests.has(requestKey)) {
+      return this.pendingRequests.get(requestKey) as Promise<T>;
+    }
+
+    const requestPromise = this.executeRequest<T>(endpoint, config).then(data => {
+        if (method === 'GET' && useCache) {
+            this.cache.set(requestKey, { timestamp: Date.now(), data });
+        }
+        return data;
+    }).finally(() => {
+      this.pendingRequests.delete(requestKey);
+    });
+
+    this.pendingRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  }
+
+  private async executeRequest<T>(
+    endpoint: string,
+    config: RequestConfig
+  ): Promise<T> {
+    const { retries = 3, retryDelay = 1000 } = config;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await this.performRequest<T>(endpoint, config);
+        } catch (error) {
+            if (isApiError(error) && error.status === 401) {
+                // Handle token refresh logic
+                if (isRefreshing) {
+                    // If a refresh is already in progress, wait for it to complete
+                    return new Promise((resolve, reject) => {
+                        failedQueue.push({ resolve: () => resolve(this.request(endpoint, config)), reject });
+                    });
+                }
+                
+                isRefreshing = true;
+                
+                try {
+                    const newToken = await getRefreshedToken();
+                    processQueue(null, newToken);
+                    // Retry the original request with the new token
+                    return this.performRequest<T>(endpoint, config);
+                } catch (refreshError) {
+                    processQueue(refreshError as Error, null);
+                    throw refreshError;
+                } finally {
+                    isRefreshing = false;
+                }
+            }
+
+            // For other errors, check if we should retry
+            const isRetryable = !isApiError(error) || (error.status && error.status >= 500);
+
+            if (isRetryable && i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, retryDelay * (i + 1))); // Exponential backoff
+                continue;
+            }
+
+            throw error; // Rethrow if not retryable or retries exhausted
+        }
+    }
+    // This part should be unreachable, but TypeScript needs it to know a promise is always returned.
+    throw new Error("Request failed after all retries.");
+  }
+
+  private async performRequest<T>(endpoint: string, config: RequestConfig): Promise<T> {
+    const {
+        data,
+        params,
+        method = 'GET',
+        useAuth = true,
+        ...restConfig
+    } = config;
+
+    const headers = new Headers(restConfig.headers || {});
+    if (!headers.has('Content-Type') && data) {
+        headers.set('Content-Type', 'application/json');
+    }
+    
+    if (useAuth) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            headers.set('Authorization', `Bearer ${session.access_token}`);
+        } else if (isRefreshing) {
+            // Wait for the token to be refreshed
+            await new Promise((resolve, reject) => failedQueue.push({ resolve, reject }));
+            const { data: { session: newSession } } = await supabase.auth.getSession();
+            if (newSession?.access_token) {
+                 headers.set('Authorization', `Bearer ${newSession.access_token}`);
+            }
+        }
+    }
+
+    const url = new URL(`${this.baseUrl}${endpoint}`);
+    if (params) {
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    }
+
+    const fetchOptions: RequestInit = {
+        ...restConfig,
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
+    };
+
+    try {
+        const response = await fetch(url.toString(), fetchOptions);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({})); // Gracefully handle non-JSON error bodies
+            throw new ApiError(
+                errorData?.message || `Request failed with status ${response.status}`,
+                response.status,
+                errorData?.code
+            );
+        }
+        
+        // Handle no-content responses
+        if (response.status === 204) {
+            return undefined as T;
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            // Network error
+            throw ApiError.networkError(error);
+        }
+        if (isApiError(error)) {
+            throw error; // Re-throw known API errors
+        }
+        // Catch other unexpected errors
+        throw ApiError.unknown(error);
+    }
+  }
+}
+
+export const apiClient = new ApiClient();
+```
+
+### `src/api/ApiError.ts`
+```typescript
+export class ApiError extends Error {
+    public readonly status: number;
+    public readonly code: string | undefined;
+  
+    constructor(message: string, status: number, code?: string) {
+      super(message);
+      this.status = status;
+      this.code = code;
+      Object.setPrototypeOf(this, ApiError.prototype);
+    }
+  
+    static networkError(originalError: Error) {
+      return new ApiError(
+        'Network error: Please check your connection.', 
+        -1, 
+        'NETWORK_ERROR'
+      );
+    }
+  
+    static unknown(originalError: any) {
+      return new ApiError(
+        'An unexpected error occurred.',
+        -2,
+        'UNKNOWN_ERROR'
+      );
+    }
+  }
+  
+  export function isApiError(error: unknown): error is ApiError {
+    return error instanceof ApiError;
+  }
+```
+
+### `src/hooks/api/useApi.ts`
+```typescript
+import { useState, useCallback, useRef } from 'react';
+import { toast } from 'sonner';
+import { ApiError, isApiError } from '@/api/ApiError';
+
+type ApiStatus = 'idle' | 'loading' | 'success' | 'error';
+
+interface UseApiState<T> {
+  data: T | null;
+  status: ApiStatus;
+  error: ApiError | null;
+}
+
+interface UseApiOptions {
+  showSuccessToast?: boolean;
+  successMessage?: string;
+  showErrorToast?: boolean;
+  errorMessage?: string;
+}
+
+export const useApi = <T, P extends any[]>(
+  apiFunc: (...args: P) => Promise<T>,
+  options: UseApiOptions = {}
+) => {
+  const { 
+    showSuccessToast = true, 
+    successMessage = 'Operation successful!',
+    showErrorToast = true, 
+    errorMessage,
+  } = options;
+
+  const [state, setState] = useState<UseApiState<T>>({
+    data: null,
+    status: 'idle',
+    error: null,
+  });
+
+  const mounted = useRef(true);
+
+  const execute = useCallback(async (...args: P) => {
+    if (!mounted.current) return;
+
+    setState(prevState => ({ ...prevState, status: 'loading', error: null }));
+    
+    try {
+      const response = await apiFunc(...args);
+      if (mounted.current) {
+        setState({ data: response, status: 'success', error: null });
+        if (showSuccessToast) {
+          toast.success(successMessage);
+        }
+      }
+      return { data: response, error: null };
+    } catch (err) {
+      const error = isApiError(err) ? err : ApiError.unknown(err);
+      if (mounted.current) {
+        setState({ data: null, status: 'error', error });
+        if (showErrorToast) {
+          toast.error(errorMessage || error.message);
+        }
+      }
+      return { data: null, error };
+    }
+  }, [apiFunc, showSuccessToast, successMessage, showErrorToast, errorMessage]);
+
+  return { ...state, execute };
+};
+```
+
+### `src/components/system/ErrorBoundary.tsx`
+```typescript
+import React, { Component, ErrorInfo, ReactNode } from 'react';
+import { ErrorDisplay } from './ErrorDisplay';
+
+interface Props {
+  children: ReactNode;
+}
+
+interface State {
+  hasError: boolean;
+  error: Error | null;
+}
+
+export class ErrorBoundary extends Component<Props, State> {
+  public state: State = {
+    hasError: false,
+    error: null,
+  };
+
+  public static getDerivedStateFromError(error: Error): State {
+    // Update state so the next render will show the fallback UI.
+    return { hasError: true, error };
+  }
+
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // You can also log the error to an error reporting service
+    console.error("Uncaught error:", error, errorInfo);
+  }
+
+  public render() {
+    if (this.state.hasError) {
+      // You can render any custom fallback UI
+      return (
+        <ErrorDisplay 
+          error={this.state.error}
+          onReset={() => this.setState({ hasError: false, error: null })} 
+        />
+      );
+    }
+
+    return this.props.children;
+  }
+}
+```
+
+### `src/components/system/ErrorDisplay.tsx`
+```typescript
+import { AlertTriangle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { ApiError } from '@/api';
+
+interface ErrorDisplayProps {
+  error: Error | ApiError | null;
+  onReset: () => void;
+  title?: string;
+}
+
+export const ErrorDisplay = ({
+  error,
+  onReset,
+  title = "Oops! Something went wrong.",
+}: ErrorDisplayProps) => {
+  const errorMessage = 
+    error instanceof ApiError 
+      ? error.message 
+      : error?.message || 'An unexpected error occurred.';
+
+  return (
+    <div
+      role="alert"
+      className="flex flex-col items-center justify-center space-y-4 rounded-lg border border-destructive/50 bg-destructive/10 p-6 text-center text-destructive"
+    >
+      <AlertTriangle className="h-10 w-10" />
+      <div className="space-y-2">
+        <h3 className="text-lg font-semibold">{title}</h3>
+        <p className="text-sm">{errorMessage}</p>
+      </div>
+      <Button
+        variant="destructive"
+        onClick={onReset}
+        className="bg-destructive/80 hover:bg-destructive"
+      >
+        Try Again
+      </Button>
+    </div>
+  );
+};
+```
+
+### `src/components/system/OfflineIndicator.tsx`
+```typescript
+import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { WifiOff } from 'lucide-react';
+
+export const OfflineIndicator = () => {
+  const isOnline = useOnlineStatus();
+
+  if (isOnline) {
+    return null;
+  }
+
+  return (
+    <div className="fixed bottom-4 right-4 z-50 flex items-center space-x-2 rounded-lg bg-secondary p-3 text-secondary-foreground shadow-lg">
+      <WifiOff className="h-5 w-5" />
+      <span>You are currently offline.</span>
+    </div>
+  );
+};
+```
+
+### `src/hooks/useOnlineStatus.ts`
+```typescript
+import { useState, useEffect } from 'react';
+
+export const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = useState(navigator.onLine);
+
+  useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};
+```
 
 </rewritten_file> 

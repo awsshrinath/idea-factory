@@ -35,5 +35,22 @@ This document provides a high-level, plain-text summary of the features implemen
   - **CORS:** A strict CORS policy is in place for production environments.
 - **User Profile Sync:** A database trigger automatically creates a public user profile in the `profiles` table upon new user sign-up, which can then be managed by the user.
 
+## API Client & System Resilience
+- **Advanced API Client:** A new, modern `ApiClient` was built using the native `fetch` API. It serves as the central point for all backend communication.
+- **Automatic JWT Refresh:** The client transparently handles JWT expiration. If an API call returns a 401 Unauthorized status, it will automatically attempt to refresh the session token with Supabase and retry the original request, ensuring a seamless user experience.
+- **Resilient API Calls:** The client includes built-in retry logic with exponential backoff for network errors and 5xx server errors, making the application more robust against transient failures.
+- **Performance Optimizations:**
+  - **Request Deduplication:** Prevents identical, in-flight API requests from being sent multiple times.
+  - **Response Caching:** Implements an in-memory cache for `GET` requests to provide instantaneous responses for frequently accessed data.
+- **Specialized React Hooks:** A suite of custom hooks was developed to simplify API interactions in the UI:
+  - **`useApi`:** A generic hook that manages the full lifecycle of an API call (loading, success, error states) and integrates with the `sonner` notification system for automatic user feedback.
+  - **`useContentGeneration`:** A hook tailored for initiating content generation jobs.
+  - **`useContentJob`:** A hook for polling the status of a running job.
+  - **`useFileUpload`:** A hook that handles obtaining signed URLs and uploading files to storage, providing real-time progress updates.
+- **Global System Feedback:**
+  - **Standardized Notifications:** The application now uses the `sonner` library for all toast notifications, providing a consistent look and feel.
+  - **Offline Indicator:** A global `OfflineIndicator` component, powered by a `useOnlineStatus` hook, automatically informs the user if their network connection is lost.
+  - **Global Error Boundary:** The entire application is wrapped in an `ErrorBoundary` that catches any unhandled JavaScript errors and displays a user-friendly fallback UI (`ErrorDisplay`) instead of a white screen, preventing application crashes.
+
 ---
 *This summary will be updated as new features are implemented.* 

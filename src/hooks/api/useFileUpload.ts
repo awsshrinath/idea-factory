@@ -1,52 +1,70 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
+import { apiClient } from '@/api';
 import { useApi } from './useApi';
 
-interface FileUploadState {
-  progress: number;
-  isUploading: boolean;
-  error: Error | null;
-  data: string | null; // Assuming the response is the URL of the uploaded file
+interface SignedUrlResponse {
+  signedUrl: string;
+  path: string;
 }
 
+const getSignedUrl = (fileName: string, fileType: string) =>
+  apiClient.post<SignedUrlResponse>('/storage/upload', { fileName, fileType });
+
 export const useFileUpload = () => {
-  const [state, setState] = useState<FileUploadState>({
-    progress: 0,
-    isUploading: false,
-    error: null,
-    data: null,
-  });
+  const [progress, setProgress] = useState(0);
+  const getSignedUrlApi = useApi(getSignedUrl);
 
-  const { state: apiState, execute } = useApi<string>();
+  const uploadFile = useCallback(
+    async (file: File) => {
+      try {
+        const { data: signedUrlData } = await getSignedUrlApi.execute(file.name, file.type);
+        
+        if (!signedUrlData) {
+          throw new Error('Failed to get a signed URL.');
+        }
 
-  const uploadFile = async (file: File) => {
-    const formData = new FormData();
-    formData.append('file', file);
+        const { signedUrl, path } = signedUrlData;
 
-    setState((prev) => ({ ...prev, isUploading: true, progress: 0, error: null, data: null }));
+        return new Promise<string>((resolve, reject) => {
+          const xhr = new XMLHttpRequest();
+          xhr.open('PUT', signedUrl, true);
+          xhr.setRequestHeader('Content-Type', file.type);
 
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-      },
-      onUploadProgress: (progressEvent: ProgressEvent) => {
-        const percentCompleted = Math.round(
-          (progressEvent.loaded * 100) / progressEvent.total
-        );
-        setState((prev) => ({ ...prev, progress: percentCompleted }));
-      },
-    };
+          xhr.upload.onprogress = (event) => {
+            if (event.lengthComputable) {
+              const percentage = Math.round((event.loaded * 100) / event.total);
+              setProgress(percentage);
+            }
+          };
 
-    const response = await execute('POST', '/storage/upload', formData, config);
-    
-    if (response) {
-      setState((prev) => ({...prev, isUploading: false, data: response}));
-    } else {
-        setState((prev) => ({...prev, isUploading: false, error: apiState.error as Error | null}));
-    }
-  };
+          xhr.onload = () => {
+            if (xhr.status === 200) {
+              // The path of the uploaded file is returned.
+              const publicUrl = apiClient.post('/storage/public-url', { path }) as Promise<string>;
+              resolve(publicUrl);
+            } else {
+              reject(new Error(`Upload failed with status: ${xhr.status}`));
+            }
+          };
+
+          xhr.onerror = () => {
+            reject(new Error('File upload failed due to a network error.'));
+          };
+
+          xhr.send(file);
+        });
+      } catch (error) {
+        console.error(error);
+        throw error;
+      }
+    },
+    [getSignedUrlApi.execute]
+  );
 
   return {
-    ...state,
-    uploadFile,
+    upload: uploadFile,
+    progress,
+    isLoading: getSignedUrlApi.status === 'loading',
+    error: getSignedUrlApi.error,
   };
 }; 

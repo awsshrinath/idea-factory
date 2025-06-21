@@ -1,39 +1,35 @@
+import { useCallback } from 'react';
+import { apiClient } from '@/api';
 import { useApi } from './useApi';
 
-interface TextGenerationPayload {
-  prompt: string;
-  // Add other text generation options here
+interface TextGenerationResponse {
+  result: string;
 }
 
-interface ImageGenerationPayload {
-  prompt: string;
-  // Add other image generation options here
+interface ImageGenerationResponse {
+  imageUrl: string;
 }
+
+const generateText = (prompt: string, platform: string) => 
+  apiClient.post<TextGenerationResponse>('/ai/text', { prompt, platform });
+
+const generateImage = (prompt: string, style: string) => 
+  apiClient.post<ImageGenerationResponse>('/ai/image', { prompt, style });
+
 
 export const useContentGeneration = () => {
-  const { state: textState, execute: executeText } = useApi<string>();
-  const { state: imageState, execute: executeImage } = useApi<string>(); // Assuming image URL is a string
-
-  const generateText = async (payload: TextGenerationPayload) => {
-    return executeText('POST', '/ai/text', payload);
-  };
-
-  const generateImage = async (payload: ImageGenerationPayload) => {
-    return executeImage('POST', '/ai/image', payload);
-  };
+  const textApi = useApi(generateText);
+  const imageApi = useApi(generateImage);
 
   return {
-    text: {
-      data: textState.data,
-      error: textState.error,
-      isLoading: textState.isLoading,
-      generate: generateText,
-    },
-    image: {
-      data: imageState.data,
-      error: imageState.error,
-      isLoading: imageState.isLoading,
-      generate: generateImage,
-    },
+    generateText: textApi.execute,
+    textData: textApi.data,
+    textStatus: textApi.status,
+    textError: textApi.error,
+    
+    generateImage: imageApi.execute,
+    imageData: imageApi.data,
+    imageStatus: imageApi.status,
+    imageError: imageApi.error,
   };
 }; 

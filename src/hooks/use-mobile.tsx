@@ -1,4 +1,3 @@
-
 import * as React from "react"
 
 // The breakpoint at which to consider the device as mobile
@@ -52,3 +51,22 @@ export function useIsDesktop() {
 
   return !!isDesktop
 }
+
+export const useOnlineStatus = () => {
+  const [isOnline, setIsOnline] = React.useState(navigator.onLine);
+
+  React.useEffect(() => {
+    const handleOnline = () => setIsOnline(true);
+    const handleOffline = () => setIsOnline(false);
+
+    window.addEventListener('online', handleOnline);
+    window.addEventListener('offline', handleOffline);
+
+    return () => {
+      window.removeEventListener('online', handleOnline);
+      window.removeEventListener('offline', handleOffline);
+    };
+  }, []);
+
+  return isOnline;
+};

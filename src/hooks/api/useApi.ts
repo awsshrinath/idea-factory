@@ -1,112 +1,99 @@
-import { useState, useCallback, useRef } from 'react';
-import { apiClient, ApiError } from '@/api';
-import { HttpMethod, RequestConfig } from '@/types/api';
-import { toast } from '@/components/ui/use-toast';
-import { getErrorMessage } from '@/lib/errors';
-import axios from 'axios';
+import { useState, useCallback, useRef, useEffect, ReactNode } from 'react';
+import { toast } from 'sonner';
+import { ApiError, isApiError } from '@/api';
+import { ErrorDisplay } from '@/components/system/ErrorDisplay';
 
-interface UseApiState<T> {
+type ApiStatus = 'idle' | 'loading' | 'success' | 'error';
+
+interface State<T> {
   data: T | null;
-  error: ApiError | null;
-  isLoading: boolean;
+  status: ApiStatus;
+  error: string | null;
+  ErrorComponent: ReactNode;
 }
 
-type ExecuteApi<T> = (
-  method: HttpMethod,
-  endpoint: string,
-  payload?: unknown,
-  config?: RequestConfig
-) => Promise<T | null>;
+type ApiRequest<T, P extends any[]> = (...args: P) => Promise<T>;
 
-interface UseApiResult<T> {
-  state: UseApiState<T>;
-  execute: ExecuteApi<T>;
-  cancel: () => void;
+interface UseApiOptions<T> {
+  initialData?: T;
+  showSuccessToast?: boolean;
+  successToastMessage?: string;
+  showErrorToast?: boolean;
+  onSuccess?: (data: T) => void;
+  onError?: (error: string) => void;
 }
 
-export const useApi = <T>(): UseApiResult<T> => {
-  const [state, setState] = useState<UseApiState<T>>({
-    data: null,
+export const useApi = <T, P extends any[]>(
+  apiRequest: ApiRequest<T, P>,
+  options: UseApiOptions<T> = {}
+) => {
+  const [state, setState] = useState<State<T>>({
+    data: options.initialData || null,
+    status: 'idle',
     error: null,
-    isLoading: false,
+    ErrorComponent: null,
   });
 
-  const abortControllerRef = useRef<AbortController | null>(null);
+  const mountedRef = useRef(true);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    return () => {
+      mountedRef.current = false;
+    };
+  }, []);
+
+  const reset = useCallback(() => {
+    setState({
+        data: options.initialData || null,
+        status: 'idle',
+        error: null,
+        ErrorComponent: null,
+    });
+  }, [options.initialData]);
 
   const execute = useCallback(
-    async (
-      method: HttpMethod,
-      endpoint: string,
-      payload?: unknown,
-      config?: RequestConfig
-    ) => {
-      abortControllerRef.current = new AbortController();
-      setState({ data: null, error: null, isLoading: true });
+    async (...args: P) => {
+      setState(prevState => ({ ...prevState, status: 'loading', error: null, ErrorComponent: null }));
       try {
-        let response;
-        const requestConfig = {
-          ...config,
-          signal: abortControllerRef.current.signal,
-        };
-
-        switch (method) {
-          case 'POST':
-            response = await apiClient.post<T>(endpoint, payload, requestConfig);
-            break;
-          case 'PUT':
-            response = await apiClient.put<T>(endpoint, payload, requestConfig);
-            break;
-          case 'PATCH':
-            response = await apiClient.patch<T>(
-              endpoint,
-              payload,
-              requestConfig
-            );
-            break;
-          case 'DELETE':
-            response = await apiClient.delete<T>(endpoint, requestConfig);
-            break;
-          case 'GET':
-          default:
-            response = await apiClient.get<T>(endpoint, requestConfig);
-            break;
+        const result = await apiRequest(...args);
+        if (mountedRef.current) {
+          setState({ data: result, status: 'success', error: null });
+          if (options.showSuccessToast) {
+            toast.success(options.successToastMessage || 'Operation successful!');
+          }
+          if (options.onSuccess) {
+            options.onSuccess(result);
+          }
         }
-        setState({ data: response.data, error: null, isLoading: false });
-        return response.data;
+        return { data: result, error: null };
       } catch (err) {
-        if (axios.isCancel(err)) {
-          console.log('Request canceled:', err.message);
-          setState({ data: null, error: null, isLoading: false });
-          return null;
+        if (mountedRef.current) {
+          const errorMessage = isApiError(err) ? err.message : 'An unexpected error occurred.';
+          
+          const retryCallback = () => {
+            execute(...args);
+          };
+
+          setState({ 
+              data: null, 
+              status: 'error', 
+              error: errorMessage,
+              ErrorComponent: <ErrorDisplay message={errorMessage} onRetry={retryCallback} />
+          });
+
+          if (options.showErrorToast) {
+            toast.error(errorMessage);
+          }
+          if (options.onError) {
+            options.onError(errorMessage);
+          }
         }
-        const apiError =
-          err instanceof ApiError
-            ? err
-            : new ApiError(
-                'An unexpected error occurred.',
-                500,
-                'UNEXPECTED_ERROR'
-              );
-        setState({ data: null, error: apiError, isLoading: false });
-
-        const message = getErrorMessage(apiError.code);
-
-        toast({
-          title: 'Error',
-          description: message,
-          variant: 'destructive',
-        });
-        return null;
+        return { data: null, error: err };
       }
     },
-    []
+    [apiRequest, options]
   );
 
-  const cancel = () => {
-    if (abortControllerRef.current) {
-      abortControllerRef.current.abort();
-    }
-  };
-
-  return { state, execute, cancel };
+  return { ...state, execute, reset };
 }; 

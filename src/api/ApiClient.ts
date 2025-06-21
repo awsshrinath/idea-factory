@@ -1,182 +1,243 @@
-import axios, {
-  AxiosInstance,
-  AxiosRequestConfig,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from 'axios';
-import axiosRetry from 'axios-retry';
-import { ApiResponse, RequestConfig } from '@/types/api';
-import { ApiError } from './ApiError';
 import { supabase } from '@/integrations/supabase/client';
+import { ApiError, isApiError } from './ApiError';
 
+// --- Type Definitions ---
+type HttpMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE';
+
+interface RequestConfig extends Omit<RequestInit, 'method' | 'body'> {
+  method?: HttpMethod;
+  data?: unknown;
+  params?: Record<string, any>;
+  onUploadProgress?: (progress: number) => void;
+  useAuth?: boolean; // Default true, set to false for public endpoints
+  retries?: number;
+  retryDelay?: number;
+  useCache?: boolean;
+  cacheTTL?: number; // Time-to-live in milliseconds
+}
+
+interface CacheEntry<T> {
+    timestamp: number;
+    data: T;
+}
+
+// --- Token Management ---
 let isRefreshing = false;
-type FailedRequest = {
+let failedQueue: Array<{
   resolve: (value: unknown) => void;
   reject: (reason?: unknown) => void;
-};
-let failedQueue: FailedRequest[] = [];
+}> = [];
 
-const processQueue = (error: ApiError | null, token: string | null = null) => {
-  failedQueue.forEach((prom) => {
+const processQueue = (error: Error | null, token: string | null = null) => {
+  failedQueue.forEach(prom => {
     if (error) {
       prom.reject(error);
     } else {
-      prom.resolve(token);
+      // The original request function will be re-called with the new token.
+      // We just need to resolve the promise that is waiting for the token.
+      prom.resolve(token); 
     }
   });
-
   failedQueue = [];
 };
 
-const getBaseUrl = () => {
-  if (import.meta.env.VITE_API_URL) {
-    return import.meta.env.VITE_API_URL;
-  }
-  return import.meta.env.PROD
-    ? 'https://your-production-api.com/api/v1'
-    : 'http://localhost:3000/api/v1';
-};
+const getRefreshedToken = async (): Promise<string> => {
+    const { data, error } = await supabase.auth.refreshSession();
+    if (error || !data.session) {
+      await supabase.auth.signOut();
+      throw new ApiError('Session expired. Please log in again.', 401, 'SESSION_EXPIRED');
+    }
+    return data.session.access_token;
+}
 
+// --- Core ApiClient Class ---
 class ApiClient {
-  private axiosInstance: AxiosInstance;
+  private readonly baseUrl: string;
+  private pendingRequests = new Map<string, Promise<any>>();
+  private cache = new Map<string, CacheEntry<any>>();
 
   constructor() {
-    this.axiosInstance = axios.create({
-      baseURL: getBaseUrl(),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-
-    axiosRetry(this.axiosInstance, {
-      retries: 3, // Number of retries
-      retryDelay: (retryCount) => {
-        console.log(`Retry attempt: ${retryCount}`);
-        return retryCount * 2000; // Time interval between retries
-      },
-      retryCondition: (error) => {
-        // Retry on network errors and 5xx server errors
-        return (
-          axiosRetry.isNetworkError(error) ||
-          (error.response ? error.response.status >= 500 : false)
-        );
-      },
-    });
-
-    this.initializeInterceptors();
+    this.baseUrl = this.getBaseUrl();
   }
 
-  private initializeInterceptors() {
-    this.axiosInstance.interceptors.request.use(
-      this.handleRequest,
-      this.handleRequestError
-    );
-    this.axiosInstance.interceptors.response.use(
-      this.handleResponse,
-      this.handleResponseError
-    );
+  private getBaseUrl(): string {
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl) return envUrl;
+    return import.meta.env.PROD
+      ? 'https://your-production-api.com/api/v1' // Replace with your actual prod URL
+      : 'http://localhost:3000/api/v1';
   }
 
-  private handleRequest = async (config: InternalAxiosRequestConfig) => {
+  public async get<T>(endpoint: string, config?: Omit<RequestConfig, 'data'>): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'GET' });
+  }
+
+  public async post<T>(endpoint:string, data: unknown, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'POST', data });
+  }
+  
+  public async put<T>(endpoint:string, data: unknown, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'PUT', data });
+  }
+
+  public async patch<T>(endpoint:string, data: unknown, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'PATCH', data });
+  }
+
+  public async delete<T>(endpoint: string, config?: RequestConfig): Promise<T> {
+    return this.request<T>(endpoint, { ...config, method: 'DELETE' });
+  }
+
+  private async request<T>(
+    endpoint: string,
+    config: RequestConfig
+  ): Promise<T> {
+    const { useCache = false, cacheTTL = 300000, method = 'GET' } = config;
+    const requestKey = `${method}:${endpoint}:${JSON.stringify(config.data)}:${JSON.stringify(config.params)}`;
+
+    if (method === 'GET' && useCache) {
+        const cached = this.cache.get(requestKey);
+        if (cached && (Date.now() - cached.timestamp < cacheTTL)) {
+            return Promise.resolve(cached.data as T);
+        }
+    }
+
+    if (this.pendingRequests.has(requestKey)) {
+      return this.pendingRequests.get(requestKey) as Promise<T>;
+    }
+
+    const requestPromise = this.executeRequest<T>(endpoint, config).then(data => {
+        if (method === 'GET' && useCache) {
+            this.cache.set(requestKey, { timestamp: Date.now(), data });
+        }
+        return data;
+    }).finally(() => {
+      this.pendingRequests.delete(requestKey);
+    });
+
+    this.pendingRequests.set(requestKey, requestPromise);
+    return requestPromise;
+  }
+
+  private async executeRequest<T>(
+    endpoint: string,
+    config: RequestConfig
+  ): Promise<T> {
+    const { retries = 3, retryDelay = 1000 } = config;
+
+    for (let i = 0; i < retries; i++) {
+        try {
+            return await this.performRequest<T>(endpoint, config);
+        } catch (error) {
+            if (isApiError(error) && error.status === 401) {
+                // Handle token refresh logic
+                if (isRefreshing) {
+                    // If a refresh is already in progress, wait for it to complete
+                    return new Promise((resolve, reject) => {
+                        failedQueue.push({ resolve: () => resolve(this.request(endpoint, config)), reject });
+                    });
+                }
+                
+                isRefreshing = true;
+                
+                try {
+                    const newToken = await getRefreshedToken();
+                    processQueue(null, newToken);
+                    // Retry the original request with the new token
+                    return this.performRequest<T>(endpoint, config);
+                } catch (refreshError) {
+                    processQueue(refreshError as Error, null);
+                    throw refreshError;
+                } finally {
+                    isRefreshing = false;
+                }
+            }
+
+            // For other errors, check if we should retry
+            const isRetryable = !isApiError(error) || (error.status && error.status >= 500);
+
+            if (isRetryable && i < retries - 1) {
+                await new Promise(resolve => setTimeout(resolve, retryDelay * (i + 1))); // Exponential backoff
+                continue;
+            }
+
+            throw error; // Rethrow if not retryable or retries exhausted
+        }
+    }
+    // This part should be unreachable, but TypeScript needs it to know a promise is always returned.
+    throw new Error("Request failed after all retries.");
+  }
+
+  private async performRequest<T>(endpoint: string, config: RequestConfig): Promise<T> {
     const {
-      data: { session },
-    } = await supabase.auth.getSession();
+        data,
+        params,
+        method = 'GET',
+        useAuth = true,
+        ...restConfig
+    } = config;
 
-    if (session?.access_token) {
-      config.headers.Authorization = `Bearer ${session.access_token}`;
+    const headers = new Headers(restConfig.headers || {});
+    if (!headers.has('Content-Type') && data) {
+        headers.set('Content-Type', 'application/json');
     }
-    return config;
-  };
-
-  private handleRequestError = (error: ApiError) => {
-    console.error('Request Error:', error);
-    return Promise.reject(error);
-  };
-
-  private handleResponse = (response: AxiosResponse) => {
-    return response;
-  };
-
-  private handleResponseError = (error: unknown) => {
-    if (axios.isAxiosError(error)) {
-      const { response } = error;
-      const message = response?.data?.message || error.message;
-      const status = response?.status;
-      const code = response?.data?.code;
-
-      return Promise.reject(new ApiError(message, status, code, response?.data));
+    
+    if (useAuth) {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.access_token) {
+            headers.set('Authorization', `Bearer ${session.access_token}`);
+        } else if (isRefreshing) {
+            // Wait for the token to be refreshed
+            await new Promise((resolve, reject) => failedQueue.push({ resolve, reject }));
+            const { data: { session: newSession } } = await supabase.auth.getSession();
+            if (newSession?.access_token) {
+                 headers.set('Authorization', `Bearer ${newSession.access_token}`);
+            }
+        }
     }
-    return Promise.reject(
-      new ApiError('An unexpected error occurred.', 500, 'UNEXPECTED_ERROR')
-    );
-  };
 
-  public async get<T>(
-    endpoint: string,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<T> = await this.axiosInstance.get(
-      endpoint,
-      config
-    );
-    return this.transformResponse<T>(response);
-  }
+    const url = new URL(`${this.baseUrl}${endpoint}`);
+    if (params) {
+        Object.keys(params).forEach(key => url.searchParams.append(key, params[key]));
+    }
 
-  public async post<T>(
-    endpoint: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<T> = await this.axiosInstance.post(
-      endpoint,
-      data,
-      config
-    );
-    return this.transformResponse<T>(response);
-  }
-
-  public async put<T>(
-    endpoint: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<T> = await this.axiosInstance.put(
-      endpoint,
-      data,
-      config
-    );
-    return this.transformResponse<T>(response);
-  }
-
-  public async patch<T>(
-    endpoint: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<T> = await this.axiosInstance.patch(
-      endpoint,
-      data,
-      config
-    );
-    return this.transformResponse<T>(response);
-  }
-
-  public async delete<T>(
-    endpoint: string,
-    config?: RequestConfig
-  ): Promise<ApiResponse<T>> {
-    const response: AxiosResponse<T> = await this.axiosInstance.delete(
-      endpoint,
-      config
-    );
-    return this.transformResponse<T>(response);
-  }
-
-  private transformResponse<T>(response: AxiosResponse<T>): ApiResponse<T> {
-    return {
-      data: response.data,
-      status: response.status,
+    const fetchOptions: RequestInit = {
+        ...restConfig,
+        method,
+        headers,
+        body: data ? JSON.stringify(data) : undefined,
     };
+
+    try {
+        const response = await fetch(url.toString(), fetchOptions);
+
+        if (!response.ok) {
+            const errorData = await response.json().catch(() => ({})); // Gracefully handle non-JSON error bodies
+            throw new ApiError(
+                errorData?.message || `Request failed with status ${response.status}`,
+                response.status,
+                errorData?.code
+            );
+        }
+        
+        // Handle no-content responses
+        if (response.status === 204) {
+            return undefined as T;
+        }
+
+        return await response.json();
+
+    } catch (error) {
+        if (error instanceof TypeError && error.message === 'Failed to fetch') {
+            // Network error
+            throw ApiError.networkError(error);
+        }
+        if (isApiError(error)) {
+            throw error; // Re-throw known API errors
+        }
+        // Catch other unexpected errors
+        throw ApiError.unknown(error);
+    }
   }
 }
 

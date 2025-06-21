@@ -1,5 +1,5 @@
-import React from 'react';
-import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useOnlineStatus } from '@/hooks/use-mobile';
+import { WifiOff } from 'lucide-react';
 
 export const OfflineIndicator = () => {
   const isOnline = useOnlineStatus();
@@ -9,8 +9,14 @@ export const OfflineIndicator = () => {
   }
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-yellow-500 text-center p-2 text-white z-50">
-      You are currently offline. Some features may not be available.
+    <div className="fixed bottom-4 right-4 z-50">
+      <div className="flex items-center space-x-2 rounded-lg bg-destructive p-3 text-destructive-foreground shadow-lg">
+        <WifiOff className="h-5 w-5" />
+        <div>
+          <p className="font-bold">You are offline</p>
+          <p className="text-sm">Please check your internet connection.</p>
+        </div>
+      </div>
     </div>
   );
 }; 

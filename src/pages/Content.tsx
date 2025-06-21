@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Sidebar } from "@/components/Sidebar";
 import { ContentForm } from "@/components/content/ContentForm";
 import { TrendingTopics } from "@/components/content/TrendingTopics";
@@ -42,7 +41,7 @@ export function Content() {
     language: "English",
   });
   const isMobile = useIsMobile();
-  const { jobId, status, data, error, submit } = useContentJob();
+  const { jobId, status, data, error, submit, cancel } = useContentJob();
 
   const handleSubmit = () => {
     // For now, we'll just use the first selected platform.
@@ -50,6 +49,25 @@ export function Content() {
     const platform = formData.platforms[0] || 'linkedin';
     submit(formData.description, platform);
   };
+
+  useEffect(() => {
+    if (status === 'completed' && data?.result_url) {
+      const fetchContent = async () => {
+        try {
+          const response = await fetch(data.result_url);
+          if (!response.ok) {
+            throw new Error('Failed to fetch generated content.');
+          }
+          const textContent = await response.text();
+          setFormData(prev => ({...prev, description: textContent}));
+        } catch (fetchError: any) {
+          console.error(fetchError);
+          // Optionally, set an error state here to inform the user
+        }
+      };
+      fetchContent();
+    }
+  }, [status, data]);
 
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
@@ -126,10 +144,13 @@ export function Content() {
                 )}
               </Button>
               
-              {status === 'processing' && (
-                <div className="flex items-center space-x-2 text-muted-foreground">
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                  <span>Generating content... (Job ID: {jobId})</span>
+              {(status === 'processing' || status === 'submitting') && (
+                <div className="flex items-center justify-between space-x-2 text-muted-foreground">
+                  <div className="flex items-center space-x-2">
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                    <span>{status === 'submitting' ? 'Submitting job...' : `Processing... (Job ID: ${jobId})`}</span>
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={cancel}>Cancel</Button>
                 </div>
               )}
 
