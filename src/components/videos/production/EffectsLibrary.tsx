@@ -1,5 +1,4 @@
 
-import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -53,13 +52,13 @@ export function EffectsLibrary({ effects, selectedEffects, onSelectionChange }: 
         </TabsList>
 
         <TabsContent value="all" className="space-y-4">
-          {Object.entries(groupedEffects).map(([category, categoryEffects]: [string, any[]]) => (
+          {Object.entries(groupedEffects).map(([category, categoryEffects]) => (
             <div key={category} className="space-y-3">
               <h4 className="font-medium capitalize text-primary">
                 {category.replace('_', ' ')} Effects
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {categoryEffects.map((effect: any) => (
+                {(categoryEffects as any[]).map((effect: any) => (
                   <EffectCard
                     key={effect.id}
                     effect={effect}
@@ -73,10 +72,10 @@ export function EffectsLibrary({ effects, selectedEffects, onSelectionChange }: 
           ))}
         </TabsContent>
 
-        {Object.entries(groupedEffects).map(([category, categoryEffects]: [string, any[]]) => (
+        {Object.entries(groupedEffects).map(([category, categoryEffects]) => (
           <TabsContent key={category} value={category} className="space-y-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {categoryEffects.map((effect: any) => (
+              {(categoryEffects as any[]).map((effect: any) => (
                 <EffectCard
                   key={effect.id}
                   effect={effect}

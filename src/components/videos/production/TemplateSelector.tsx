@@ -28,11 +28,11 @@ export function TemplateSelector({ templates, selectedTemplate, onSelect }: Temp
         </p>
       </div>
 
-      {Object.entries(groupedTemplates).map(([niche, nicheTemplates]: [string, any[]]) => (
+      {Object.entries(groupedTemplates).map(([niche, nicheTemplates]) => (
         <div key={niche} className="space-y-3">
           <h4 className="font-medium capitalize text-primary">{niche} Templates</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {nicheTemplates.map((template: any) => (
+            {(nicheTemplates as any[]).map((template: any) => (
               <Card
                 key={template.id}
                 className={`cursor-pointer transition-all duration-200 hover:shadow-lg ${

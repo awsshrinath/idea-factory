@@ -13,7 +13,7 @@ import { VideoPreview } from './VideoPreview';
 import { TemplateSelector } from './TemplateSelector';
 import { Tables } from '@/integrations/supabase/types';
 
-type VideoProject = Tables<"videos">;
+type VideoProject = Tables<"video_projects">;
 type AudioTrack = Tables<"audio_library">;
 type Template = Tables<"video_templates">;
 type CaptionStyle = Tables<"caption_styles">;
@@ -47,7 +47,7 @@ export function VideoProductionStudio() {
       effects: selectedEffects,
       audioTrack: selectedAudio || undefined,
       captionStyle: selectedCaptions || undefined,
-      brandSettings,
+      brandSettings: brandSettings || undefined,
       customSettings: {
         duration: formData.duration || 30,
         resolution: formData.resolution || '1080p',
