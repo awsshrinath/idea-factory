@@ -1,9 +1,7 @@
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Slider } from '@/components/ui/slider';
-import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { FileText, Image, Video, Calendar, Target, TrendingUp } from 'lucide-react';
@@ -24,7 +22,7 @@ export function ContentPreferencesTab() {
   });
 
   const [selectedContentTypes, setSelectedContentTypes] = useState(['text', 'images']);
-  const [platformPriority, setPlatformPriority] = useState(['linkedin', 'instagram', 'twitter']);
+  const platformPriority = ['linkedin', 'instagram', 'twitter'];
 
   const contentTypes = [
     { id: 'text', label: 'Text Posts', icon: FileText },
