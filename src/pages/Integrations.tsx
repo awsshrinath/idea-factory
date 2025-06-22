@@ -1,10 +1,9 @@
-
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
 import { cn } from "@/lib/utils";
-import { Zap, Settings, Link as LinkIcon } from "lucide-react";
+import { Link as LinkIcon } from "lucide-react";
 import { ZapierIntegration } from "@/components/integrations/ZapierIntegration";
 import { IntegrationsOverview } from "@/components/integrations/IntegrationsOverview";
 import { AvailableIntegrations } from "@/components/integrations/AvailableIntegrations";
