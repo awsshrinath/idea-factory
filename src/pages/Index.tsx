@@ -3,6 +3,7 @@ import { HeroBanner } from "@/components/dashboard/HeroBanner";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { PerformanceMetrics } from "@/components/dashboard/PerformanceMetrics";
+import { AdvancedAnalytics } from "@/components/dashboard/AdvancedAnalytics";
 import { Sidebar } from "@/components/Sidebar";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
@@ -26,6 +27,7 @@ export default function Index() {
           <HeroBanner />
           <QuickActions />
           <PerformanceMetrics />
+          <AdvancedAnalytics />
           <RecentActivity />
         </div>
       </main>

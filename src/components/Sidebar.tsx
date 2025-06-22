@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
@@ -33,6 +32,7 @@ export function Sidebar() {
     { icon: Image, label: "Images", path: "/images" },
     { icon: Video, label: "Videos", path: "/videos" },
     { icon: Rss, label: "Sources", path: "/sources" },
+    { icon: Settings, label: "Integrations", path: "/integrations" },
     { icon: Settings, label: "Settings", path: "/settings" },
   ];
 

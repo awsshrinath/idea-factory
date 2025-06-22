@@ -11,6 +11,7 @@ import { Images } from '@/pages/Images';
 import { Videos } from '@/pages/Videos';
 import { VideoStudio } from '@/pages/VideoStudio';
 import { Sources } from '@/pages/Sources';
+import { Integrations } from '@/pages/Integrations';
 import { Settings } from '@/pages/Settings';
 import './App.css';
 
@@ -75,6 +76,14 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <Sources />
+                  </ProtectedRoute>
+                }
+              />
+              <Route
+                path="/integrations"
+                element={
+                  <ProtectedRoute>
+                    <Integrations />
                   </ProtectedRoute>
                 }
               />
