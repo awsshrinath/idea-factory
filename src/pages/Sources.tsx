@@ -4,7 +4,7 @@ import { MobileNavigation } from "@/components/MobileNavigation";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
 import { cn } from "@/lib/utils";
-import { Rss, Plus, TrendingUp, CheckCircle, AlertTriangle, BarChart3 } from "lucide-react";
+import { Rss } from "lucide-react";
 import { RSSOverviewCards } from "@/components/sources/RSSOverviewCards";
 import { RSSFeedManager } from "@/components/sources/RSSFeedManager";
 import { AddRSSForm } from "@/components/sources/AddRSSForm";

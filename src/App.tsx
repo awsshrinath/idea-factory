@@ -1,15 +1,15 @@
-import React from 'react';
+
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/system/ErrorBoundary';
 import { ProtectedRoute } from '@/components/system/ProtectedRoute';
 import Index from '@/pages/Index';
-import Auth from '@/pages/Auth';
-import Content from '@/pages/Content';
-import Schedule from '@/pages/Schedule';
-import Images from '@/pages/Images';
-import Videos from '@/pages/Videos';
-import VideoStudio from '@/pages/VideoStudio';
+import { Auth } from '@/pages/Auth';
+import { Content } from '@/pages/Content';
+import { Schedule } from '@/pages/Schedule';
+import { Images } from '@/pages/Images';
+import { Videos } from '@/pages/Videos';
+import { VideoStudio } from '@/pages/VideoStudio';
 import { Sources } from '@/pages/Sources';
 import { Settings } from '@/pages/Settings';
 import './App.css';

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { 
@@ -13,7 +14,6 @@ import {
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +23,7 @@ import {
 
 export function Sidebar() {
   const location = useLocation();
-  const { logout } = useAuth();
+  const { signOut } = useAuth();
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
 
   const menuItems = [
@@ -89,7 +89,7 @@ export function Sidebar() {
             <DropdownMenuItem
               className="text-red-400 hover:bg-gray-700"
               onClick={() => {
-                logout();
+                signOut();
                 setIsUserMenuOpen(false);
               }}
             >

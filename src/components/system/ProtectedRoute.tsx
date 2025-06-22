@@ -1,12 +1,15 @@
+
 import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 
 interface ProtectedRouteProps {
+  children: React.ReactNode;
   redirectPath?: string;
 }
 
 export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+  children,
   redirectPath = '/auth',
 }) => {
   const { isAuthenticated, session } = useAuth();
@@ -20,5 +23,5 @@ export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     return <Navigate to={redirectPath} replace />;
   }
 
-  return <Outlet />;
+  return <>{children}</>;
 }; 
