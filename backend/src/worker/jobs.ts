@@ -37,7 +37,11 @@ const withRetries = async <T>(fn: () => Promise<T>, retries = 3, delayMs = 1000,
             await delay(delayMs * (i + 1)); // Exponential backoff
         }
     }
-    throw new Error(finalErr, { cause: lastError });
+    const finalError = new Error(finalErr);
+    if (lastError) {
+        finalError.stack = lastError.stack;
+    }
+    throw finalError;
 }
 
 const processJob = async (job: any) => {
