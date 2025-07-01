@@ -33,11 +33,12 @@ export const useRole = () => {
       }
 
       try {
-        const { data, error } = await supabase
+        // Use any type to bypass TypeScript checking for new table
+        const { data, error } = await (supabase as any)
           .from('user_roles')
           .select('role')
           .eq('user_id', user.id)
-          .single();
+          .maybeSingle();
 
         if (error) {
           console.error('Error fetching user role:', error);
