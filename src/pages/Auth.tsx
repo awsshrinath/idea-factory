@@ -1,6 +1,6 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -19,12 +19,12 @@ export function Auth() {
   const [fullName, setFullName] = useState('');
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { isAuthenticated, loading } = useAuth();
+  const { isAuthenticated, loading, signInWithEmail, signUpWithEmail } = useAuth();
 
   useEffect(() => {
     // If user is already authenticated, redirect to home
     if (!loading && isAuthenticated) {
-      navigate('/');
+      navigate('/', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
@@ -42,23 +42,24 @@ export function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await signInWithEmail(email, password);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
+      
+      // Navigation will be handled by the useEffect hook
     } catch (error: any) {
       console.error('Sign in error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Sign In Failed",
+        description: error.message || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -80,18 +81,15 @@ export function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/`,
-          data: {
-            full_name: fullName,
-          }
+      const { error } = await signUpWithEmail(email, password, {
+        data: {
+          full_name: fullName,
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Account created!",
@@ -101,12 +99,17 @@ export function Auth() {
       console.error('Sign up error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Sign Up Failed",
+        description: error.message || "Failed to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handleTestLogin = (testEmail: string, testPassword: string) => {
+    setEmail(testEmail);
+    setPassword(testPassword);
   };
 
   return (
@@ -121,6 +124,29 @@ export function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {/* Test Account Helper */}
+          <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+            <p className="text-sm text-gray-300 mb-2">Test Accounts:</p>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleTestLogin('admin@test.com', 'admin123')}
+                className="text-xs border-orange-500/30 text-orange-400 hover:bg-orange-600/20"
+              >
+                Admin: admin@test.com / admin123
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleTestLogin('user@test.com', 'user123')}
+                className="text-xs border-purple-500/30 text-purple-400 hover:bg-purple-600/20"
+              >
+                User: user@test.com / user123
+              </Button>
+            </div>
+          </div>
+
           <Tabs defaultValue="sign-in" className="space-y-4">
             <TabsList className="grid grid-cols-2">
               <TabsTrigger value="sign-in">Sign In</TabsTrigger>

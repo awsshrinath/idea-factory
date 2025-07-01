@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +11,8 @@ import { Videos } from "./pages/Videos";
 import { Schedule } from "./pages/Schedule";
 import { Settings } from "./pages/Settings";
 import { Auth } from "./pages/Auth";
+import { AdminIntegrations } from "./pages/AdminIntegrations";
+import { ProtectedRoute, AdminRoute } from "./components/ProtectedRoute";
 import { OfflineIndicator } from "./components/system/OfflineIndicator";
 
 const App = () => {
@@ -35,14 +38,49 @@ const App = () => {
         <OfflineIndicator />
         <BrowserRouter>
           <Routes>
-            <Route path="/" element={<Index />} />
             <Route path="/auth" element={<Auth />} />
-            <Route path="/content" element={<Content />} />
-            <Route path="/images" element={<Images />} />
-            <Route path="/videos" element={<Videos />} />
-            <Route path="/schedule" element={<Schedule />} />
-            <Route path="/settings" element={<Settings />} />
-            {/* Add a catch-all route that redirects to the index page */}
+            <Route path="/" element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            } />
+            <Route path="/content" element={
+              <ProtectedRoute>
+                <Content />
+              </ProtectedRoute>
+            } />
+            <Route path="/images" element={
+              <ProtectedRoute>
+                <Images />
+              </ProtectedRoute>
+            } />
+            <Route path="/videos" element={
+              <ProtectedRoute>
+                <Videos />
+              </ProtectedRoute>
+            } />
+            <Route path="/schedule" element={
+              <ProtectedRoute>
+                <Schedule />
+              </ProtectedRoute>
+            } />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <Settings />
+              </ProtectedRoute>
+            } />
+            {/* Admin-only routes */}
+            <Route path="/admin" element={
+              <AdminRoute>
+                <Index />
+              </AdminRoute>
+            } />
+            <Route path="/admin/integrations" element={
+              <AdminRoute>
+                <AdminIntegrations />
+              </AdminRoute>
+            } />
+            {/* Catch-all route that redirects to the appropriate dashboard */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>
