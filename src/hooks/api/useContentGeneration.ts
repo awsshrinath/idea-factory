@@ -1,42 +1,15 @@
 
-import { useCallback } from 'react';
-import { apiClient } from '@/api';
-import { useApi } from './useApi';
-=======
-
 import { useMutation } from '@tanstack/react-query';
 
-
-interface TextGenerationResponse {
-  result: string;
+interface TextGenerationPayload {
+  prompt: string;
+  platform: string;
 }
 
-interface ImageGenerationResponse {
-  imageUrl: string;
+interface ImageGenerationPayload {
+  prompt: string;
+  style: string;
 }
-
-
-const generateText = (prompt: string, platform: string) => 
-  apiClient.post<TextGenerationResponse>('/ai/text', { prompt, platform });
-
-const generateImage = (prompt: string, style: string) => 
-  apiClient.post<ImageGenerationResponse>('/ai/image', { prompt, style });
-
-
-export const useContentGeneration = () => {
-  const textApi = useApi(generateText);
-  const imageApi = useApi(generateImage);
-
-  return {
-    generateText: textApi.execute,
-    textData: textApi.data,
-    textStatus: textApi.status,
-    textError: textApi.error,
-    
-    generateImage: imageApi.execute,
-    imageData: imageApi.data,
-    imageStatus: imageApi.status,
-    imageError: imageApi.error,
 
 export const useContentGeneration = () => {
   const textMutation = useMutation({
@@ -76,6 +49,5 @@ export const useContentGeneration = () => {
       isLoading: imageMutation.isPending,
       generate: imageMutation.mutate,
     },
-
   };
 };

@@ -1,4 +1,4 @@
-import { apiClient } from '@/api';
+
 import { useApi } from './useApi';
 
 interface ScheduledJob {
@@ -7,32 +7,25 @@ interface ScheduledJob {
   content: string;
 }
 
-const scheduleJob = (cronTime: string, content: string) =>
-  apiClient.post<ScheduledJob>('/scheduler', { cronTime, content });
-
-const getJobs = () =>
-  apiClient.get<ScheduledJob[]>('/scheduler');
-
-const cancelJob = (id: string) =>
-  apiClient.delete(`/scheduler/${id}`);
-
 export const useScheduler = () => {
-  const scheduleApi = useApi(scheduleJob);
-  const getJobsApi = useApi(getJobs);
-  const cancelApi = useApi(cancelJob);
+  const { useGet, usePost, useDelete } = useApi();
+
+  const scheduleApi = usePost('/scheduler');
+  const getJobsApi = useGet('/scheduler');
+  const cancelApi = useDelete('/scheduler');
 
   return {
-    scheduleJob: scheduleApi.execute,
+    scheduleJob: scheduleApi.mutate,
     schedulingStatus: scheduleApi.status,
     schedulingError: scheduleApi.error,
 
-    getScheduledJobs: getJobsApi.execute,
-    jobs: getJobsApi.data,
-    loadingJobsStatus: getJobsApi.status,
+    getScheduledJobs: getJobsApi.refetch,
+    jobs: getJobsApi.data as ScheduledJob[],
+    loadingJobsStatus: getJobsApi.isLoading ? 'loading' : 'idle',
     jobsError: getJobsApi.error,
 
-    cancelJob: cancelApi.execute,
+    cancelJob: cancelApi.mutate,
     cancellingStatus: cancelApi.status,
     cancellingError: cancelApi.error,
   };
-}; 
+};

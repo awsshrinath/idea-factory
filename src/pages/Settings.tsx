@@ -6,10 +6,13 @@ import { ChangelogSection } from "@/components/settings/ChangelogSection";
 import { RoadmapSection } from "@/components/settings/RoadmapSection";
 import { WorkflowsSection } from "@/components/settings/WorkflowsSection";
 import { TechStackSection } from "@/components/settings/TechStackSection";
+import { BrandIdentityTab } from "@/components/settings/BrandIdentityTab";
+import { ContentPreferencesTab } from "@/components/settings/ContentPreferencesTab";
+import { VisualStyleTab } from "@/components/settings/VisualStyleTab";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
 import { cn } from "@/lib/utils";
-import { Settings as SettingsIcon, Sparkles } from "lucide-react";
+import { Settings as SettingsIcon, Sparkles, Palette, FileText, Image } from "lucide-react";
 
 export function Settings() {
   const { isMobile, getCardPadding } = useMobileOptimized();
@@ -32,7 +35,7 @@ export function Settings() {
                 "enterprise-heading",
                 isMobile ? "text-2xl" : "text-4xl"
               )}>
-                Settings & Documentation
+                Settings & Personalization
               </h1>
               <SettingsIcon className="h-6 w-6 text-purple-400 animate-pulse" />
             </div>
@@ -40,16 +43,46 @@ export function Settings() {
               "premium-body max-w-2xl",
               isMobile ? "text-base" : "text-lg"
             )}>
-              Configure your workspace and explore platform documentation
+              Customize your brand identity, content preferences, and platform experience
             </p>
           </div>
           
           <div className="premium-card premium-card-hover rounded-2xl backdrop-blur-sm border border-white/10 p-2 transition-all duration-300">
-            <Tabs defaultValue="changelog" className="w-full">
+            <Tabs defaultValue="brand" className="w-full">
               <TabsList className={cn(
                 "mb-6 premium-card border border-white/10 bg-gradient-to-r from-slate-900/80 to-slate-800/60 p-1 rounded-xl",
-                isMobile && "grid grid-cols-2 gap-1 w-full"
+                isMobile ? "grid grid-cols-2 gap-1 w-full" : "flex flex-wrap"
               )}>
+                <TabsTrigger 
+                  value="brand"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200",
+                    isMobile && "text-xs py-2"
+                  )}
+                >
+                  <Palette className="h-3 w-3 mr-2" />
+                  Brand Identity
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="content"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200",
+                    isMobile && "text-xs py-2"
+                  )}
+                >
+                  <FileText className="h-3 w-3 mr-2" />
+                  Content Prefs
+                </TabsTrigger>
+                <TabsTrigger 
+                  value="visual"
+                  className={cn(
+                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200",
+                    isMobile && "text-xs py-2"
+                  )}
+                >
+                  <Image className="h-3 w-3 mr-2" />
+                  Visual Style
+                </TabsTrigger>
                 <TabsTrigger 
                   value="changelog"
                   className={cn(
@@ -60,17 +93,14 @@ export function Settings() {
                   <Sparkles className="h-3 w-3 mr-2" />
                   {isMobile ? "Updates" : "Changelog"}
                 </TabsTrigger>
-                <TabsTrigger 
-                  value="roadmap"
-                  className={cn(
-                    "premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200",
-                    isMobile && "text-xs py-2"
-                  )}
-                >
-                  Roadmap
-                </TabsTrigger>
                 {!isMobile && (
                   <>
+                    <TabsTrigger 
+                      value="roadmap"
+                      className="premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200"
+                    >
+                      Roadmap
+                    </TabsTrigger>
                     <TabsTrigger 
                       value="workflows"
                       className="premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200"
@@ -83,12 +113,6 @@ export function Settings() {
                     >
                       Tech
                     </TabsTrigger>
-                    <TabsTrigger 
-                      value="integrations"
-                      className="premium-subheading data-[state=active]:bg-gradient-to-r data-[state=active]:from-purple-600/20 data-[state=active]:to-indigo-600/20 data-[state=active]:border data-[state=active]:border-purple-500/30 rounded-lg transition-all duration-200"
-                    >
-                      API
-                    </TabsTrigger>
                   </>
                 )}
               </TabsList>
@@ -96,6 +120,18 @@ export function Settings() {
               <div className={cn(
                 getCardPadding()
               )}>
+                <TabsContent value="brand" className="mt-0">
+                  <BrandIdentityTab />
+                </TabsContent>
+
+                <TabsContent value="content" className="mt-0">
+                  <ContentPreferencesTab />
+                </TabsContent>
+
+                <TabsContent value="visual" className="mt-0">
+                  <VisualStyleTab />
+                </TabsContent>
+
                 <TabsContent value="changelog" className="mt-0">
                   <ChangelogSection />
                 </TabsContent>
@@ -110,15 +146,6 @@ export function Settings() {
 
                 <TabsContent value="tech" className="mt-0">
                   <TechStackSection />
-                </TabsContent>
-
-                <TabsContent value="integrations" className="mt-0">
-                  <div className="premium-card rounded-xl p-6 border border-white/10 bg-gradient-to-br from-white/[0.02] to-white/[0.01]">
-                    <h3 className="premium-heading text-xl mb-4">API Integration</h3>
-                    <p className="premium-body">
-                      Integration documentation and API endpoints will be available here.
-                    </p>
-                  </div>
                 </TabsContent>
               </div>
             </Tabs>
