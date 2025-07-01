@@ -99,6 +99,7 @@ serve(async (req) => {
               username TEXT UNIQUE,
               full_name TEXT,
               avatar_url TEXT,
+              role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user')),
               updated_at TIMESTAMPTZ DEFAULT now()
             );
 
@@ -113,14 +114,18 @@ serve(async (req) => {
 
             CREATE POLICY "Users can update their own profile."
               ON public.profiles FOR UPDATE USING (auth.uid() = id);
+          ELSE
+            -- Add role column if it doesn't exist
+            ALTER TABLE public.profiles 
+            ADD COLUMN IF NOT EXISTS role TEXT DEFAULT 'user' CHECK (role IN ('admin', 'user'));
           END IF;
 
           -- Create the trigger function
           CREATE OR REPLACE FUNCTION public.handle_new_user()
           RETURNS trigger AS $$
           BEGIN
-            INSERT INTO public.profiles (id, username)
-            VALUES (new.id, new.email);
+            INSERT INTO public.profiles (id, username, role)
+            VALUES (new.id, new.email, 'user');
             return new;
           END;
           $$ LANGUAGE plpgsql SECURITY DEFINER;
@@ -130,6 +135,112 @@ serve(async (req) => {
           CREATE TRIGGER on_auth_user_created
             AFTER INSERT ON auth.users
             FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+        END;
+        $$ LANGUAGE plpgsql;
+      `
+    });
+
+    // Create demo users
+    const { error: createDemoUsersError } = await supabaseAdmin.rpc('exec_sql', {
+      sql: `
+        CREATE OR REPLACE FUNCTION create_demo_users()
+        RETURNS void AS $$
+        DECLARE
+          admin_user_id UUID;
+          demo_user_id UUID;
+        BEGIN
+          -- Create admin user if not exists
+          INSERT INTO auth.users (
+            id,
+            instance_id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            recovery_sent_at,
+            last_sign_in_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at,
+            confirmation_token,
+            email_change,
+            email_change_token_new,
+            recovery_token
+          ) VALUES (
+            gen_random_uuid(),
+            '00000000-0000-0000-0000-000000000000',
+            'authenticated',
+            'authenticated',
+            'admin@ideafactory.com',
+            crypt('admin123', gen_salt('bf')),
+            now(),
+            null,
+            null,
+            '{"provider": "email", "providers": ["email"]}',
+            '{"full_name": "Admin User"}',
+            now(),
+            now(),
+            '',
+            '',
+            '',
+            ''
+          ) ON CONFLICT (email) DO NOTHING
+          RETURNING id INTO admin_user_id;
+
+          -- Create demo user if not exists  
+          INSERT INTO auth.users (
+            id,
+            instance_id,
+            aud,
+            role,
+            email,
+            encrypted_password,
+            email_confirmed_at,
+            recovery_sent_at,
+            last_sign_in_at,
+            raw_app_meta_data,
+            raw_user_meta_data,
+            created_at,
+            updated_at,
+            confirmation_token,
+            email_change,
+            email_change_token_new,
+            recovery_token
+          ) VALUES (
+            gen_random_uuid(),
+            '00000000-0000-0000-0000-000000000000',
+            'authenticated',
+            'authenticated',
+            'demo@ideafactory.com',
+            crypt('demo123', gen_salt('bf')),
+            now(),
+            null,
+            null,
+            '{"provider": "email", "providers": ["email"]}',
+            '{"full_name": "Demo User"}',
+            now(),
+            now(),
+            '',
+            '',
+            '',
+            ''
+          ) ON CONFLICT (email) DO NOTHING
+          RETURNING id INTO demo_user_id;
+
+          -- Update profiles with roles
+          UPDATE public.profiles 
+          SET role = 'admin' 
+          WHERE id IN (
+            SELECT id FROM auth.users WHERE email = 'admin@ideafactory.com'
+          );
+
+          UPDATE public.profiles 
+          SET role = 'user' 
+          WHERE id IN (
+            SELECT id FROM auth.users WHERE email = 'demo@ideafactory.com'
+          );
         END;
         $$ LANGUAGE plpgsql;
       `
@@ -185,6 +296,23 @@ serve(async (req) => {
       `
     });
 
+    // Execute the functions
+    if (!createFunctionError) {
+      await supabaseAdmin.rpc('create_generated_images_table');
+    }
+
+    if (!createProfilesError) {
+      await supabaseAdmin.rpc('create_profiles_table_and_trigger');
+    }
+
+    if (!createDemoUsersError) {
+      await supabaseAdmin.rpc('create_demo_users');
+    }
+
+    if (!createJobsError) {
+      await supabaseAdmin.rpc('create_content_generation_jobs_table');
+    }
+
     // Create storage bucket
     const { error: bucketError } = await supabaseAdmin
       .storage
@@ -216,6 +344,7 @@ serve(async (req) => {
         sqlFunctionError: sqlFunctionError?.message,
         createFunctionError: createFunctionError?.message,
         createProfilesError: createProfilesError?.message,
+        createDemoUsersError: createDemoUsersError?.message,
         createJobsError: createJobsError?.message,
         bucketError: bucketError?.message,
         textBucketError: textBucketError?.message
