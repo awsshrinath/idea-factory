@@ -2,12 +2,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ErrorBoundary } from '@/components/system/ErrorBoundary';
-import { ProtectedRoute } from '@/components/system/ProtectedRoute';
+import { ProtectedRoute, AdminRoute } from '@/components/ProtectedRoute';
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { OfflineIndicator } from "@/components/system/OfflineIndicator";
 import Index from '@/pages/Index';
 import { Auth } from '@/pages/Auth';
+import { Admin } from '@/pages/Admin';
+import { AdminIntegrations } from '@/pages/AdminIntegrations';
 import { Content } from '@/pages/Content';
 import { Schedule } from '@/pages/Schedule';
 import { Images } from '@/pages/Images';
@@ -38,6 +40,26 @@ function App() {
             <ErrorBoundary>
               <Routes>
                 <Route path="/auth" element={<Auth />} />
+                
+                {/* Admin Routes - Protected by AdminRoute */}
+                <Route
+                  path="/admin"
+                  element={
+                    <AdminRoute>
+                      <Admin />
+                    </AdminRoute>
+                  }
+                />
+                <Route
+                  path="/admin/integrations"
+                  element={
+                    <AdminRoute>
+                      <AdminIntegrations />
+                    </AdminRoute>
+                  }
+                />
+                
+                {/* User Routes - Protected by ProtectedRoute */}
                 <Route
                   path="/"
                   element={

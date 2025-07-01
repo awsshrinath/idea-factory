@@ -4,7 +4,7 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { RecentActivity } from "@/components/dashboard/RecentActivity";
 import { PerformanceMetrics } from "@/components/dashboard/PerformanceMetrics";
 import { AdvancedAnalytics } from "@/components/dashboard/AdvancedAnalytics";
-import { Sidebar } from "@/components/Sidebar";
+import { RoleBasedSidebar } from "@/components/RoleBasedSidebar";
 import { MobileNavigation } from "@/components/MobileNavigation";
 import { MultimediaPremiumBackground } from "@/components/ui/multimedia-premium-background";
 import { useMobileOptimized } from "@/hooks/use-mobile-optimized";
@@ -16,7 +16,7 @@ export default function Index() {
   return (
     <div className="min-h-screen flex bg-background overflow-x-hidden w-full relative">
       <MultimediaPremiumBackground />
-      <Sidebar />
+      <RoleBasedSidebar />
       <MobileNavigation />
       <main className={cn(
         "flex-1 animate-fadeIn w-full max-w-full relative z-10 transition-all duration-300",
