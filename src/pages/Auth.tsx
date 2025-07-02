@@ -1,17 +1,23 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+
 import { useToast } from '@/components/ui/use-toast';
 import { Loader, Mail, Lock, User, Eye, EyeOff, AlertTriangle, CheckCircle, Database } from 'lucide-react';
 import { checkDemoUsers, createDemoUserProfiles } from '@/utils/setupDatabase';
 import { validateExistingDatabase, DatabaseValidation } from '@/utils/validateDatabase';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
+
+import { useToast } from '@/hooks/use-toast';
+import { Loader, Mail, Lock, User, Eye, EyeOff } from 'lucide-react';
+import { useAuth } from '@/hooks/useAuth';
+
 
 export function Auth() {
   const [isLoading, setIsLoading] = useState(false);
@@ -24,8 +30,10 @@ export function Auth() {
   const [dbValidation, setDbValidation] = useState<DatabaseValidation | null>(null);
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isAuthenticated, loading, signInWithEmail, signUpWithEmail } = useAuth();
 
   useEffect(() => {
+
     checkExistingSetup();
   }, []);
 
@@ -42,30 +50,46 @@ export function Auth() {
       console.error('Error checking existing setup:', error);
     }
   };
+=======
+    // If user is already authenticated, redirect to home
+    if (!loading && isAuthenticated) {
+      navigate('/', { replace: true });
+    }
+  }, [isAuthenticated, loading, navigate]);
+
+  // Show loading while checking auth state
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background">
+        <Loader className="h-8 w-8 animate-spin text-purple-400" />
+      </div>
+    );
+  }
+
 
   const handleSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
+      const { error } = await signInWithEmail(email, password);
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
       
-      navigate('/');
+      // Navigation will be handled by the useEffect hook
     } catch (error: any) {
+      console.error('Sign in error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Sign In Failed",
+        description: error.message || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -87,32 +111,32 @@ export function Auth() {
     setIsLoading(true);
 
     try {
-      const { error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-          }
+      const { error } = await signUpWithEmail(email, password, {
+        data: {
+          full_name: fullName,
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        throw error;
+      }
 
       toast({
         title: "Account created!",
         description: "Please check your email to verify your account.",
       });
     } catch (error: any) {
+      console.error('Sign up error:', error);
       toast({
         variant: "destructive",
-        title: "Error",
-        description: error.message,
+        title: "Sign Up Failed",
+        description: error.message || "Failed to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);
     }
   };
+
 
   const handleDemoLogin = async (role: 'admin' | 'user') => {
     setIsLoading(true);
@@ -157,6 +181,11 @@ export function Auth() {
     } finally {
       setIsLoading(false);
     }
+
+  const handleTestLogin = (testEmail: string, testPassword: string) => {
+    setEmail(testEmail);
+    setPassword(testPassword);
+
   };
 
   return (
@@ -171,6 +200,7 @@ export function Auth() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+
           {/* Demo Users Status Alert */}
           {demoUsersStatus && (!demoUsersStatus.adminExists || !demoUsersStatus.demoExists) && (
             <Alert className="mb-4">
@@ -197,6 +227,31 @@ export function Auth() {
             </Alert>
           )}
           
+
+          {/* Test Account Helper */}
+          <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
+            <p className="text-sm text-gray-300 mb-2">Test Accounts:</p>
+            <div className="flex flex-col gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleTestLogin('admin@test.com', 'admin123')}
+                className="text-xs border-orange-500/30 text-orange-400 hover:bg-orange-600/20"
+              >
+                Admin: admin@test.com / admin123
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => handleTestLogin('user@test.com', 'user123')}
+                className="text-xs border-purple-500/30 text-purple-400 hover:bg-purple-600/20"
+              >
+                User: user@test.com / user123
+              </Button>
+            </div>
+          </div>
+
+
           <Tabs defaultValue="sign-in" className="space-y-4">
             <TabsList className="grid grid-cols-2">
               <TabsTrigger value="sign-in">Sign In</TabsTrigger>

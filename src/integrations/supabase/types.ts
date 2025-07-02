@@ -9,6 +9,66 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      audio_library: {
+        Row: {
+          audio_url: string
+          category: string
+          created_at: string
+          duration: number | null
+          id: string
+          is_premium: boolean | null
+          mood: string | null
+          name: string
+        }
+        Insert: {
+          audio_url: string
+          category: string
+          created_at?: string
+          duration?: number | null
+          id?: string
+          is_premium?: boolean | null
+          mood?: string | null
+          name: string
+        }
+        Update: {
+          audio_url?: string
+          category?: string
+          created_at?: string
+          duration?: number | null
+          id?: string
+          is_premium?: boolean | null
+          mood?: string | null
+          name?: string
+        }
+        Relationships: []
+      }
+      caption_styles: {
+        Row: {
+          created_at: string
+          id: string
+          is_premium: boolean | null
+          name: string
+          preview_url: string | null
+          style_data: Json
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          preview_url?: string | null
+          style_data: Json
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          preview_url?: string | null
+          style_data?: Json
+        }
+        Relationships: []
+      }
       content: {
         Row: {
           created_at: string | null
@@ -287,6 +347,51 @@ export type Database = {
         }
         Relationships: []
       }
+      user_brand_settings: {
+        Row: {
+          brand_name: string | null
+          brand_style: string | null
+          created_at: string
+          font_family: string | null
+          id: string
+          logo_url: string | null
+          primary_color: string | null
+          secondary_color: string | null
+          settings: Json | null
+          updated_at: string
+          user_id: string
+          voice_id: string | null
+        }
+        Insert: {
+          brand_name?: string | null
+          brand_style?: string | null
+          created_at?: string
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          settings?: Json | null
+          updated_at?: string
+          user_id: string
+          voice_id?: string | null
+        }
+        Update: {
+          brand_name?: string | null
+          brand_style?: string | null
+          created_at?: string
+          font_family?: string | null
+          id?: string
+          logo_url?: string | null
+          primary_color?: string | null
+          secondary_color?: string | null
+          settings?: Json | null
+          updated_at?: string
+          user_id?: string
+          voice_id?: string | null
+        }
+        Relationships: []
+      }
       user_metrics: {
         Row: {
           engagement_rate: number | null
@@ -311,6 +416,7 @@ export type Database = {
         }
         Relationships: []
       }
+
       profiles: {
         Row: {
           id: string
@@ -345,6 +451,145 @@ export type Database = {
             referencedColumns: ["id"]
           }
         ]
+
+      user_roles: {
+        Row: {
+          created_at: string
+          id: string
+          role: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          role?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      video_effects: {
+        Row: {
+          category: string
+          created_at: string
+          effect_data: Json
+          id: string
+          is_premium: boolean | null
+          name: string
+          preview_url: string | null
+        }
+        Insert: {
+          category: string
+          created_at?: string
+          effect_data: Json
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          preview_url?: string | null
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          effect_data?: Json
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          preview_url?: string | null
+        }
+        Relationships: []
+      }
+      video_projects: {
+        Row: {
+          created_at: string
+          description: string | null
+          duration: number | null
+          id: string
+          niche: string | null
+          prompt: string
+          settings: Json | null
+          status: string
+          thumbnail_url: string | null
+          title: string
+          updated_at: string
+          user_id: string
+          video_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          niche?: string | null
+          prompt: string
+          settings?: Json | null
+          status?: string
+          thumbnail_url?: string | null
+          title: string
+          updated_at?: string
+          user_id: string
+          video_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          duration?: number | null
+          id?: string
+          niche?: string | null
+          prompt?: string
+          settings?: Json | null
+          status?: string
+          thumbnail_url?: string | null
+          title?: string
+          updated_at?: string
+          user_id?: string
+          video_url?: string | null
+        }
+        Relationships: []
+      }
+      video_templates: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          is_premium: boolean | null
+          name: string
+          niche: string
+          preview_url: string | null
+          template_data: Json
+          usage_count: number | null
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean | null
+          name: string
+          niche: string
+          preview_url?: string | null
+          template_data: Json
+          usage_count?: number | null
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          is_premium?: boolean | null
+          name?: string
+          niche?: string
+          preview_url?: string | null
+          template_data?: Json
+          usage_count?: number | null
+        }
+        Relationships: []
+
       }
       videos: {
         Row: {
