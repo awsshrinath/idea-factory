@@ -37,3 +37,8 @@ tasks/
 .cursor/
 .taskmaster/
 mcp.json
+
+cursor-notion-integration.js
+cursor-notion.log
+.cursorrules
+setup-cursor-notion.sh

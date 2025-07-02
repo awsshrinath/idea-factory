@@ -1399,6 +1399,389 @@ export const useOnlineStatus = () => {
 };
 ```
 
+### `src/routes/content.ts`
+```typescript
+import { Request, Response } from 'express';
+import { ApiError } from '@/api';
+
+export const getContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of getContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const createContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of createContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const updateContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of updateContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const deleteContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of deleteContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const generateContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of generateContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const regenerateContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of regenerateContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const submitContentForApproval = async (req: Request, res: Response) => {
+  try {
+    // Implementation of submitContentForApproval function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const approveContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of approveContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const rejectContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of rejectContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const scheduleContent = async (req: Request, res: Response) => {
+  try {
+    // Implementation of scheduleContent function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const getContentAnalytics = async (req: Request, res: Response) => {
+  try {
+    // Implementation of getContentAnalytics function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const bulkContentOperations = async (req: Request, res: Response) => {
+  try {
+    // Implementation of bulkContentOperations function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const getContentDashboard = async (req: Request, res: Response) => {
+  try {
+    // Implementation of getContentDashboard function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const checkContentSetup = async (req: Request, res: Response) => {
+  try {
+    // Implementation of checkContentSetup function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+
+export const initializeContentSetup = async (req: Request, res: Response) => {
+  try {
+    // Implementation of initializeContentSetup function
+  } catch (error) {
+    if (error instanceof ApiError) {
+      res.status(error.status).json({ error: error.message });
+    } else {
+      res.status(500).json({ error: 'An unexpected error occurred.' });
+    }
+  }
+};
+```
+
+### `src/database/content-schema.sql`
+```sql
+CREATE TABLE content (
+  id SERIAL PRIMARY KEY,
+  title TEXT NOT NULL,
+  content TEXT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE content_analytics (
+  id SERIAL PRIMARY KEY,
+  content_id INT NOT NULL,
+  engagement_count INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (content_id) REFERENCES content(id)
+);
+
+CREATE TABLE content_approvals (
+  id SERIAL PRIMARY KEY,
+  content_id INT NOT NULL,
+  status TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (content_id) REFERENCES content(id)
+);
+
+CREATE TABLE content_revisions (
+  id SERIAL PRIMARY KEY,
+  content_id INT NOT NULL,
+  revision_number INT NOT NULL,
+  content TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (content_id) REFERENCES content(id)
+);
+
+CREATE TABLE content_templates (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  template TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE content_campaigns (
+  id SERIAL PRIMARY KEY,
+  name TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE content_templates_campaigns (
+  id SERIAL PRIMARY KEY,
+  content_template_id INT NOT NULL,
+  content_campaign_id INT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (content_template_id) REFERENCES content_templates(id),
+  FOREIGN KEY (content_campaign_id) REFERENCES content_campaigns(id)
+);
+
+CREATE TABLE row_level_security (
+  id SERIAL PRIMARY KEY,
+  user_id INT NOT NULL,
+  content_id INT NOT NULL,
+  access_type TEXT NOT NULL,
+  created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (content_id) REFERENCES content(id)
+);
+
+CREATE INDEX idx_content_status ON content(status);
+CREATE INDEX idx_content_created_at ON content(created_at);
+CREATE INDEX idx_content_updated_at ON content(updated_at);
+CREATE INDEX idx_content_analytics_engagement_count ON content_analytics(engagement_count);
+CREATE INDEX idx_content_approvals_status ON content_approvals(status);
+CREATE INDEX idx_content_revisions_revision_number ON content_revisions(revision_number);
+CREATE INDEX idx_content_templates_name ON content_templates(name);
+CREATE INDEX idx_content_campaigns_name ON content_campaigns(name);
+CREATE INDEX idx_row_level_security_user_id ON row_level_security(user_id);
+CREATE INDEX idx_row_level_security_content_id ON row_level_security(content_id);
+CREATE INDEX idx_row_level_security_access_type ON row_level_security(access_type);
+```
+
+### `src/services/database-setup.ts`
+```typescript
+import { supabase } from '../database';
+
+export const initializeDatabase = async () => {
+  // Implementation of initializeDatabase function
+};
+
+export const validateDatabase = async () => {
+  // Implementation of validateDatabase function
+};
+
+export const createSampleContent = async () => {
+  // Implementation of createSampleContent function
+};
+```
+
+### `src/routes/index.ts`
+```typescript
+import { Router } from 'express';
+import contentRoutes from './content';
+
+const router = Router();
+
+router.use('/content', contentRoutes);
+
+export default router;
+```
+
+### `src/index.ts`
+```typescript
+import express, { Request, Response } from 'express';
+import dotenv from 'dotenv';
+import contentRoutes from './routes/content';
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3001;
+
+app.use(express.json());
+
+app.get('/api/v1/health', (req: Request, res: Response) => {
+  res.status(200).json({ status: 'ok' });
+});
+
+// Add routes here
+import aiRoutes from './routes/ai';
+app.use('/api/v1/ai', aiRoutes);
+
+import instagramRoutes from './routes/instagram';
+app.use('/api/v1/instagram', instagramRoutes);
+
+import schedulerRoutes from './routes/scheduler';
+app.use('/api/v1/scheduler', schedulerRoutes);
+
+import storageRoutes from './routes/storage';
+app.use('/api/v1/storage', storageRoutes);
+
+app.use('/api/v1/content', contentRoutes);
+
+// Example: import contentRoutes from './routes/content';
+// app.use('/api/v1/content', contentRoutes);
+
+app.listen(port, () => {
+  console.log(`[server]: Server is running at http://localhost:${port}`);
+});
+```
+
+### `src/SETUP.md`
+```
+# Setup Instructions
+
+## Environment Variables
+
+1. **SUPABASE_JWT_SECRET**: This is required for JWT authentication.
+
+## Database Setup
+
+1. **Initialize Database**: Run the `initializeDatabase` function in the `database-setup` service.
+2. **Validate Database**: Run the `validateDatabase` function in the `database-setup` service.
+3. **Create Sample Content**: Run the `createSampleContent` function in the `database-setup` service.
+
+## Authentication
+
+1. **JWT Authentication**: Ensure that JWT authentication is implemented for all endpoints.
+2. **Row Level Security (RLS)**: Implement RLS policies for user-specific content isolation.
+
+## API Endpoints
+
+1. **Content Management**:
+   - **CRUD Operations**: Implement full CRUD operations for content management.
+   - **AI Integration**: Integrate AI for content generation and regeneration.
+   - **Approval Workflow**: Implement submit, approve, and reject workflows.
+   - **Scheduling**: Implement content scheduling.
+   - **Analytics**: Implement analytics tracking and reporting.
+   - **Bulk Operations**: Implement bulk operations for efficient content management.
+   - **Dashboard**: Implement a dashboard for content metrics and statistics.
+   - **Setup**: Implement setup endpoints for database validation and schema initialization.
+
+## Security
+
+1. **JWT Authentication**: Ensure that all endpoints require JWT authentication.
+2. **RLS Policies**: Implement RLS policies for user-specific content isolation.
+3. **Comprehensive Error Handling**: Implement comprehensive error handling for all API calls.
+4. **TypeScript Type Safety**: Ensure that all API calls are type-safe.
+
+## Notes
+
 ## Recent Changes
 
 ### Authentication System Fixes (Fixed login issues for admin and regular users)
