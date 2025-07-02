@@ -10,6 +10,15 @@ dotenv.config();
 const JWT_SECRET = process.env.SUPABASE_JWT_SECRET;
 
 if (!JWT_SECRET) {
+  console.error('\n❌ Backend Configuration Error:');
+  console.error('Missing required SUPABASE_JWT_SECRET environment variable.\n');
+  console.error('Get your JWT secret from:');
+  console.error('https://supabase.com/dashboard/project/nphkufnrodsvvyxyaglc/settings/api');
+  console.error('Add it to your backend/.env file as:');
+  console.error('SUPABASE_JWT_SECRET=your_actual_jwt_secret\n');
+  console.error('📖 See backend/SETUP.md for detailed setup instructions.');
+  console.error('⚠️  Backend cannot start without this variable.\n');
+  
   throw new Error('Supabase JWT Secret must be provided in environment variables.');
 }
 
@@ -101,6 +110,9 @@ app.use('/api/v1/storage', authMiddleware, storageRoutes);
 
 import jobsRoutes from './routes/jobs';
 app.use('/api/v1/jobs', authMiddleware, jobsRoutes);
+
+import contentRoutes from './routes/content';
+app.use('/api/v1/content', authMiddleware, contentRoutes);
 
 // Example: import contentRoutes from './routes/content';
 // app.use('/api/v1/content', contentRoutes);
