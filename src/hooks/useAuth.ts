@@ -2,7 +2,6 @@
 import { useState, useEffect } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useEffect, useState } from 'react';
 
 interface UserProfile {
   id: string;
@@ -13,11 +12,44 @@ interface UserProfile {
 }
 
 export const useAuth = () => {
-
-  const session = useSession();
-  const user = useUser();
+  const [user, setUser] = useState<User | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Set up auth state listener first
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.email);
+        setSession(session);
+        setUser(session?.user ?? null);
+        setLoading(false);
+      }
+    );
+
+    // Then check for existing session
+    const getSession = async () => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) {
+          console.error('Error getting session:', error);
+        } else {
+          console.log('Initial session:', session?.user?.email);
+          setSession(session);
+          setUser(session?.user ?? null);
+        }
+      } catch (error) {
+        console.error('Error in getSession:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    getSession();
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -69,49 +101,10 @@ export const useAuth = () => {
       } else {
         setProfile(null);
       }
-      setLoading(false);
     };
 
     fetchProfile();
   }, [user]);
-
-  const [user, setUser] = useState<User | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    // Set up auth state listener first
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.email);
-        setSession(session);
-        setUser(session?.user ?? null);
-        setLoading(false);
-      }
-    );
-
-    // Then check for existing session
-    const getSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        if (error) {
-          console.error('Error getting session:', error);
-        } else {
-          console.log('Initial session:', session?.user?.email);
-          setSession(session);
-          setUser(session?.user ?? null);
-        }
-      } catch (error) {
-        console.error('Error in getSession:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    getSession();
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   const signInWithEmail = async (email: string, password: string) => {
     try {
@@ -163,7 +156,6 @@ export const useAuth = () => {
     }
   };
 
-
   const signInWithGithub = async () => {
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'github',
@@ -175,18 +167,6 @@ export const useAuth = () => {
   };
 
   const signOut = async () => {
-
-    await supabase.auth.signOut();
-    setProfile(null);
-  };
-
-  const isAdmin = () => {
-    return profile?.role === 'admin';
-  };
-
-  const isUser = () => {
-    return profile?.role === 'user';
-=======
     try {
       setLoading(true);
       const { error } = await supabase.auth.signOut();
@@ -195,25 +175,29 @@ export const useAuth = () => {
         throw error;
       }
       console.log('Sign out successful');
+      setProfile(null);
     } catch (error) {
       console.error('Error signing out:', error);
     } finally {
       setLoading(false);
     }
+  };
 
+  const isAdmin = () => {
+    return profile?.role === 'admin';
+  };
+
+  const isUser = () => {
+    return profile?.role === 'user';
   };
 
   return {
     session,
     user,
-
     profile,
-    loading,
-=======
     loading,
     signInWithEmail,
     signUpWithEmail,
-
     signInWithGithub,
     signOut,
     isAuthenticated: !!session,

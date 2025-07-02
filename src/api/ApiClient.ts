@@ -1,3 +1,4 @@
+
 import { supabase } from '@/integrations/supabase/client';
 import { ApiError, isApiError } from './ApiError';
 
@@ -347,7 +348,6 @@ class ApiClient {
         this.logger.error('Unexpected error:', error);
         throw ApiError.unknown(error);
     }
-
   }
 
   // --- Request Cancellation ---
@@ -368,8 +368,6 @@ class ApiClient {
 
   public getCacheSize(): number {
     return this.cache.size;
-=======
-
   }
 }
 
