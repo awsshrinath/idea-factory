@@ -1,413 +1,247 @@
+
 import { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { GridView } from './gallery/GridView';
-import { CarouselView } from './gallery/CarouselView';
-import { EmptyGalleryState } from './gallery/EmptyGalleryState';
-import { LoadingState } from './gallery/LoadingState';
-import { ImageDetailModal } from './gallery/ImageDetailModal';
-import { GeneratedImage, SortOption, ViewMode } from './gallery/types';
+import { Heart, Download, Share2, Trash2, Eye } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/hooks/useAuth';
-import { Grid, List, Filter, SortAsc, SortDesc, Heart, Calendar, Sparkles } from 'lucide-react';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
+
+interface GeneratedImage {
+  id: string;
+  prompt: string;
+  style: string;
+  aspect_ratio: string;
+  image_path: string;
+  title?: string;
+  is_favorite: boolean;
+  created_at: string;
+  user_id: string;
+}
 
 interface ImageGalleryProps {
+  viewMode?: 'grid' | 'carousel';
+  filter?: 'all' | 'favorites' | 'recent';
   previewMode?: boolean;
-  viewMode?: ViewMode;
-  filter?: "all" | "favorites" | "recent";
 }
 
 export function ImageGallery({ 
-  previewMode = false, 
-  viewMode: initialViewMode = "grid",
-  filter: initialFilter = "all"
+  viewMode = 'grid', 
+  filter = 'all',
+  previewMode = false 
 }: ImageGalleryProps) {
   const [images, setImages] = useState<GeneratedImage[]>([]);
   const [loading, setLoading] = useState(true);
-  const [viewMode, setViewMode] = useState<ViewMode>(initialViewMode);
-  const [sortBy, setSortBy] = useState<SortOption>("recent");
-  const [filter, setFilter] = useState<"all" | "favorites" | "recent">(initialFilter);
   const [selectedImage, setSelectedImage] = useState<GeneratedImage | null>(null);
-  const [showDetailModal, setShowDetailModal] = useState(false);
-  const [editingId, setEditingId] = useState<string | null>(null);
-  const [editTitle, setEditTitle] = useState('');
-  const { user } = useAuth();
+  const { toast } = useToast();
 
-  // Fetch images from Supabase
   useEffect(() => {
     fetchImages();
-  }, [user, sortBy, filter]);
+  }, [filter]);
 
   const fetchImages = async () => {
-    if (!user) return;
-    
-    setLoading(true);
     try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
       let query = supabase
         .from('generated_images')
         .select('*')
-        .eq('user_id', user.id);
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
 
-      // Apply filters
       if (filter === 'favorites') {
         query = query.eq('is_favorite', true);
       } else if (filter === 'recent') {
-        query = query.gte('created_at', new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString());
+        query = query.limit(10);
       }
 
-      // Apply sorting
-      if (sortBy === 'recent') {
-        query = query.order('created_at', { ascending: false });
-      } else if (sortBy === 'oldest') {
-        query = query.order('created_at', { ascending: true });
-      } else if (sortBy === 'favorites') {
-        query = query.order('is_favorite', { ascending: false });
-      }
-
-      // Limit for preview mode
       if (previewMode) {
-        query = query.limit(6);
+        query = query.limit(3);
       }
 
       const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching images:', error);
-        toast.error('Failed to load images');
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: "Failed to load images"
+        });
         return;
       }
 
-      if (data) {
-        const processedImages: GeneratedImage[] = data.map(img => ({
-          ...img,
-          created_at: img.created_at || new Date().toISOString(),
-          updated_at: img.updated_at || undefined,
-          title: img.title || undefined,
-          is_favorite: img.is_favorite || false
-        }));
-        setImages(processedImages);
-      }
+      setImages(data || []);
     } catch (error) {
       console.error('Error fetching images:', error);
-      toast.error('Failed to load images');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleImageClick = (image: GeneratedImage) => {
-    setSelectedImage(image);
-    setShowDetailModal(true);
-  };
-
-  const handleFavoriteToggle = async (image: GeneratedImage) => {
+  const toggleFavorite = async (imageId: string, currentFavorite: boolean) => {
     try {
-      const newFavoriteStatus = !image.is_favorite;
-      
       const { error } = await supabase
         .from('generated_images')
-        .update({ is_favorite: newFavoriteStatus })
-        .eq('id', image.id);
+        .update({ is_favorite: !currentFavorite })
+        .eq('id', imageId);
 
       if (error) throw error;
 
       setImages(prev => prev.map(img => 
-        img.id === image.id 
-          ? { ...img, is_favorite: newFavoriteStatus }
+        img.id === imageId 
+          ? { ...img, is_favorite: !currentFavorite }
           : img
       ));
 
-      toast.success(newFavoriteStatus ? 'Added to favorites' : 'Removed from favorites');
+      toast({
+        title: !currentFavorite ? "Added to favorites" : "Removed from favorites",
+        description: "Image updated successfully"
+      });
     } catch (error) {
-      console.error('Error toggling favorite:', error);
-      toast.error('Failed to update favorite status');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to update favorite status"
+      });
     }
   };
 
-  const handleDownload = async (image: GeneratedImage) => {
-    try {
-      const { data } = await supabase.storage
-        .from('generated-images')
-        .download(image.image_path);
-      
-      if (data) {
-        const url = URL.createObjectURL(data);
-        const link = document.createElement('a');
-        link.href = url;
-        link.download = `${image.title || 'generated-image'}.png`;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        URL.revokeObjectURL(url);
-        toast.success('Image downloaded successfully');
-      }
-    } catch (error) {
-      console.error('Error downloading image:', error);
-      toast.error('Failed to download image');
-    }
-  };
-
-  const handleRegenerate = async () => {
-    toast.info('Regeneration feature coming soon');
-  };
-
-  const handleDelete = async (id: string) => {
+  const deleteImage = async (imageId: string) => {
     try {
       const { error } = await supabase
         .from('generated_images')
         .delete()
-        .eq('id', id);
+        .eq('id', imageId);
 
       if (error) throw error;
 
-      setImages(prev => prev.filter(img => img.id !== id));
-      toast.success('Image deleted successfully');
+      setImages(prev => prev.filter(img => img.id !== imageId));
+      toast({
+        title: "Image deleted",
+        description: "Image removed successfully"
+      });
     } catch (error) {
-      console.error('Error deleting image:', error);
-      toast.error('Failed to delete image');
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "Failed to delete image"
+      });
     }
   };
 
-  const handleSaveTitle = async (id: string, title: string) => {
-    try {
-      const { error } = await supabase
-        .from('generated_images')
-        .update({ title })
-        .eq('id', id);
-
-      if (error) throw error;
-
-      setImages(prev => prev.map(img => 
-        img.id === id ? { ...img, title } : img
-      ));
-
-      toast.success('Title updated successfully');
-    } catch (error) {
-      console.error('Error updating title:', error);
-      toast.error('Failed to update title');
-    }
+  const getImageUrl = (imagePath: string) => {
+    const { data } = supabase.storage
+      .from('ai_generated_images')
+      .getPublicUrl(imagePath);
+    return data.publicUrl;
   };
-
-  const handleShare = async (image: GeneratedImage) => {
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: image.title || 'Generated Image',
-          text: image.prompt,
-        });
-      } else {
-        await navigator.clipboard.writeText(window.location.href);
-        toast.success('Link copied to clipboard');
-      }
-    } catch (error) {
-      console.error('Error sharing:', error);
-      toast.error('Failed to share image');
-    }
-  };
-
-  const handleStartEditing = (image: GeneratedImage) => {
-    setEditingId(image.id);
-    setEditTitle(image.title || '');
-  };
-
-  const handleSaveTitleModal = (id: string) => {
-    handleSaveTitle(id, editTitle);
-    setEditingId(null);
-    setEditTitle('');
-  };
-
-  const handleCancelEditing = () => {
-    setEditingId(null);
-    setEditTitle('');
-  };
-
-  const handleEditChange = (title: string) => {
-    setEditTitle(title);
-  };
-
-  const getFilteredAndSortedImages = () => {
-    let filteredImages = [...images];
-
-    // Apply sorting
-    if (sortBy === 'recent') {
-      filteredImages.sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
-    } else if (sortBy === 'oldest') {
-      filteredImages.sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
-    } else if (sortBy === 'favorites') {
-      filteredImages.sort((a, b) => (b.is_favorite ? 1 : 0) - (a.is_favorite ? 1 : 0));
-    }
-
-    return filteredImages;
-  };
-
-  const filteredImages = getFilteredAndSortedImages();
 
   if (loading) {
-    return <LoadingState />;
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {[...Array(6)].map((_, i) => (
+          <Card key={i} className="premium-card animate-pulse">
+            <div className="aspect-square bg-white/5 rounded-t-lg" />
+            <CardContent className="p-4">
+              <div className="h-4 bg-white/5 rounded mb-2" />
+              <div className="h-3 bg-white/5 rounded w-2/3" />
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
   }
 
   if (images.length === 0) {
-    return <EmptyGalleryState />;
-  }
-
-  const renderControls = () => {
-    if (previewMode) return null;
-
     return (
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="flex gap-2">
-          <Button
-            variant={viewMode === 'grid' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('grid')}
-            className="flex items-center gap-2"
-          >
-            <Grid className="h-4 w-4" />
-            Grid
-          </Button>
-          <Button
-            variant={viewMode === 'carousel' ? 'default' : 'outline'}
-            size="sm"
-            onClick={() => setViewMode('carousel')}
-            className="flex items-center gap-2"
-          >
-            <List className="h-4 w-4" />
-            Carousel
-          </Button>
+      <div className="text-center py-12">
+        <div className="text-white/60 text-lg mb-2">No images found</div>
+        <div className="text-white/40 text-sm">
+          {filter === 'favorites' 
+            ? "You haven't favorited any images yet"
+            : "Start generating images to see them here"
+          }
         </div>
-
-        <div className="flex gap-2 flex-1">
-          <Select value={filter} onValueChange={(value: "all" | "favorites" | "recent") => setFilter(value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  All
-                </div>
-              </SelectItem>
-              <SelectItem value="favorites">
-                <div className="flex items-center gap-2">
-                  <Heart className="h-4 w-4" />
-                  Favorites
-                </div>
-              </SelectItem>
-              <SelectItem value="recent">
-                <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
-                  Recent
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-
-          <Select value={sortBy} onValueChange={(value: SortOption) => setSortBy(value)}>
-            <SelectTrigger className="w-32">
-              <SelectValue placeholder="Sort" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="recent">
-                <div className="flex items-center gap-2">
-                  <SortDesc className="h-4 w-4" />
-                  Recent
-                </div>
-              </SelectItem>
-              <SelectItem value="oldest">
-                <div className="flex items-center gap-2">
-                  <SortAsc className="h-4 w-4" />
-                  Oldest
-                </div>
-              </SelectItem>
-              <SelectItem value="favorites">
-                <div className="flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
-                  Favorites
-                </div>
-              </SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-    );
-  };
-
-  const renderGallery = () => {
-    const commonProps = {
-      images: filteredImages,
-      onImageClick: handleImageClick,
-      onToggleFavorite: handleFavoriteToggle,
-      onDownload: handleDownload,
-      onRegenerate: handleRegenerate,
-      onDelete: handleDelete,
-      onSaveTitle: handleSaveTitle,
-      onShare: handleShare,
-    };
-
-    if (viewMode === 'carousel') {
-      return <CarouselView {...commonProps} />;
-    }
-
-    return <GridView {...commonProps} />;
-  };
-
-  if (previewMode) {
-    return (
-      <div className="space-y-4">
-        {renderGallery()}
-        <ImageDetailModal
-          selectedImage={selectedImage}
-          isOpen={showDetailModal}
-          onOpenChange={setShowDetailModal}
-          editingId={editingId}
-          editTitle={editTitle}
-          onEditChange={handleEditChange}
-          onStartEditing={handleStartEditing}
-          onSaveTitle={handleSaveTitleModal}
-          onCancelEditing={handleCancelEditing}
-          onToggleFavorite={handleFavoriteToggle}
-          onRegenerate={selectedImage ? () => handleRegenerate() : () => {}}
-          onDownload={selectedImage ? () => handleDownload(selectedImage) : () => {}}
-          onDelete={(id: string) => handleDelete(id)}
-        />
       </div>
     );
   }
 
   return (
-    <Card className="premium-card border border-white/10 shadow-lg">
-      <CardHeader>
-        <CardTitle className="premium-heading flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-400" />
-          Generated Images
-          <Badge variant="secondary" className="ml-auto">
-            {filteredImages.length} images
-          </Badge>
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        {renderControls()}
-        {renderGallery()}
-        <ImageDetailModal
-          selectedImage={selectedImage}
-          isOpen={showDetailModal}
-          onOpenChange={setShowDetailModal}
-          editingId={editingId}
-          editTitle={editTitle}
-          onEditChange={handleEditChange}
-          onStartEditing={handleStartEditing}
-          onSaveTitle={handleSaveTitleModal}
-          onCancelEditing={handleCancelEditing}
-          onToggleFavorite={handleFavoriteToggle}
-          onRegenerate={selectedImage ? () => handleRegenerate() : () => {}}
-          onDownload={selectedImage ? () => handleDownload(selectedImage) : () => {}}
-          onDelete={(id: string) => handleDelete(id)}
-        />
-      </CardContent>
-    </Card>
+    <div className={cn(
+      viewMode === 'grid' 
+        ? "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+        : "flex gap-4 overflow-x-auto pb-4"
+    )}>
+      {images.map((image) => (
+        <Card key={image.id} className="premium-card premium-card-hover group">
+          <div className="relative aspect-square overflow-hidden rounded-t-lg">
+            <img
+              src={getImageUrl(image.image_path)}
+              alt={image.prompt}
+              className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            />
+            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-300">
+              <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex gap-2">
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70"
+                  onClick={() => toggleFavorite(image.id, image.is_favorite)}
+                >
+                  <Heart className={cn(
+                    "h-4 w-4",
+                    image.is_favorite ? "fill-red-500 text-red-500" : "text-white"
+                  )} />
+                </Button>
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="h-8 w-8 p-0 bg-black/50 hover:bg-black/70"
+                  onClick={() => setSelectedImage(image)}
+                >
+                  <Eye className="h-4 w-4 text-white" />
+                </Button>
+              </div>
+            </div>
+          </div>
+          <CardContent className="p-4">
+            <p className="text-sm text-white/80 line-clamp-2 mb-2">
+              {image.prompt}
+            </p>
+            <div className="flex items-center justify-between text-xs text-white/60">
+              <Badge variant="outline" className="bg-white/5">
+                {image.style}
+              </Badge>
+              <span>
+                {new Date(image.created_at).toLocaleDateString()}
+              </span>
+            </div>
+            {!previewMode && (
+              <div className="flex gap-2 mt-3">
+                <Button size="sm" variant="outline" className="flex-1">
+                  <Download className="h-3 w-3 mr-1" />
+                  Download
+                </Button>
+                <Button size="sm" variant="outline">
+                  <Share2 className="h-3 w-3" />
+                </Button>
+                <Button 
+                  size="sm" 
+                  variant="outline"
+                  onClick={() => deleteImage(image.id)}
+                  className="text-red-400 hover:text-red-300"
+                >
+                  <Trash2 className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      ))}
+    </div>
   );
 }

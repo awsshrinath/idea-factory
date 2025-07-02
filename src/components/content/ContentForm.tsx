@@ -9,9 +9,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { PlatformSelector } from './PlatformSelector';
 import { ToneSelector } from './ToneSelector';
 import { ModelLanguageSelector } from './ModelLanguageSelector';
-import { useContentJob } from '@/hooks/api/useContentJob';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { useAIGeneration } from '@/hooks/api/useAIGeneration';
 
 interface ContentFormProps {
   onContentGenerated: (content: string) => void;
@@ -24,7 +23,7 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
   const [language, setLanguage] = useState('English');
   const [model, setModel] = useState('chatgpt');
   
-  const { submit, status, data, error } = useContentJob();
+  const { mutate: generateContent, isPending, error } = useAIGeneration();
   const { toast } = useToast();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -48,46 +47,37 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
       return;
     }
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) {
+    generateContent({
+      prompt,
+      platform: selectedPlatforms[0],
+      tone,
+      language,
+      model
+    }, {
+      onSuccess: (data) => {
+        if (data.success && data.content) {
+          onContentGenerated(data.content);
+          toast({
+            title: "Content generated",
+            description: "Your content is ready to use!",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Generation failed",
+            description: data.error || "Failed to generate content",
+          });
+        }
+      },
+      onError: (error) => {
         toast({
           variant: "destructive",
-          title: "Authentication required",
-          description: "Please log in to generate content.",
+          title: "Generation failed",
+          description: error.message,
         });
-        return;
       }
-
-      const fullPrompt = `Create ${tone} content for ${selectedPlatforms.join(', ')} about: ${prompt}. Use ${language} language.`;
-      await submit(fullPrompt, selectedPlatforms[0]);
-      
-    } catch (err: unknown) {
-      console.error('Content generation error:', err);
-      const errorMessage = err instanceof Error ? err.message : 'An unexpected error occurred';
-      toast({
-        variant: "destructive",
-        title: "Generation failed",
-        description: errorMessage,
-      });
-    }
+    });
   };
-
-  useEffect(() => {
-    if (status === 'completed' && data?.generated_text) {
-      onContentGenerated(data.generated_text);
-      toast({
-        title: "Content generated",
-        description: "Your content is ready to use!",
-      });
-    } else if (status === 'failed' && error) {
-      toast({
-        variant: "destructive",
-        title: "Content generation failed",
-        description: error,
-      });
-    }
-  }, [status, data, error, onContentGenerated, toast]);
 
   return (
     <Card className="premium-card premium-card-hover border border-white/10 shadow-lg backdrop-blur-sm">
@@ -145,14 +135,9 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
           <Button 
             type="submit" 
             className="w-full premium-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:shadow-purple-500/25 border border-purple-500/20 hover:border-purple-400/40 font-semibold text-base micro-bounce disabled:opacity-50"
-            disabled={status === 'submitting' || status === 'processing'}
+            disabled={isPending}
           >
-            {status === 'submitting' ? (
-              <>
-                <Wand2 className="h-4 w-4 mr-2 animate-spin" />
-                Submitting...
-              </>
-            ) : status === 'processing' ? (
+            {isPending ? (
               <>
                 <Wand2 className="h-4 w-4 mr-2 animate-spin" />
                 Generating...
@@ -169,7 +154,7 @@ export function ContentForm({ onContentGenerated }: ContentFormProps) {
         {error && (
           <div className="premium-card rounded-xl p-4 bg-gradient-to-r from-red-500/10 to-pink-500/5 border border-red-500/20">
             <p className="premium-body text-sm text-red-300">
-              {error}
+              {error.message}
             </p>
           </div>
         )}

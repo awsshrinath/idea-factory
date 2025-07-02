@@ -18,56 +18,46 @@ import {
   Loader
 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { useSessionContext } from '@supabase/auth-helpers-react';
-import { supabase } from '@/integrations/supabase/client';
+import { useImageGeneration } from '@/hooks/api/useImageGeneration';
 
 interface ImageFormData {
   prompt: string;
   style: string;
   aspectRatio: string;
-  numImages: number;
-  guidanceScale: number;
-  numInferenceSteps: number;
+  detailLevel: string;
+  lighting: string;
+  seed: string;
 }
 
-const numImagesOptions = [
-  { value: 1, label: "1 Image" },
-  { value: 2, label: "2 Images" },
-  { value: 3, label: "3 Images" },
-  { value: 4, label: "4 Images" }
+const detailLevelOptions = [
+  { value: "low", label: "Low - Simple" },
+  { value: "medium", label: "Medium - Default" },
+  { value: "high", label: "High - Detailed" }
 ];
 
-const guidanceScaleOptions = [
-  { value: 7, label: "7 - Default" },
-  { value: 5, label: "5 - Less Strict" },
-  { value: 9, label: "9 - More Strict" },
-  { value: 12, label: "12 - Very Strict" }
-];
-
-const numInferenceStepsOptions = [
-  { value: 30, label: "30 Steps - Fast" },
-  { value: 50, label: "50 Steps - Default" },
-  { value: 75, label: "75 Steps - High Quality" },
-  { value: 100, label: "100 Steps - Max Quality" }
+const lightingOptions = [
+  { value: "natural", label: "Natural Lighting" },
+  { value: "studio", label: "Studio Lighting" },
+  { value: "cinematic", label: "Cinematic Lighting" }
 ];
 
 interface ImageGenerationFormProps {
   initialData?: Partial<ImageFormData>;
+  onImageGenerated?: (imageUrl: string) => void;
 }
 
-export function ImageGenerationForm({ initialData }: ImageGenerationFormProps) {
+export function ImageGenerationForm({ initialData, onImageGenerated }: ImageGenerationFormProps) {
   const [formData, setFormData] = useState<ImageFormData>({
     prompt: initialData?.prompt || "",
-    style: initialData?.style || "Cinematic",
+    style: initialData?.style || "realistic",
     aspectRatio: initialData?.aspectRatio || "16:9",
-    numImages: initialData?.numImages || 1,
-    guidanceScale: initialData?.guidanceScale || 7,
-    numInferenceSteps: initialData?.numInferenceSteps || 50
+    detailLevel: initialData?.detailLevel || "medium",
+    lighting: initialData?.lighting || "natural",
+    seed: initialData?.seed || ""
   });
   
-  const [isGenerating, setIsGenerating] = useState(false);
+  const { mutate: generateImage, isPending } = useImageGeneration();
   const { toast } = useToast();
-  const { session } = useSessionContext();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -81,32 +71,23 @@ export function ImageGenerationForm({ initialData }: ImageGenerationFormProps) {
       return;
     }
 
-    setIsGenerating(true);
-
-    try {
-      const { error } = await supabase.functions.invoke('generate-image', {
-        body: {
-          ...formData,
-          user_id: session?.user?.id || ''
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Image Generated!",
-        description: "Your image has been created successfully"
-      });
-    } catch (error: any) {
-      console.error('Error generating image:', error);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: error.message || "Failed to generate image"
-      });
-    } finally {
-      setIsGenerating(false);
-    }
+    generateImage(formData, {
+      onSuccess: (data) => {
+        toast({
+          title: "Image Generated!",
+          description: "Your image has been created successfully"
+        });
+        onImageGenerated?.(data.imageUrl);
+      },
+      onError: (error) => {
+        console.error('Error generating image:', error);
+        toast({
+          variant: "destructive",
+          title: "Error",
+          description: error.message || "Failed to generate image"
+        });
+      }
+    });
   };
 
   return (
@@ -126,46 +107,32 @@ export function ImageGenerationForm({ initialData }: ImageGenerationFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="numImages" className="text-sm font-medium">Number of Images</Label>
-          <Select value={String(formData.numImages)} onValueChange={(value) => setFormData({ ...formData, numImages: Number(value) })}>
+          <Label htmlFor="detailLevel" className="text-sm font-medium">Detail Level</Label>
+          <Select value={formData.detailLevel} onValueChange={(value) => setFormData({ ...formData, detailLevel: value })}>
             <SelectTrigger className="bg-background/50 border-white/10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {numImagesOptions.map((option) => (
-                <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>
+              {detailLevelOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="guidanceScale" className="text-sm font-medium">Guidance Scale</Label>
-          <Select value={String(formData.guidanceScale)} onValueChange={(value) => setFormData({ ...formData, guidanceScale: Number(value) })}>
+          <Label htmlFor="lighting" className="text-sm font-medium">Lighting</Label>
+          <Select value={formData.lighting} onValueChange={(value) => setFormData({ ...formData, lighting: value })}>
             <SelectTrigger className="bg-background/50 border-white/10">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              {guidanceScaleOptions.map((option) => (
-                <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>
+              {lightingOptions.map((option) => (
+                <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>
               ))}
             </SelectContent>
           </Select>
         </div>
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="numInferenceSteps" className="text-sm font-medium">Inference Steps</Label>
-        <Select value={String(formData.numInferenceSteps)} onValueChange={(value) => setFormData({ ...formData, numInferenceSteps: Number(value) })}>
-          <SelectTrigger className="bg-background/50 border-white/10">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {numInferenceStepsOptions.map((option) => (
-              <SelectItem key={option.value} value={String(option.value)}>{option.label}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
       </div>
 
       <Separator className="bg-white/10" />
@@ -183,10 +150,10 @@ export function ImageGenerationForm({ initialData }: ImageGenerationFormProps) {
 
       <Button 
         type="submit" 
-        disabled={isGenerating || !formData.prompt.trim()}
+        disabled={isPending || !formData.prompt.trim()}
         className="w-full h-12 text-base font-medium bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 transition-all duration-300"
       >
-        {isGenerating ? (
+        {isPending ? (
           <>
             <Loader className="h-5 w-5 mr-2 animate-spin" />
             Generating...
