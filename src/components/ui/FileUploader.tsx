@@ -31,7 +31,7 @@ export function FileUploader({
     acceptedFiles.forEach(async (file) => {
       try {
         const result = await upload({ file, bucket, folder });
-        if (result) {
+        if (result && result.url && result.path) {
           onUploadComplete?.(result.url, result.path);
           toast({
             title: "Upload Successful",
