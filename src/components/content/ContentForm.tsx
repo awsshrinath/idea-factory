@@ -1,163 +1,166 @@
 
-import { useState, useEffect } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Platform } from '@/types/content';
-import { Wand2, Send } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { PlatformSelector } from './PlatformSelector';
-import { ToneSelector } from './ToneSelector';
-import { ModelLanguageSelector } from './ModelLanguageSelector';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { useAIGeneration } from '@/hooks/api/useAIGeneration';
+import { Loader2 } from 'lucide-react';
 
 interface ContentFormProps {
-  onContentGenerated: (content: string) => void;
+  onContentGenerated?: (content: string) => void;
 }
 
 export function ContentForm({ onContentGenerated }: ContentFormProps) {
   const [prompt, setPrompt] = useState('');
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Platform[]>([]);
-  const [tone, setTone] = useState('professional');
+  const [platform, setPlatform] = useState('');
+  const [tone, setTone] = useState('');
   const [language, setLanguage] = useState('English');
-  const [model, setModel] = useState('chatgpt');
+  const [model, setModel] = useState('ChatGPT');
   
-  const { mutate: generateContent, isPending, error } = useAIGeneration();
   const { toast } = useToast();
+  const aiGeneration = useAIGeneration();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!prompt.trim()) {
+    if (!prompt.trim() || !platform || !tone) {
       toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Please enter a prompt to generate content.",
+        title: "Missing Information",
+        description: "Please fill in all required fields.",
+        variant: "destructive"
       });
       return;
     }
 
-    if (selectedPlatforms.length === 0) {
-      toast({
-        variant: "destructive",
-        title: "Error", 
-        description: "Please select at least one platform.",
+    try {
+      const result = await aiGeneration.mutateAsync({
+        prompt,
+        platform,
+        tone,
+        language,
+        model
       });
-      return;
-    }
 
-    generateContent({
-      prompt,
-      platform: selectedPlatforms[0],
-      tone,
-      language,
-      model
-    }, {
-      onSuccess: (data) => {
-        if (data.success && data.content) {
-          onContentGenerated(data.content);
-          toast({
-            title: "Content generated",
-            description: "Your content is ready to use!",
-          });
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Generation failed",
-            description: data.error || "Failed to generate content",
-          });
-        }
-      },
-      onError: (error) => {
+      if (result.success) {
+        onContentGenerated?.(result.content);
         toast({
-          variant: "destructive",
-          title: "Generation failed",
-          description: error.message,
+          title: "Content Generated",
+          description: "Your content has been generated successfully!"
         });
+      } else {
+        throw new Error(result.error || 'Failed to generate content');
       }
-    });
+    } catch (error) {
+      toast({
+        title: "Generation Failed",
+        description: error instanceof Error ? error.message : "An error occurred while generating content.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
-    <Card className="premium-card premium-card-hover border border-white/10 shadow-lg backdrop-blur-sm">
-      <CardHeader className="space-y-4">
-        <div className="flex items-center gap-3">
-          <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-purple-600/20 to-indigo-600/20 flex items-center justify-center border border-purple-500/20">
-            <Wand2 className="h-4 w-4 text-purple-400" />
-          </div>
-          <div>
-            <CardTitle className="premium-heading text-xl">Content Generator</CardTitle>
-            <CardDescription className="premium-body">
-              Describe what you want to create and we'll generate engaging content
-            </CardDescription>
-          </div>
-        </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Create Content</CardTitle>
       </CardHeader>
-      
-      <CardContent className="space-y-6">
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="space-y-3">
-            <label className="premium-subheading text-sm">What would you like to create?</label>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="prompt">Content Description *</Label>
             <Textarea
+              id="prompt"
+              placeholder="Describe what you want to create..."
               value={prompt}
               onChange={(e) => setPrompt(e.target.value)}
-              placeholder="Describe your content idea..."
-              className="premium-focus bg-white/5 border-white/10 hover:border-white/20 focus:border-purple-400 transition-all duration-300 resize-none"
-              rows={4}
+              required
             />
-            <div className="flex justify-between items-center text-xs">
-              <span className="premium-caption">Be specific for better results</span>
-              <Badge variant="outline" className="bg-white/5">
-                {prompt.length}/500
-              </Badge>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="platform">Platform *</Label>
+              <Select value={platform} onValueChange={setPlatform} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select platform" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="instagram">Instagram</SelectItem>
+                  <SelectItem value="twitter">Twitter</SelectItem>
+                  <SelectItem value="facebook">Facebook</SelectItem>
+                  <SelectItem value="linkedin">LinkedIn</SelectItem>
+                  <SelectItem value="blog">Blog</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="tone">Tone *</Label>
+              <Select value={tone} onValueChange={setTone} required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select tone" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="professional">Professional</SelectItem>
+                  <SelectItem value="casual">Casual</SelectItem>
+                  <SelectItem value="friendly">Friendly</SelectItem>
+                  <SelectItem value="humorous">Humorous</SelectItem>
+                  <SelectItem value="serious">Serious</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
-          <PlatformSelector
-            selectedPlatforms={selectedPlatforms}
-            onPlatformChange={setSelectedPlatforms}
-          />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="language">Language</Label>
+              <Select value={language} onValueChange={setLanguage}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="English">English</SelectItem>
+                  <SelectItem value="Spanish">Spanish</SelectItem>
+                  <SelectItem value="French">French</SelectItem>
+                  <SelectItem value="German">German</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ToneSelector
-              selectedTone={tone as any}
-              onToneSelect={setTone as any}
-            />
-            <ModelLanguageSelector
-              selectedModel={model as any}
-              selectedLanguage={language as any}
-              onModelSelect={setModel as any}
-              onLanguageSelect={setLanguage}
-            />
+            <div className="space-y-2">
+              <Label htmlFor="model">AI Model</Label>
+              <Select value={model} onValueChange={setModel}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ChatGPT">ChatGPT</SelectItem>
+                  <SelectItem value="Claude">Claude</SelectItem>
+                  <SelectItem value="Gemini">Gemini</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           <Button 
             type="submit" 
-            className="w-full premium-button bg-gradient-to-r from-purple-600 to-indigo-600 hover:shadow-xl hover:shadow-purple-500/25 border border-purple-500/20 hover:border-purple-400/40 font-semibold text-base micro-bounce disabled:opacity-50"
-            disabled={isPending}
+            disabled={aiGeneration.isPending}
+            className="w-full"
           >
-            {isPending ? (
+            {aiGeneration.isPending ? (
               <>
-                <Wand2 className="h-4 w-4 mr-2 animate-spin" />
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                 Generating...
               </>
             ) : (
-              <>
-                <Send className="h-4 w-4 mr-2" />
-                Generate Content
-              </>
+              'Generate Content'
             )}
           </Button>
         </form>
-        
-        {error && (
-          <div className="premium-card rounded-xl p-4 bg-gradient-to-r from-red-500/10 to-pink-500/5 border border-red-500/20">
-            <p className="premium-body text-sm text-red-300">
-              {error.message}
-            </p>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

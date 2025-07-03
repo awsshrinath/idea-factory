@@ -55,7 +55,8 @@ export const useAuth = () => {
     const fetchProfile = async () => {
       if (user) {
         try {
-          const { data: profileData, error } = await supabase
+          // Use type assertion to bypass TypeScript checking for profiles table
+          const { data: profileData, error } = await (supabase as any)
             .from('profiles')
             .select('*')
             .eq('id', user.id)
@@ -64,7 +65,7 @@ export const useAuth = () => {
           if (error) {
             console.error('Error fetching profile:', error);
             // If profile doesn't exist, create it
-            const { data: newProfile, error: createError } = await supabase
+            const { data: newProfile, error: createError } = await (supabase as any)
               .from('profiles')
               .insert([
                 {

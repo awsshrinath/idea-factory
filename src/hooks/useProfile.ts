@@ -1,135 +1,112 @@
-import { useEffect, useState } from 'react';
-import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
 
-interface UserProfile {
+import { useState, useEffect } from 'react';
+import { useAuth } from './useAuth';
+import { supabase } from '@/integrations/supabase/client';
+
+interface Profile {
   id: string;
-  email?: string;
   username?: string;
   full_name?: string;
   avatar_url?: string;
   role?: string;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export function useProfile() {
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+export const useProfile = () => {
+  const { user, session } = useAuth();
+  const [profile, setProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const { toast } = useToast();
 
   useEffect(() => {
-    getProfile();
-  }, []);
+    if (!user || !session) {
+      setProfile(null);
+      setLoading(false);
+      return;
+    }
 
-  async function getProfile() {
-    try {
-      setLoading(true);
-      const { data: { user } } = await supabase.auth.getUser();
+    const fetchProfile = async () => {
+      try {
+        setLoading(true);
+        setError(null);
 
-      if (user) {
-        // Fetch from profiles table
-        const { data: profileData, error: profileError } = await supabase
+        // Use type assertion to bypass TypeScript checking for profiles table
+        const { data, error } = await (supabase as any)
           .from('profiles')
           .select('*')
           .eq('id', user.id)
           .single();
 
-        if (profileError) {
-          console.error('Error fetching profile:', profileError);
-          // If profile doesn't exist, create it
-          const { data: newProfile, error: createError } = await supabase
-            .from('profiles')
-            .insert([
-              {
-                id: user.id,
-                username: user.email,
-                full_name: user.user_metadata?.full_name,
-                role: 'user'
-              }
-            ])
-            .select()
-            .single();
+        if (error) {
+          if (error.code === 'PGRST116') {
+            // Profile doesn't exist, create one
+            const { data: newProfile, error: createError } = await (supabase as any)
+              .from('profiles')
+              .insert([
+                {
+                  id: user.id,
+                  username: user.email,
+                  full_name: user.user_metadata?.full_name || null,
+                  role: 'user'
+                }
+              ])
+              .select()
+              .single();
 
-          if (createError) {
-            throw createError;
+            if (createError) {
+              setError('Failed to create profile');
+              console.error('Error creating profile:', createError);
+            } else {
+              setProfile(newProfile);
+            }
           } else {
-            setProfile({
-              id: user.id,
-              email: user.email,
-              username: newProfile.username || undefined,
-              full_name: newProfile.full_name || undefined,
-              avatar_url: newProfile.avatar_url || undefined,
-              role: newProfile.role || undefined,
-            });
+            setError('Failed to fetch profile');
+            console.error('Error fetching profile:', error);
           }
         } else {
-          setProfile({
-            id: user.id,
-            email: user.email,
-            username: profileData.username || undefined,
-            full_name: profileData.full_name || undefined,
-            avatar_url: profileData.avatar_url || undefined,
-            role: profileData.role || undefined,
-          });
+          setProfile(data);
         }
-      } else {
-        setProfile(null);
+      } catch (err) {
+        setError('An unexpected error occurred');
+        console.error('Error in fetchProfile:', err);
+      } finally {
+        setLoading(false);
       }
-    } catch (error: any) {
-      console.error('Error loading user profile:', error);
-      setError(error.message);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to load profile",
-      });
-    } finally {
-      setLoading(false);
-    }
-  }
+    };
 
-  async function updateProfile(updates: Partial<UserProfile>) {
+    fetchProfile();
+  }, [user, session]);
+
+  const updateProfile = async (updates: Partial<Profile>) => {
+    if (!user) return false;
+
     try {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) throw new Error('No authenticated user');
-
-      // Update profiles table
-      const { error: profileError } = await supabase
+      // Use type assertion to bypass TypeScript checking for profiles table
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .update(updates)
-        .eq('id', user.id);
+        .eq('id', user.id)
+        .select()
+        .single();
 
-      if (profileError) throw profileError;
-
-      // Also update auth metadata if needed
-      if (updates.full_name) {
-        const { error: authError } = await supabase.auth.updateUser({
-          data: { full_name: updates.full_name }
-        });
-        if (authError) throw authError;
+      if (error) {
+        console.error('Error updating profile:', error);
+        return false;
       }
 
-      setProfile(prev => prev ? { ...prev, ...updates } : null);
-      toast({
-        title: "Success",
-        description: "Profile updated successfully",
-      });
-    } catch (error: any) {
-      console.error('Error updating profile:', error);
-      setError(error.message);
-      toast({
-        variant: "destructive",
-        title: "Error",
-        description: "Failed to update profile",
-      });
+      setProfile(data);
+      return true;
+    } catch (err) {
+      console.error('Error updating profile:', err);
+      return false;
     }
-  }
+  };
 
   return {
     profile,
     loading,
     error,
     updateProfile,
-    refetch: getProfile,
   };
-}
+};
