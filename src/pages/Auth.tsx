@@ -22,13 +22,11 @@ export function Auth() {
   const { isAuthenticated, loading, signInWithEmail, signUpWithEmail } = useAuth();
 
   useEffect(() => {
-    // If user is already authenticated, redirect to home
     if (!loading && isAuthenticated) {
       navigate('/', { replace: true });
     }
   }, [isAuthenticated, loading, navigate]);
 
-  // Show loading while checking auth state
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-background">
@@ -52,14 +50,55 @@ export function Auth() {
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-      
-      // Navigation will be handled by the useEffect hook
     } catch (error: any) {
       console.error('Sign in error:', error);
       toast({
         variant: "destructive",
         title: "Sign In Failed",
         description: error.message || "Invalid email or password. Please try again.",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleQuickLogin = async (testEmail: string, testPassword: string) => {
+    setIsLoading(true);
+    try {
+      const { error } = await signInWithEmail(testEmail, testPassword);
+
+      if (error) {
+        // If user doesn't exist, try to create them first
+        if (error.message?.includes('Invalid login credentials')) {
+          const { error: signUpError } = await signUpWithEmail(testEmail, testPassword, {
+            data: {
+              full_name: testEmail.includes('demo') ? 'Demo User' : 'Admin User',
+            }
+          });
+          
+          if (signUpError) {
+            throw signUpError;
+          }
+          
+          toast({
+            title: "Account created and logged in!",
+            description: `Welcome ${testEmail}!`,
+          });
+        } else {
+          throw error;
+        }
+      } else {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
+      }
+    } catch (error: any) {
+      console.error('Quick login error:', error);
+      toast({
+        variant: "destructive",
+        title: "Login Failed",
+        description: error.message || "Failed to login. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -107,11 +146,6 @@ export function Auth() {
     }
   };
 
-  const handleTestLogin = (testEmail: string, testPassword: string) => {
-    setEmail(testEmail);
-    setPassword(testPassword);
-  };
-
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
       <Card className="w-full max-w-md p-6 space-y-4 premium-card border border-white/10 shadow-lg">
@@ -126,26 +160,27 @@ export function Auth() {
         <CardContent>
           {/* Test Account Helper */}
           <div className="mb-4 p-3 bg-gray-800/50 rounded-lg border border-gray-700">
-            <p className="text-sm text-gray-300 mb-2">Test Accounts:</p>
+            <p className="text-sm text-gray-300 mb-2">Quick Login:</p>
             <div className="flex flex-col gap-2">
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleTestLogin('demo@example.com', 'demo123')}
-                className="text-xs border-orange-500/30 text-orange-400 hover:bg-orange-600/20"
+                onClick={() => handleQuickLogin('demo@example.com', 'demo123')}
+                disabled={isLoading}
+                className="text-xs border-blue-500/30 text-blue-400 hover:bg-blue-600/20"
               >
-                Demo User: demo@example.com / demo123
+                {isLoading ? <Loader className="h-3 w-3 animate-spin mr-1" /> : null}
+                Demo User: demo@example.com
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => {
-                  setEmail('admin@example.com');
-                  setPassword('admin123');
-                }}
-                className="text-xs border-purple-500/30 text-purple-400 hover:bg-purple-600/20"
+                onClick={() => handleQuickLogin('admin@example.com', 'admin123')}
+                disabled={isLoading}
+                className="text-xs border-orange-500/30 text-orange-400 hover:bg-orange-600/20"
               >
-                Create Admin: admin@example.com / admin123
+                {isLoading ? <Loader className="h-3 w-3 animate-spin mr-1" /> : null}
+                Admin: admin@example.com
               </Button>
             </div>
           </div>
@@ -155,6 +190,7 @@ export function Auth() {
               <TabsTrigger value="sign-in">Sign In</TabsTrigger>
               <TabsTrigger value="sign-up">Sign Up</TabsTrigger>
             </TabsList>
+            
             <TabsContent value="sign-in" className="space-y-4">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
@@ -219,6 +255,7 @@ export function Auth() {
                 </Button>
               </form>
             </TabsContent>
+            
             <TabsContent value="sign-up" className="space-y-4">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
