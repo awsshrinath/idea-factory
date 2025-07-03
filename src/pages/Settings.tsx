@@ -1,7 +1,6 @@
 
 import { AnimatedLayout } from "@/components/layouts/animated-layout";
 import { RoleBasedSidebar } from "@/components/RoleBasedSidebar";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { BrandIdentityTab } from "@/components/settings/BrandIdentityTab";
 import { ContentPreferencesTab } from "@/components/settings/ContentPreferencesTab";

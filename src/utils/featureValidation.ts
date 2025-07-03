@@ -186,7 +186,7 @@ export class FeatureValidator {
   private async testEmbeddingServices() {
     try {
       // Test OpenAI integration through edge functions
-      const { data, error } = await supabase.functions.invoke('test-openai', {
+      const { error } = await supabase.functions.invoke('test-openai', {
         body: { test: true }
       });
 
@@ -242,13 +242,6 @@ export class FeatureValidator {
   private async testDashboardComponents() {
     try {
       // Test if premium dashboard components are properly integrated
-      const dashboardElements = [
-        'PersonalizedGreeting',
-        'QuickActions',
-        'PerformanceMetrics',
-        'ContentPipeline'
-      ];
-
       this.results.push({
         feature: 'UI - Premium Dashboard',
         status: 'success',
@@ -283,15 +276,15 @@ export class FeatureValidator {
   private async testRoleBasedNavigation() {
     try {
       // Test role-based navigation system
-      const { data } = await supabase
+      const { error } = await supabase
         .from('user_roles')
         .select('*')
         .limit(1);
 
       this.results.push({
         feature: 'UI - Role Navigation',
-        status: 'success',
-        message: 'Role-based navigation system is functional'
+        status: error ? 'error' : 'success',
+        message: error ? `Role navigation error: ${error.message}` : 'Role-based navigation system is functional'
       });
     } catch (error) {
       this.results.push({
