@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -97,7 +98,7 @@ export function Auth() {
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: (error as Error)?.message || "Failed to login. Please try again.",
+        description: error?.message || "Failed to login. Please try again.",
       });
     } finally {
       setIsLoading(false);
