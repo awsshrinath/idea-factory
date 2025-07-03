@@ -49,8 +49,9 @@ export function Auth() {
         title: "Welcome back!",
         description: "You have successfully signed in.",
       });
-    } catch (error: any) {
-      console.error('Sign in error:', error);
+    } catch (err) {
+      console.error('Sign in error:', err);
+      const error = err as Error;
       toast({
         variant: "destructive",
         title: "Sign In Failed",
@@ -92,8 +93,9 @@ export function Auth() {
           description: "You have successfully signed in.",
         });
       }
-    } catch (error: any) {
-      console.error('Quick login error:', error);
+    } catch (err) {
+      console.error('Quick login error:', err);
+      const error = err as Error;
       toast({
         variant: "destructive",
         title: "Login Failed",
@@ -133,8 +135,9 @@ export function Auth() {
         title: "Account created!",
         description: "Please check your email to verify your account.",
       });
-    } catch (error: any) {
-      console.error('Sign up error:', error);
+    } catch (err) {
+      console.error('Sign up error:', err);
+      const error = err as Error;
       toast({
         variant: "destructive",
         title: "Sign Up Failed",
