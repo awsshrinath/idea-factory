@@ -19,29 +19,25 @@ export async function validateDatabase() {
 
     console.log('✅ User authenticated:', user.email);
 
-    // Test basic table access
-    const tables = [
-      'profiles',
-      'generated_content', 
-      'generated_images',
-      'videos',
-      'scheduled_posts'
+    // Test basic table access with specific table names
+    const tableTests = [
+      { name: 'profiles', query: () => supabase.from('profiles').select('*').limit(1) },
+      { name: 'generated_content', query: () => supabase.from('generated_content').select('*').limit(1) },
+      { name: 'generated_images', query: () => supabase.from('generated_images').select('*').limit(1) },
+      { name: 'videos', query: () => supabase.from('videos').select('*').limit(1) },
+      { name: 'scheduled_posts', query: () => supabase.from('scheduled_posts').select('*').limit(1) }
     ];
 
-    for (const table of tables) {
+    for (const test of tableTests) {
       try {
-        const { error } = await supabase
-          .from(table)
-          .select('*')
-          .limit(1);
-
+        const { error } = await test.query();
         if (error) {
-          console.error(`❌ Error accessing ${table}:`, error);
+          console.error(`❌ Error accessing ${test.name}:`, error);
         } else {
-          console.log(`✅ ${table} table accessible`);
+          console.log(`✅ ${test.name} table accessible`);
         }
       } catch (err) {
-        console.error(`❌ Exception accessing ${table}:`, err);
+        console.error(`❌ Exception accessing ${test.name}:`, err);
       }
     }
 

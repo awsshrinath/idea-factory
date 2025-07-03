@@ -57,13 +57,6 @@ export function ImageGallery({ viewMode: initialViewMode = 'grid', filter: initi
     setIsModalOpen(true);
   };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedImage(null);
-    setEditingId(null);
-    setEditTitle('');
-  };
-
   const handleStartEditing = (image: GeneratedImage) => {
     setEditingId(image.id);
     setEditTitle(image.title || '');
