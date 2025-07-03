@@ -22,7 +22,7 @@ export function FileUploader({
   folder = ''
 }: FileUploaderProps) {
   const [uploadedFiles, setUploadedFiles] = useState<File[]>([]);
-  const { upload, isLoading } = useFileUpload();
+  const { uploadAsync, isLoading } = useFileUpload();
   const { toast } = useToast();
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
@@ -30,8 +30,8 @@ export function FileUploader({
     
     acceptedFiles.forEach(async (file) => {
       try {
-        const result = await upload({ file, bucket, folder });
-        if (result && result.url && result.path) {
+        const result = await uploadAsync({ file, bucket, folder });
+        if (result?.url && result?.path) {
           onUploadComplete?.(result.url, result.path);
           toast({
             title: "Upload Successful",
@@ -46,7 +46,7 @@ export function FileUploader({
         });
       }
     });
-  }, [upload, onUploadComplete, bucket, folder, toast]);
+  }, [uploadAsync, onUploadComplete, bucket, folder, toast]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,

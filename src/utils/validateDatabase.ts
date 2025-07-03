@@ -30,7 +30,7 @@ export async function validateDatabase() {
 
     for (const table of tables) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .from(table)
           .select('*')
           .limit(1);
@@ -50,7 +50,7 @@ export async function validateDatabase() {
     
     for (const bucket of buckets) {
       try {
-        const { data, error } = await supabase
+        const { error } = await supabase
           .storage
           .from(bucket)
           .list('', { limit: 1 });
