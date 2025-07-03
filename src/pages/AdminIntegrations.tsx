@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { RoleBasedSidebar } from "@/components/RoleBasedSidebar";
 import { MobileNavigation } from "@/components/MobileNavigation";
@@ -206,7 +207,8 @@ export function AdminIntegrations() {
       key: "sendgrid",
       apiKey: "SG.abc123...",
       status: "connected",
-      emailsSent: 456
+      emailsSent: 456,
+      region: "US-East-1"
     }
   ];
 
@@ -505,19 +507,6 @@ export function AdminIntegrations() {
                             {service.region && (
                               <p className="text-gray-400 text-xs">Region: {service.region}</p>
                             )}
-                          </div>
-                        )}
-                        
-                        {service.activeFeeds && (
-                          <div className="p-3 bg-gray-800/50 rounded-lg">
-                            <div className="flex justify-between items-center">
-                              <span className="text-gray-400 text-sm">Active RSS Feeds</span>
-                              <span className="text-white font-medium">{service.activeFeeds}</span>
-                            </div>
-                            <div className="flex justify-between items-center mt-1">
-                              <span className="text-gray-400 text-sm">Last Update</span>
-                              <span className="text-white font-medium">{service.lastUpdate}</span>
-                            </div>
                           </div>
                         )}
                       </CardContent>

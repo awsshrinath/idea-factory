@@ -55,7 +55,7 @@ export function Auth() {
       toast({
         variant: "destructive",
         title: "Sign In Failed",
-        description: error.message || "Invalid email or password. Please try again.",
+        description: error?.message || "Invalid email or password. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -69,7 +69,7 @@ export function Auth() {
 
       if (error) {
         // If user doesn't exist, try to create them first
-        if (error.message?.includes('Invalid login credentials')) {
+        if (error?.message?.includes('Invalid login credentials')) {
           const { error: signUpError } = await signUpWithEmail(testEmail, testPassword, {
             data: {
               full_name: testEmail.includes('demo') ? 'Demo User' : 'Admin User',
@@ -98,7 +98,7 @@ export function Auth() {
       toast({
         variant: "destructive",
         title: "Login Failed",
-        description: error.message || "Failed to login. Please try again.",
+        description: error?.message || "Failed to login. Please try again.",
       });
     } finally {
       setIsLoading(false);
@@ -139,7 +139,7 @@ export function Auth() {
       toast({
         variant: "destructive",
         title: "Sign Up Failed",
-        description: error.message || "Failed to create account. Please try again.",
+        description: error?.message || "Failed to create account. Please try again.",
       });
     } finally {
       setIsLoading(false);
