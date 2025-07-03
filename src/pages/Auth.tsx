@@ -131,18 +131,21 @@ export function Auth() {
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleTestLogin('admin@test.com', 'admin123')}
+                onClick={() => handleTestLogin('demo@example.com', 'demo123')}
                 className="text-xs border-orange-500/30 text-orange-400 hover:bg-orange-600/20"
               >
-                Admin: admin@test.com / admin123
+                Demo User: demo@example.com / demo123
               </Button>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={() => handleTestLogin('user@test.com', 'user123')}
+                onClick={() => {
+                  setEmail('admin@example.com');
+                  setPassword('admin123');
+                }}
                 className="text-xs border-purple-500/30 text-purple-400 hover:bg-purple-600/20"
               >
-                User: user@test.com / user123
+                Create Admin: admin@example.com / admin123
               </Button>
             </div>
           </div>
